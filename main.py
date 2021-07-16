@@ -41,37 +41,9 @@ def evaluate(genome, num_inputs, num_outputs,
 def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer,
             dir_path, file_name):
 
-    dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                             neurons_per_hidden_layer)
-    num_weights = dummy_nn.get_num_weights()
-
-    render=False
-
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
-
-    toolbox = base.Toolbox()
-    toolbox.register("evaluate", evaluate,
-                     num_inputs=num_inputs, num_outputs=num_outputs,
-                     num_hidden_layers=num_hidden_layers,
-                     neurons_per_hidden_layer=neurons_per_hidden_layer,
-                     render=render)
-
     #np.random.seed(108)
 
-    #Initial location of distribution centre
-    centroid = [0.0] * num_weights
-    #Initial standard deviation of the distribution
-    init_sigma = 1.0
-    #Number of children to produce at each generation
-    #lambda_ = 20 * num_weights
-    lambda_ = 10
-    strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
-
-    toolbox.register("generate", strategy.generate, creator.Individual)
-    toolbox.register("update", strategy.update)
-
-    parallelise = False
+    parallelise = True
     if parallelise:
         import multiprocessing
 
@@ -95,6 +67,9 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     #Save best agent
     dummy_nn.set_weights(hof[0])
     dummy_nn.save_genotype(dir_path, file_name)
+
+    if parallelise:
+        pool.close()
 
     return dummy_nn
 
@@ -127,6 +102,47 @@ def main():
 
     indv_run(winner.get_weights(), num_inputs, num_outputs, num_hidden_layers,
              neurons_per_hidden_layer)
+
+
+#Some bug in DEAP means that I have to define toolbox before if __name__ == "__main__"
+#apparently
+
+dummy_env = gym.make("BipedalWalker-v3")
+state = dummy_env.reset()
+
+num_inputs = len(state)
+num_outputs = len(dummy_env.action_space.high)
+num_hidden_layers = 0
+neurons_per_hidden_layer = 0
+
+render = False
+
+dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
+                         neurons_per_hidden_layer)
+num_weights = dummy_nn.get_num_weights()
+
+
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMax)
+
+toolbox = base.Toolbox()
+toolbox.register("evaluate", evaluate,
+                 num_inputs=num_inputs, num_outputs=num_outputs,
+                 num_hidden_layers=num_hidden_layers,
+                 neurons_per_hidden_layer=neurons_per_hidden_layer,
+                 render=render)
+
+#Initial location of distribution centre
+centroid = [0.0] * num_weights
+#Initial standard deviation of the distribution
+init_sigma = 1.0
+#Number of children to produce at each generation
+#lambda_ = 20 * num_weights
+lambda_ = 100
+strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
+
+toolbox.register("generate", strategy.generate, creator.Individual)
+toolbox.register("update", strategy.update)
 
 
 if __name__ == "__main__":
