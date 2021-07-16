@@ -1,8 +1,8 @@
 import numpy as np
 import torch
+import csv
 
 class NeuralNetwork():
-
 
     def __init__(self, num_inputs, num_outputs,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
@@ -98,15 +98,18 @@ class NeuralNetwork():
                 weights += params.flatten().tolist()
         return weights
 
-    def _save_genotype(self, dir_path):
+    def save_genotype(self, dir_path, file_name):
         #Save genotype as a csv - it is just a list
-        file_path = dir_path + '/genotype.csv'
+        file_path = dir_path + file_name
 
         with open(file_path, 'w') as outfile:
             csv_writer = csv.writer(outfile)
-            csv_writer.writerow(self.get_weights())
+            #Added default fitness of 0 at the beginning because this is how it is
+            #read in on the NeuroEvo side
+            fitness_and_weights = [0.] + self.get_weights()
+            csv_writer.writerow(fitness_and_weights)
 
-    def _read_genotype(self, genotype_filepath):
+    def read_genotype(self, genotype_filepath):
         with open(genotype_filepath, 'r') as genotype_file:
             reader = csv.reader(genotype_file)
             genotype = list(map(float, list(reader)[0]))
