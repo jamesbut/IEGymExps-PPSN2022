@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 import csv
+import os
+import shutil
 
 class NeuralNetwork():
 
@@ -101,6 +103,11 @@ class NeuralNetwork():
     def save_genotype(self, dir_path, file_name):
         #Save genotype as a csv - it is just a list
         file_path = dir_path + file_name
+
+        #Create directory
+        if os.path.exists(dir_path):
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
 
         with open(file_path, 'w') as outfile:
             csv_writer = csv.writer(outfile)

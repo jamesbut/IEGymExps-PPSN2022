@@ -7,7 +7,6 @@ import numpy as np
 def evaluate(genome, num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              render=False):
-    print("Evaluating...")
 
     env = gym.make("BipedalWalker-v3")
     env.seed(108)
@@ -39,7 +38,7 @@ def evaluate(genome, num_inputs, num_outputs,
 
 
 def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer,
-            dir_path, file_name):
+            dir_path, file_name, run_num):
 
     #np.random.seed(108)
 
@@ -58,7 +57,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 1
+    num_gens = 100
     dump_every = 25
     population, logbook = evo_utils.eaGenerateUpdate(
         toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -66,6 +65,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
     #Save best agent
     dummy_nn.set_weights(hof[0])
+    dir_path += str(run_num) + '/'
     dummy_nn.save_genotype(dir_path, file_name)
 
     if parallelise:
@@ -97,8 +97,12 @@ def main():
     num_hidden_layers = 0
     neurons_per_hidden_layer = 0
 
-    winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
-                     neurons_per_hidden_layer, dir_path, file_name)
+    num_runs = 2000
+
+    for i in range(num_runs):
+        print("Evo run: ", i)
+        winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
+                         neurons_per_hidden_layer, dir_path, file_name, i)
 
     indv_run(winner.get_weights(), num_inputs, num_outputs, num_hidden_layers,
              neurons_per_hidden_layer)
