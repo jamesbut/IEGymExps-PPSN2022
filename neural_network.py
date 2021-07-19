@@ -107,7 +107,7 @@ class NeuralNetwork():
         #Create directory
         if os.path.exists(dir_path):
             shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
+        os.makedirs(dir_path)
 
         with open(file_path, 'w') as outfile:
             csv_writer = csv.writer(outfile)
