@@ -103,6 +103,10 @@ def main():
         print("Evo run: ", i)
         winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, dir_path, file_name, i)
+        #Reset strategy
+        strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
+        toolbox.register("generate", strategy.generate, creator.Individual)
+        toolbox.register("update", strategy.update)
 
     indv_run(winner.get_weights(), num_inputs, num_outputs, num_hidden_layers,
              neurons_per_hidden_layer)
