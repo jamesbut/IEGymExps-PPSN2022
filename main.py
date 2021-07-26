@@ -3,6 +3,7 @@ import gym
 from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np
+import uuid
 
 def evaluate(genome, num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
@@ -64,8 +65,8 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
         dump_every=dump_every, dummy_nn=dummy_nn)
 
     #Save best agent
+    dir_path += str(uuid.uuid4()) + '/'
     dummy_nn.set_weights(hof[0])
-    dir_path += str(run_num) + '/'
     dummy_nn.save_genotype(dir_path, file_name)
 
     if parallelise:
