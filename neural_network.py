@@ -8,7 +8,7 @@ class NeuralNetwork():
 
     def __init__(self, num_inputs, num_outputs,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
-                 genotype=None):
+                 genotype=None, genotype_dir=None):
 
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -23,6 +23,10 @@ class NeuralNetwork():
         if genotype is not None:
             self.set_weights(genotype)
 
+        #Read genotype from file
+        elif genotype_dir is not None:
+            genotype = self._read_genotype(genotype_dir)
+            self.set_weights(genotype)
 
     def _build_nn(self):
 
@@ -100,7 +104,7 @@ class NeuralNetwork():
                 weights += params.flatten().tolist()
         return weights
 
-    def save_genotype(self, dir_path, file_name):
+    def save_genotype(self, dir_path, file_name, fitness, domain_params=None):
         #Save genotype as a csv - it is just a list
         file_path = dir_path + file_name
 
@@ -111,13 +115,21 @@ class NeuralNetwork():
 
         with open(file_path, 'w') as outfile:
             csv_writer = csv.writer(outfile)
-            #Added default fitness of 0 at the beginning because this is how it is
+            #Added fitness at the beginning because this is how it is
             #read in on the NeuroEvo side
-            fitness_and_weights = [0.] + self.get_weights()
+            fitness_and_weights = [fitness] + self.get_weights()
             csv_writer.writerow(fitness_and_weights)
 
-    def read_genotype(self, genotype_filepath):
+            #Add domain hyperparameters on next line for cGAN
+            if domain_params is not None:
+                csv_writer.writerow(domain_params)
+
+    def _read_genotype(self, genotype_filepath):
         with open(genotype_filepath, 'r') as genotype_file:
             reader = csv.reader(genotype_file)
             genotype = list(map(float, list(reader)[0]))
+
+        #Remove fitness
+        del genotype[0]
+
         return genotype

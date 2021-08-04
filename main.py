@@ -4,22 +4,32 @@ from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np
 import uuid
+import sys
+import random
+
+#Suppress scientific notation
+np.set_printoptions(suppress=True)
 
 def evaluate(genome, num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
-             render=False):
+             render=False, genotype_dir=None, env_kwargs=None):
 
-    env = gym.make("BipedalWalker-v3")
+    env = gym.make("BipedalWalker-v3", **env_kwargs)
+
     env.seed(108)
 
     nn = NeuralNetwork(num_inputs, num_outputs,
-                       num_hidden_layers, neurons_per_hidden_layer)
-    nn.set_weights(genome)
+                       num_hidden_layers, neurons_per_hidden_layer,
+                       genotype_dir=genotype_dir)
+
+    if genotype_dir is None:
+        nn.set_weights(genome)
 
     reward = 0
     done = False
 
     state = env.reset()
+    #print("State: ", state)
     while not done:
 
         if render:
@@ -35,11 +45,19 @@ def evaluate(genome, num_inputs, num_outputs,
 
         reward += r
 
+        '''
+        print("Net out: ", net_out)
+        print("Action vals: ", action_vals)
+        print("State: ", state)
+        print("Reward: ", r)
+        print("Total reward: ", reward)
+        '''
+
     return [reward]
 
 
 def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer,
-            dir_path, file_name, run_num):
+            dir_path, file_name, run_num, domain_params):
 
     #np.random.seed(108)
 
@@ -67,21 +85,23 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     #Save best agent
     dir_path += str(uuid.uuid4()) + '/'
     dummy_nn.set_weights(hof[0])
-    dummy_nn.save_genotype(dir_path, file_name)
+    dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
+                           [domain_params])
 
     if parallelise:
         pool.close()
 
     return dummy_nn
 
-def indv_run(genotype, num_inputs, num_outputs,
-             num_hidden_layers, neurons_per_hidden_layer):
+def indv_run(num_inputs, num_outputs,
+             num_hidden_layers, neurons_per_hidden_layer,
+             genotype=None, genotype_dir=None):
 
-    render = True
+    render = False
 
     reward = evaluate(genotype, num_inputs, num_outputs,
                       num_hidden_layers, neurons_per_hidden_layer,
-                      render)
+                      render, genotype_dir)
 
     print("Reward: ", reward)
 
@@ -98,19 +118,48 @@ def main():
     num_hidden_layers = 0
     neurons_per_hidden_layer = 0
 
-    num_runs = 2000
+    randomise_hyperparams = True
 
-    for i in range(num_runs):
-        print("Evo run: ", i)
-        winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
-                         neurons_per_hidden_layer, dir_path, file_name, i)
-        #Reset strategy
-        strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
-        toolbox.register("generate", strategy.generate, creator.Individual)
-        toolbox.register("update", strategy.update)
+    if len(sys.argv)==1:
 
-    indv_run(winner.get_weights(), num_inputs, num_outputs, num_hidden_layers,
-             neurons_per_hidden_layer)
+        num_runs = 2000
+
+        for i in range(num_runs):
+            print("Evo run: ", i)
+
+            #Generate new domain hyperparams
+            if randomise_hyperparams:
+
+                env_kwargs = {
+                    'speed_knee' : random.uniform(2., 6.)
+                }
+
+                toolbox.register("evaluate", evaluate,
+                                 num_inputs=num_inputs, num_outputs=num_outputs,
+                                 num_hidden_layers=num_hidden_layers,
+                                 neurons_per_hidden_layer=neurons_per_hidden_layer,
+                                 render=render, genotype_dir=None, env_kwargs=env_kwargs)
+
+            winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
+                             neurons_per_hidden_layer, dir_path, file_name, i,
+                             env_kwargs['speed_knee'])
+            #Reset strategy
+            strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
+            toolbox.register("generate", strategy.generate, creator.Individual)
+            toolbox.register("update", strategy.update)
+
+        #indv_run(winner.get_weights(), num_inputs, num_outputs, num_hidden_layers,
+        #         neurons_per_hidden_layer)
+
+    else:
+
+        #Genome directory comes from the command line
+        indv_dir = sys.argv[1]
+
+        indv_full_path = dir_path + indv_dir + "/" + file_name
+
+        indv_run(num_inputs, num_outputs, num_hidden_layers,
+                 neurons_per_hidden_layer, genotype_dir=indv_full_path)
 
 
 #Some bug in DEAP means that I have to define toolbox before if __name__ == "__main__"
@@ -139,7 +188,7 @@ toolbox.register("evaluate", evaluate,
                  num_inputs=num_inputs, num_outputs=num_outputs,
                  num_hidden_layers=num_hidden_layers,
                  neurons_per_hidden_layer=neurons_per_hidden_layer,
-                 render=render)
+                 render=render, genotype_dir=None)
 
 #Initial location of distribution centre
 centroid = [0.0] * num_weights
@@ -152,7 +201,6 @@ strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
 
 toolbox.register("generate", strategy.generate, creator.Individual)
 toolbox.register("update", strategy.update)
-
 
 if __name__ == "__main__":
     main()
