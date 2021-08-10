@@ -8,7 +8,7 @@ class NeuralNetwork():
 
     def __init__(self, num_inputs, num_outputs,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
-                 genotype=None, genotype_dir=None):
+                 genotype=None, genotype_dir=None, decoder=None):
 
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs

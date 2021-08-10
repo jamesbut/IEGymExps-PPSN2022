@@ -1,4 +1,5 @@
 from neural_network import NeuralNetwork
+from decoder import Decoder
 import gym
 from deap import creator, base, cma, tools
 import evo_utils
@@ -6,6 +7,8 @@ import numpy as np
 import uuid
 import sys
 import random
+from gan import *
+from data import *
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -105,7 +108,43 @@ def indv_run(num_inputs, num_outputs,
 
     print("Reward: ", reward)
 
+
+def train_gan(train_data_path):
+
+    training_data = read_data(train_data_path)
+
+    code_size = 1
+
+    #training_data = create_synthetic_data(code_size)
+
+    training_steps = 20000
+
+    gan = GAN(code_size, training_data.size(1), training_data)
+
+    gan.train(training_steps)
+
+    gan.test()
+
+    quit()
+
+
 def main():
+
+    '''
+    d_num_inputs = 1
+    d_num_outputs = 100
+    d_num_hidden_layers = 0
+    d_neurons_per_hidden_layer = 0
+    decoder = Decoder(d_num_inputs, d_num_outputs,
+                      d_num_hidden_layers, d_neurons_per_hidden_layer)
+    decoder.decode([2.0, -0.5])
+    quit()
+    '''
+
+    gan_train = True
+    if gan_train:
+        train_gan(sys.argv[1])
+
 
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_training/"
     file_name = "best_winner_so_far"
