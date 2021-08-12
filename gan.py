@@ -93,8 +93,12 @@ class GAN():
         noise = torch.randn(self.training_data.size(0), self.code_size)
         fake_data = self.generator(noise)
 
-        print("Fake data:")
+        print("Testing...\nFake data:")
         print(fake_data)
+
+    def dump_generator(self):
+
+        torch.save(self.generator, "generator.pt")
 
 
 def create_synthetic_data(code_size, num_data_points=500):

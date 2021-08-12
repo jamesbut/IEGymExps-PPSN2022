@@ -5,34 +5,33 @@ import torch
 
 class Decoder:
 
-    def __init__(self, num_inputs, num_outputs, num_hidden_layers,
-                 neurons_per_hidden_layer):
+    #def __init__(self, num_inputs, num_outputs, num_hidden_layers,
+    #             neurons_per_hidden_layer, file_name):
+    def __init__(self, file_name):
 
+        '''
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
         self.num_hidden_layers = num_hidden_layers
         self.neurons_per_hidden_layer = neurons_per_hidden_layer
+        '''
 
-        #Decoder path
-        path_dir = "../IndirectEncodingsExperiments/lib/NeuroEvo/config/decoders/"
-        file_name = "ie_gan.pt"
-        self.path = path_dir + file_name
 
         #Read decoder
+        self.decoder = torch.load(file_name)
         #self.decoder = torch.jit.load(self.path)
         #self.decoder = torch.load(self.path)
-        self.decoder = self._build_nn()
-        print("Decoder: ", self.decoder)
-        self.decoder.load_state_dict(torch.jit.load(self.path))
+        #self.decoder = self._build_nn()
+        #print("Decoder: ", self.decoder)
+        #self.decoder.load_state_dict(torch.jit.load(self.path))
 
 
     def decode(self, genotype):
+        output = self.decoder.forward(torch.Tensor(genotype))
+        return output.detach().numpy()
 
-        print("Decoding")
-        print(self.decoder)
-        output = self.decoder.forward(genotype)
-        print("Output: ", output)
-
+    def get_num_inputs(self):
+        return self.decoder.l1.in_features
 
     def _build_nn(self):
 
@@ -54,6 +53,6 @@ class Decoder:
                                           self.num_outputs))
 
         #Final layer goes through Sigmoid
-        layers.append(torch.nn.Sigmoid())
+        #layers.append(torch.nn.Sigmoid())
 
         return torch.nn.Sequential(*layers).double()

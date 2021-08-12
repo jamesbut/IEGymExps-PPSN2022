@@ -17,13 +17,16 @@ def evaluate(genome, num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              render=False, genotype_dir=None, env_kwargs=None):
 
-    env = gym.make("BipedalWalker-v3", **env_kwargs)
+    if env_kwargs is not None:
+        env = gym.make("BipedalWalker-v3", **env_kwargs)
+    else:
+        env = gym.make("BipedalWalker-v3")
 
     env.seed(108)
 
     nn = NeuralNetwork(num_inputs, num_outputs,
                        num_hidden_layers, neurons_per_hidden_layer,
-                       genotype_dir=genotype_dir)
+                       genotype_dir=genotype_dir, decoder=use_decoder)
 
     if genotype_dir is None:
         nn.set_weights(genome)
@@ -100,7 +103,7 @@ def indv_run(num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              genotype=None, genotype_dir=None):
 
-    render = False
+    render = True
 
     reward = evaluate(genotype, num_inputs, num_outputs,
                       num_hidden_layers, neurons_per_hidden_layer,
@@ -114,9 +117,6 @@ def train_gan(train_data_path):
     training_data = read_data(train_data_path)
 
     code_size = 1
-
-    #training_data = create_synthetic_data(code_size)
-
     training_steps = 20000
 
     gan = GAN(code_size, training_data.size(1), training_data)
@@ -125,28 +125,17 @@ def train_gan(train_data_path):
 
     gan.test()
 
-    quit()
+    gan.dump_generator()
 
 
 def main():
 
-    '''
-    d_num_inputs = 1
-    d_num_outputs = 100
-    d_num_hidden_layers = 0
-    d_neurons_per_hidden_layer = 0
-    decoder = Decoder(d_num_inputs, d_num_outputs,
-                      d_num_hidden_layers, d_neurons_per_hidden_layer)
-    decoder.decode([2.0, -0.5])
-    quit()
-    '''
-
-    gan_train = True
+    gan_train = False
     if gan_train:
         train_gan(sys.argv[1])
+        return
 
-
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_training/"
+    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
     file_name = "best_winner_so_far"
 
     dummy_env = gym.make("BipedalWalker-v3")
@@ -213,10 +202,12 @@ num_hidden_layers = 0
 neurons_per_hidden_layer = 0
 
 render = False
+use_decoder = True
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                         neurons_per_hidden_layer)
-num_weights = dummy_nn.get_num_weights()
+                         neurons_per_hidden_layer, decoder=use_decoder)
+#num_weights = dummy_nn.get_num_weights()
+num_genes = dummy_nn.get_genotype_size()
 
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -230,7 +221,7 @@ toolbox.register("evaluate", evaluate,
                  render=render, genotype_dir=None)
 
 #Initial location of distribution centre
-centroid = [0.0] * num_weights
+centroid = [0.0] * num_genes
 #Initial standard deviation of the distribution
 init_sigma = 1.0
 #Number of children to produce at each generation

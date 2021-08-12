@@ -3,12 +3,13 @@ import torch
 import csv
 import os
 import shutil
+from decoder import Decoder
 
 class NeuralNetwork():
 
     def __init__(self, num_inputs, num_outputs,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
-                 genotype=None, genotype_dir=None, decoder=None):
+                 genotype=None, genotype_dir=None, decoder=False):
 
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -18,15 +19,23 @@ class NeuralNetwork():
         #Build neural net
         self._build_nn()
 
+        self.decoder = None
+
+        #Read genotype from file
+        if genotype_dir is not None:
+            genotype = self._read_genotype(genotype_dir)
+
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
         if genotype is not None:
-            self.set_weights(genotype)
+            #If decoder is true, read in and use decoder to set weights
+            if decoder:
+                self.decoder = Decoder("generator.pt")
+                weights = self.decoder.decode(genotype)
+                self.set_weights(weights)
+            else:
+                self.set_weights(genotype)
 
-        #Read genotype from file
-        elif genotype_dir is not None:
-            genotype = self._read_genotype(genotype_dir)
-            self.set_weights(genotype)
 
     def _build_nn(self):
 
@@ -65,6 +74,13 @@ class NeuralNetwork():
             for params in layer.parameters():
                 num_weights += params.numel()
         return num_weights
+
+    #Returns size of genotype needed for this NN
+    def get_genotype_size(self):
+        if self.decoder is None:
+            return self.get_num_weights()
+        else:
+            return self.decoder.get_num_inputs()
 
     def print_weights(self):
         for layer in self.nn:
