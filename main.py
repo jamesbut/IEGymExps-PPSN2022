@@ -26,10 +26,7 @@ def evaluate(genome, num_inputs, num_outputs,
 
     nn = NeuralNetwork(num_inputs, num_outputs,
                        num_hidden_layers, neurons_per_hidden_layer,
-                       genotype_dir=genotype_dir, decoder=use_decoder)
-
-    if genotype_dir is None:
-        nn.set_weights(genome)
+                       genotype=genome, genotype_dir=genotype_dir, decoder=use_decoder)
 
     reward = 0
     done = False
@@ -208,7 +205,6 @@ dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder)
 #num_weights = dummy_nn.get_num_weights()
 num_genes = dummy_nn.get_genotype_size()
-
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)

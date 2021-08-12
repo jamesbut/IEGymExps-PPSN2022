@@ -20,6 +20,8 @@ class NeuralNetwork():
         self._build_nn()
 
         self.decoder = None
+        if decoder:
+            self.decoder = Decoder("generator.pt")
 
         #Read genotype from file
         if genotype_dir is not None:
@@ -30,7 +32,6 @@ class NeuralNetwork():
         if genotype is not None:
             #If decoder is true, read in and use decoder to set weights
             if decoder:
-                self.decoder = Decoder("generator.pt")
                 weights = self.decoder.decode(genotype)
                 self.set_weights(weights)
             else:
