@@ -87,7 +87,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
     #Save best agent
     dir_path += str(uuid.uuid4()) + '/'
-    dummy_nn.set_weights(hof[0])
+    dummy_nn.set_genotype(hof[0])
     dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
                            [domain_params])
 
@@ -132,7 +132,7 @@ def main():
         train_gan(sys.argv[1])
         return
 
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
+    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data/"
     file_name = "best_winner_so_far"
 
     dummy_env = gym.make("BipedalWalker-v3")
@@ -143,11 +143,11 @@ def main():
     num_hidden_layers = 0
     neurons_per_hidden_layer = 0
 
-    randomise_hyperparams = True
+    randomise_hyperparams = False
 
     if len(sys.argv)==1:
 
-        num_runs = 2000
+        num_runs = 1
 
         for i in range(num_runs):
             print("Evo run: ", i)
@@ -165,9 +165,16 @@ def main():
                                  neurons_per_hidden_layer=neurons_per_hidden_layer,
                                  render=render, genotype_dir=None, env_kwargs=env_kwargs)
 
+            else:
+
+                env_kwargs = {
+                    'speed_knee' : 6.
+                }
+
             winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
                              neurons_per_hidden_layer, dir_path, file_name, i,
                              env_kwargs['speed_knee'])
+
             #Reset strategy
             strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
             toolbox.register("generate", strategy.generate, creator.Individual)

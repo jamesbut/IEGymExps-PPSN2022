@@ -37,6 +37,12 @@ class NeuralNetwork():
             else:
                 self.set_weights(genotype)
 
+            self.genotype = genotype
+
+        else:
+            self.genotype = self.get_weights()
+
+
 
     def _build_nn(self):
 
@@ -113,6 +119,17 @@ class NeuralNetwork():
                 params.data = torch.tensor(np.reshape(p_weights, params.size()), \
                                            dtype=torch.float64)
 
+    #Set genotype - this uses a decoder if there is one as opposed to set_weights
+    #which just sets the NN weights
+    def set_genotype(self, genotype):
+
+        self.genotype = genotype
+
+        if self.decoder is not None:
+            weights = self.decoder.decode(genotype)
+
+        self.set_weights(weights)
+
     #Return weights as a 1d list
     def get_weights(self):
         weights = []
@@ -134,8 +151,8 @@ class NeuralNetwork():
             csv_writer = csv.writer(outfile)
             #Added fitness at the beginning because this is how it is
             #read in on the NeuroEvo side
-            fitness_and_weights = [fitness] + self.get_weights()
-            csv_writer.writerow(fitness_and_weights)
+            fitness_and_genotype = [fitness] + self.genotype
+            csv_writer.writerow(fitness_and_genotype)
 
             #Add domain hyperparameters on next line for cGAN
             if domain_params is not None:
