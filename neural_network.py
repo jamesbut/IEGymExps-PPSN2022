@@ -127,8 +127,9 @@ class NeuralNetwork():
 
         if self.decoder is not None:
             weights = self.decoder.decode(genotype)
-
-        self.set_weights(weights)
+            self.set_weights(weights)
+        else:
+            self.set_weights(genotype)
 
     #Return weights as a 1d list
     def get_weights(self):

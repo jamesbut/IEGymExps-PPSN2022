@@ -143,11 +143,11 @@ def main():
     num_hidden_layers = 0
     neurons_per_hidden_layer = 0
 
-    randomise_hyperparams = False
+    randomise_hyperparams = True
 
     if len(sys.argv)==1:
 
-        num_runs = 1
+        num_runs = 1000
 
         for i in range(num_runs):
             print("Evo run: ", i)
@@ -155,21 +155,27 @@ def main():
             #Generate new domain hyperparams
             if randomise_hyperparams:
 
-                env_kwargs = {
-                    'speed_knee' : random.uniform(2., 6.)
-                }
+                #Range is [2., 6.] - does not include 6.5
+                incremented_speeds = np.arange(2., 6.5, 0.5)
+                selected_speed = random.choice(incremented_speeds)
 
-                toolbox.register("evaluate", evaluate,
-                                 num_inputs=num_inputs, num_outputs=num_outputs,
-                                 num_hidden_layers=num_hidden_layers,
-                                 neurons_per_hidden_layer=neurons_per_hidden_layer,
-                                 render=render, genotype_dir=None, env_kwargs=env_kwargs)
+                env_kwargs = {
+                    #'speed_knee' : random.uniform(2., 6.)
+                    'speed_knee' : selected_speed
+                }
 
             else:
 
                 env_kwargs = {
                     'speed_knee' : 6.
+                    #'speed_knee' : 4.5
                 }
+
+            toolbox.register("evaluate", evaluate,
+                             num_inputs=num_inputs, num_outputs=num_outputs,
+                             num_hidden_layers=num_hidden_layers,
+                             neurons_per_hidden_layer=neurons_per_hidden_layer,
+                             render=render, genotype_dir=None, env_kwargs=env_kwargs)
 
             winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
                              neurons_per_hidden_layer, dir_path, file_name, i,
@@ -206,7 +212,7 @@ num_hidden_layers = 0
 neurons_per_hidden_layer = 0
 
 render = False
-use_decoder = True
+use_decoder = False
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder)
