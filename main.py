@@ -81,7 +81,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
     num_gens = 100
     dump_every = 25
-    population, logbook = evo_utils.eaGenerateUpdate(
+    population, logbook, avg_fitnesses, best_fitnesses = evo_utils.eaGenerateUpdate(
         toolbox, ngen=num_gens, stats=stats, halloffame=hof,
         dump_every=dump_every, dummy_nn=dummy_nn)
 
@@ -90,6 +90,10 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     dummy_nn.set_genotype(hof[0])
     dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
                            [domain_params])
+
+    #Save population statistics
+    dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
+    dump_data(best_fitnesses, dir_path, 'best_fitnesses')
 
     if parallelise:
         pool.close()
@@ -143,11 +147,15 @@ def main():
     num_hidden_layers = 0
     neurons_per_hidden_layer = 0
 
-    randomise_hyperparams = True
+    randomise_hyperparams = False
 
     if len(sys.argv)==1:
 
-        num_runs = 1000
+        num_runs = 25
+
+        #Create experiment path
+        exp_dir_name = create_exp_dir_name(dir_path)
+        dir_exp_path = dir_path + '/' + exp_dir_name + '/'
 
         for i in range(num_runs):
             print("Evo run: ", i)
@@ -167,8 +175,9 @@ def main():
             else:
 
                 env_kwargs = {
-                    'speed_knee' : 6.
+                    #'speed_knee' : 6.
                     #'speed_knee' : 4.5
+                    'speed_knee' : 4.75
                 }
 
             toolbox.register("evaluate", evaluate,
@@ -178,7 +187,7 @@ def main():
                              render=render, genotype_dir=None, env_kwargs=env_kwargs)
 
             winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
-                             neurons_per_hidden_layer, dir_path, file_name, i,
+                             neurons_per_hidden_layer, dir_exp_path, file_name, i,
                              env_kwargs['speed_knee'])
 
             #Reset strategy

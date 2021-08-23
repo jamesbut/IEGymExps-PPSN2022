@@ -43,6 +43,10 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
+    avg_fitnesses = []
+    best_fitness_so_far = None
+    best_fitnesses = []
+
     for gen in range(ngen):
         # Generate a new population
         population = toolbox.generate()
@@ -68,4 +72,15 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         if verbose:
             print(logbook.stream)
 
-    return population, logbook
+        #Log statistics
+        avg_fitnesses.append(record['avg'])
+
+        #Calculate best fitness so far
+        if best_fitness_so_far is None:
+            best_fitness_so_far = record['max']
+        else:
+            if record['max'] > best_fitness_so_far:
+                best_fitness_so_far = record['max']
+        best_fitnesses.append(best_fitness_so_far)
+
+    return population, logbook, avg_fitnesses, best_fitnesses
