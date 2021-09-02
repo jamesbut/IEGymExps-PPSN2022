@@ -81,3 +81,17 @@ def create_exp_dir_name(base_path):
                     max_exp_num = exp_num
 
     return 'exp_' + str(max_exp_num+1)
+
+def create_synthetic_data(code_size, num_data_points=500):
+
+    #return -10. + torch.randn(500, code_size)
+
+    means = torch.zeros(500, 2)
+    for i in range(means.size(0)):
+        for j in range(means.size(1)):
+            if j == 0:
+                means[i][j] = 10.
+            else:
+                means[i][j] = -10.
+
+    return means + torch.randn(500, 2)

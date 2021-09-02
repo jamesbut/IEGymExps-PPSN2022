@@ -31,10 +31,10 @@ class Discriminator(nn.Module):
 
 class GAN():
 
-    def __init__(self, code_size, input_size, training_data):
+    def __init__(self, code_size, training_data):
 
-        self.generator = Generator(code_size, input_size)
-        self.discriminator = Discriminator(input_size)
+        self.generator = Generator(code_size, training_data.size(1))
+        self.discriminator = Discriminator(training_data.size(1))
 
         self.g_optimiser = torch.optim.Adam(self.generator.parameters(), lr=0.001)
         self.d_optimiser = torch.optim.Adam(self.discriminator.parameters(), lr=0.001)
@@ -99,18 +99,3 @@ class GAN():
     def dump_generator(self):
 
         torch.save(self.generator, "generator.pt")
-
-
-def create_synthetic_data(code_size, num_data_points=500):
-
-    #return -10. + torch.randn(500, code_size)
-
-    means = torch.zeros(500, 2)
-    for i in range(means.size(0)):
-        for j in range(means.size(1)):
-            if j == 0:
-                means[i][j] = 10.
-            else:
-                means[i][j] = -10.
-
-    return means + torch.randn(500, 2)

@@ -7,8 +7,9 @@ import numpy as np
 import uuid
 import sys
 import random
-from gan import *
+from generative_models.gan import *
 from data import *
+from generative_models.autoencoder import *
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -120,7 +121,7 @@ def train_gan(train_data_path):
     code_size = 1
     training_steps = 20000
 
-    gan = GAN(code_size, training_data.size(1), training_data)
+    gan = GAN(code_size, training_data)
 
     gan.train(training_steps)
 
@@ -129,12 +130,34 @@ def train_gan(train_data_path):
     gan.dump_generator()
 
 
+def train_ae():
+
+    code_size = 1
+
+    #training_data = read_data(train_data_path)
+    training_data = create_synthetic_data(code_size)
+
+    training_steps = 50000
+
+    ae = Autoencoder(code_size, training_data)
+
+    ae.train(training_steps)
+
+    ae.test()
+
+    #ae.dump_generator()
+
 def main():
+
+    train_ae()
+    quit()
 
     gan_train = False
     if gan_train:
         train_gan(sys.argv[1])
         return
+
+    train_vae(sys.argv[1])
 
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data/"
     file_name = "best_winner_so_far"
