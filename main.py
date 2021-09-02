@@ -102,13 +102,13 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
 def indv_run(num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
-             genotype=None, genotype_dir=None):
+             genotype=None, genotype_dir=None, env_kwargs=None):
 
     render = True
 
     reward = evaluate(genotype, num_inputs, num_outputs,
                       num_hidden_layers, neurons_per_hidden_layer,
-                      render, genotype_dir)
+                      render, genotype_dir, env_kwargs)
 
     print("Reward: ", reward)
 
@@ -151,7 +151,7 @@ def main():
 
     if len(sys.argv)==1:
 
-        num_runs = 25
+        num_runs = 1
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path)
@@ -200,13 +200,19 @@ def main():
 
     else:
 
+        env_kwargs = {
+            'speed_knee' : 6.
+            #'speed_knee' : 4.75
+        }
+
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
 
         indv_full_path = dir_path + indv_dir + "/" + file_name
 
         indv_run(num_inputs, num_outputs, num_hidden_layers,
-                 neurons_per_hidden_layer, genotype_dir=indv_full_path)
+                 neurons_per_hidden_layer, genotype_dir=indv_full_path,
+                 env_kwargs=env_kwargs)
 
 
 #Some bug in DEAP means that I have to define toolbox before if __name__ == "__main__"
