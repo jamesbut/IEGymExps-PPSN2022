@@ -6,7 +6,6 @@ class Autoencoder(nn.Module):
     def __init__(self, code_size, training_data):
         super().__init__()
 
-        #self.code_size = code_size
         self.training_data = training_data
 
         self.encoder_ol = nn.Linear(training_data.size(1), code_size)
@@ -52,9 +51,8 @@ class Autoencoder(nn.Module):
                                                         train_loss))
 
     def test(self):
-
-        print("Testing AE...")
         self(self.training_data, verbosity=True)
 
     def dump_decoder(self):
-        print("Dumping AE...")
+        #Figure out how to dump just the decoder
+        pass

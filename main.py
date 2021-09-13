@@ -10,6 +10,7 @@ import random
 from generative_models.gan import *
 from data import *
 from generative_models.autoencoder import *
+from generative_models.vae import *
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -147,9 +148,25 @@ def train_ae():
 
     #ae.dump_generator()
 
+def train_vae():
+
+    code_size = 1
+
+    #training_data = read_data(train_data_path)
+    training_data = create_synthetic_data(code_size)
+
+    training_steps = 10000
+
+    vae = VAE(code_size, training_data)
+
+    vae.train(training_steps)
+
+    vae.test()
+
+
 def main():
 
-    train_ae()
+    train_vae()
     quit()
 
     gan_train = False

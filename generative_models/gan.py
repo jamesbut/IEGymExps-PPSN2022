@@ -97,5 +97,4 @@ class GAN():
         print(fake_data)
 
     def dump_generator(self):
-
         torch.save(self.generator, "generator.pt")
