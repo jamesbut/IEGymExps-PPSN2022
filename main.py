@@ -131,14 +131,14 @@ def train_gan(train_data_path):
     gan.dump_generator()
 
 
-def train_ae():
+def train_ae(train_data_path):
 
     code_size = 1
 
     #training_data = read_data(train_data_path)
     training_data = create_synthetic_data(code_size)
 
-    training_steps = 50000
+    training_steps = 20000
 
     ae = Autoencoder(code_size, training_data)
 
@@ -146,14 +146,14 @@ def train_ae():
 
     ae.test()
 
-    #ae.dump_generator()
+    ae.dump_decoder()
 
-def train_vae():
+def train_vae(train_data_path):
 
     code_size = 1
 
-    #training_data = read_data(train_data_path)
-    training_data = create_synthetic_data(code_size)
+    training_data = read_data(train_data_path)
+    #training_data = create_synthetic_data(code_size)
 
     training_steps = 10000
 
@@ -166,8 +166,15 @@ def train_vae():
 
 def main():
 
-    train_vae()
-    quit()
+    ae_train = True
+    if ae_train:
+        train_ae(sys.argv[1])
+        return
+
+    vae_train = False
+    if vae_train:
+        train_vae(sys.argv[1])
+        return
 
     gan_train = False
     if gan_train:

@@ -58,7 +58,6 @@ class GAN():
             d_real_loss = loss(d_real_output, true_labels)
             d_real_loss.backward()
 
-
             #Generate fake data using generator
             noise = torch.randn(self.training_data.size(0), self.code_size)
             fake_data = self.generator(noise)
@@ -71,7 +70,6 @@ class GAN():
             d_fake_loss.backward()
 
             self.d_optimiser.step()
-
 
             #Train generator
             self.generator.zero_grad()

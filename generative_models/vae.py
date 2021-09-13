@@ -12,8 +12,6 @@ class VAE(nn.Module):
                                      nn.ReLU())
         self.hidden2mu = nn.Linear(code_size, code_size)
         self.hidden2log_var = nn.Linear(code_size, code_size)
-        #self.decoder = nn.Sequential(nn.Linear(code_size, training_data.size(1)),
-        #                             nn.ReLU())
         self.decoder = nn.Sequential(nn.Linear(code_size, training_data.size(1)))
 
         self.optimiser = torch.optim.Adam(self.parameters(), lr=1e-3)
@@ -67,9 +65,6 @@ class VAE(nn.Module):
         kl_loss = (-0.5*(1+log_var - mu**2 - torch.exp(log_var)).sum(dim=1)).mean(dim=0)
         recon_loss_criterion = nn.MSELoss()
         reconstruction_loss = recon_loss_criterion(inputs, outputs)
-
-        #print("Recon loss: ", reconstruction_loss)
-        #print("KL loss: ", kl_loss)
 
         return reconstruction_loss + kl_loss
 
