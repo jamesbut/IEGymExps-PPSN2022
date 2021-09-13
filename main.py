@@ -135,8 +135,8 @@ def train_ae(train_data_path):
 
     code_size = 1
 
-    #training_data = read_data(train_data_path)
-    training_data = create_synthetic_data(code_size)
+    training_data = read_data(train_data_path)
+    #training_data = create_synthetic_data(code_size)
 
     training_steps = 20000
 
@@ -144,7 +144,7 @@ def train_ae(train_data_path):
 
     ae.train(training_steps)
 
-    ae.test()
+    #ae.test()
 
     ae.dump_decoder()
 
@@ -166,7 +166,7 @@ def train_vae(train_data_path):
 
 def main():
 
-    ae_train = True
+    ae_train = False
     if ae_train:
         train_ae(sys.argv[1])
         return
@@ -180,8 +180,6 @@ def main():
     if gan_train:
         train_gan(sys.argv[1])
         return
-
-    train_vae(sys.argv[1])
 
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data/"
     file_name = "best_winner_so_far"
@@ -198,7 +196,7 @@ def main():
 
     if len(sys.argv)==1:
 
-        num_runs = 1
+        num_runs = 25
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path)
@@ -247,9 +245,11 @@ def main():
 
     else:
 
+        print("Individual run")
+
         env_kwargs = {
-            'speed_knee' : 6.
-            #'speed_knee' : 4.75
+            #'speed_knee' : 6.
+            'speed_knee' : 4.75
         }
 
         #Genome directory comes from the command line
@@ -274,7 +274,7 @@ num_hidden_layers = 0
 neurons_per_hidden_layer = 0
 
 render = False
-use_decoder = False
+use_decoder = True
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder)
