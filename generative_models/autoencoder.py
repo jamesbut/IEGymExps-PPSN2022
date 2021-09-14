@@ -4,7 +4,6 @@ import torch.nn as nn
 class Encoder(nn.Module):
 
     def __init__(self, num_inputs, code_size):
-
         super(Encoder, self).__init__()
 
         self.l1 = nn.Linear(num_inputs, code_size)
@@ -15,7 +14,6 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
 
     def __init__(self, code_size, num_outputs):
-
         super(Decoder, self).__init__()
 
         self.l1 = nn.Linear(code_size, num_outputs)

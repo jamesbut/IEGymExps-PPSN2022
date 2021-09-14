@@ -1,5 +1,27 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
+class Encoder(nn.Module):
+
+    def __init__(self, num_inputs, code_size):
+        super(Encoder, self).__init__()
+
+        self.l1 = nn.Linear(num_inputs, code_size)
+
+    def forward(self, x):
+        return self.l1(F.relu(x))
+
+class Decoder(nn.Module):
+
+    def __init__(self, code_size, num_outputs):
+        super(Decoder, self).__init__()
+
+        self.l1 = nn.Linear(code_size, num_outputs)
+
+    def forward(self, x):
+        return self.l1(x)
+
 
 class VAE(nn.Module):
 
@@ -8,11 +30,10 @@ class VAE(nn.Module):
 
         self.training_data = training_data
 
-        self.encoder = nn.Sequential(nn.Linear(training_data.size(1), code_size),
-                                     nn.ReLU())
+        self.encoder = Encoder(training_data.size(1), code_size)
         self.hidden2mu = nn.Linear(code_size, code_size)
         self.hidden2log_var = nn.Linear(code_size, code_size)
-        self.decoder = nn.Sequential(nn.Linear(code_size, training_data.size(1)))
+        self.decoder = Decoder(code_size, training_data.size(1))
 
         self.optimiser = torch.optim.Adam(self.parameters(), lr=1e-3)
 
@@ -88,3 +109,6 @@ class VAE(nn.Module):
 
     def test(self):
         self(self.training_data, verbosity=True)
+
+    def dump_decoder(self):
+        torch.save(self.decoder, "generator.pt")
