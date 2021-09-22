@@ -1,6 +1,15 @@
 import numpy as np
 import random
 
+def get_kwarg_values(env_name):
+    if env_name == 'BipedalWalkerv3':
+        return 4.75
+    elif env_name == 'MountainCarContinuous-v0':
+        #return [0.0012]
+        #return [0.0012, 0.0012, 0.0012]
+        #return [0.0011, 0.0012, 0.0013]
+        return [0.0010, 0.0012, 0.0014]
+
 #Get env kwargs for particular environment
 def get_env_kwargs(randomise, env_name):
 
@@ -36,10 +45,23 @@ def get_env_kwargs(randomise, env_name):
             }
 
         elif env_name == 'MountainCarContinuous-v0':
+            #Create list of env kwargs for different trials for the same organism
+            env_kwargs = []
+            env_kwarg_vals = get_kwarg_values(env_name)
+            for val in env_kwarg_vals:
+                env_kwargs.append(
+                    {
+                        'power' : val
+                    }
+                )
+
+            '''
             env_kwargs = {
                 #'power' : 0.0015
-                'power' : 0.0015
+                #'power' : 0.0012
+                'power' : [0.0011, 0.0012, 0.0013]
             }
+            '''
 
         else:
             env_kwargs = None
@@ -52,6 +74,11 @@ def get_domain_params(env_kwargs, env_name):
     if env_name == 'BipedalWalker-v3':
         return env_kwargs['speed_knee']
     elif env_name == 'MountainCarContinuous-v0':
-        return env_kwargs['power']
+        #if len(env_kwargs) == 1:
+        #    return env_kwargs['power']
+        #else:
+        kwargs = []
+        for val in env_kwargs:
+            kwargs.append(val['power'])
     else:
         return None

@@ -29,9 +29,9 @@ def reset_env(env):
         state = env.reset()
         return state
 
-def evaluate(genome, num_inputs, num_outputs,
-             num_hidden_layers, neurons_per_hidden_layer,
-             render=False, genotype_dir=None, env_kwargs=None):
+def run(genome, num_inputs, num_outputs,
+        num_hidden_layers, neurons_per_hidden_layer,
+        render=False, genotype_dir=None, env_kwargs=None):
 
     if env_kwargs is not None:
         #env = gym.make("BipedalWalker-v3", **env_kwargs)
@@ -48,7 +48,6 @@ def evaluate(genome, num_inputs, num_outputs,
 
     reward = 0
     done = False
-
 
     if render:
         env.render()
@@ -82,6 +81,31 @@ def evaluate(genome, num_inputs, num_outputs,
 
     env.close()
 
+    return reward
+
+
+def evaluate(genome, num_inputs, num_outputs,
+             num_hidden_layers, neurons_per_hidden_layer,
+             render=False, genotype_dir=None, env_kwargs=None,
+             verbosity=False):
+
+    reward = 0
+
+    #For a certain number of trials/env arguments
+    for kwargs in env_kwargs:
+        r = run(genome, num_inputs, num_outputs, num_hidden_layers,
+                neurons_per_hidden_layer, render, genotype_dir, kwargs)
+        reward += r
+
+        if verbosity:
+            print(kwargs)
+            print("Reward: ", r)
+
+    #print("Reward before:", reward)
+    #Average reward over number of trials
+    reward /= len(env_kwargs)
+    #print("Reward after:", reward)
+
     return [reward]
 
 
@@ -105,7 +129,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 20
+    num_gens = 50
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses = evo_utils.eaGenerateUpdate(
         toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -130,11 +154,11 @@ def indv_run(num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              genotype=None, genotype_dir=None, env_kwargs=None):
 
-    render = False
+    render = True
 
     reward = evaluate(genotype, num_inputs, num_outputs,
                       num_hidden_layers, neurons_per_hidden_layer,
-                      render, genotype_dir, env_kwargs)
+                      render, genotype_dir, env_kwargs, verbosity=True)
 
     print("Reward: ", reward)
 
