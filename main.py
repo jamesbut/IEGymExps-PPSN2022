@@ -1,6 +1,7 @@
 from neural_network import NeuralNetwork
 from decoder import Decoder
 import gym
+import pybulletgym
 from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np
@@ -11,18 +12,33 @@ from generative_models.gan import *
 from data import *
 from generative_models.autoencoder import *
 from generative_models.vae import *
+from formatting import *
+from domain_params import *
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
+
+def reset_env(env):
+
+    #Check for pybullet env
+    if 'PyBulletEnv' in env_name:
+        state = env.reset()
+        delete_last_lines(2)
+        return state
+    else:
+        state = env.reset()
+        return state
 
 def evaluate(genome, num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              render=False, genotype_dir=None, env_kwargs=None):
 
     if env_kwargs is not None:
-        env = gym.make("BipedalWalker-v3", **env_kwargs)
+        #env = gym.make("BipedalWalker-v3", **env_kwargs)
+        env = gym.make(env_name, **env_kwargs)
     else:
-        env = gym.make("BipedalWalker-v3")
+        #env = gym.make("BipedalWalker-v3")
+        env = gym.make(env_name)
 
     env.seed(108)
 
@@ -33,9 +49,15 @@ def evaluate(genome, num_inputs, num_outputs,
     reward = 0
     done = False
 
+
+    if render:
+        env.render()
+
     state = env.reset()
-    #print("State: ", state)
+
+    step=0
     while not done:
+        step += 1
 
         if render:
             env.render()
@@ -57,6 +79,8 @@ def evaluate(genome, num_inputs, num_outputs,
         print("Reward: ", r)
         print("Total reward: ", reward)
         '''
+
+    env.close()
 
     return [reward]
 
@@ -81,7 +105,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 100
+    num_gens = 20
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses = evo_utils.eaGenerateUpdate(
         toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -106,64 +130,13 @@ def indv_run(num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              genotype=None, genotype_dir=None, env_kwargs=None):
 
-    render = True
+    render = False
 
     reward = evaluate(genotype, num_inputs, num_outputs,
                       num_hidden_layers, neurons_per_hidden_layer,
                       render, genotype_dir, env_kwargs)
 
     print("Reward: ", reward)
-
-
-def train_gan(train_data_path):
-
-    training_data = read_data(train_data_path)
-
-    code_size = 1
-    training_steps = 20000
-
-    gan = GAN(code_size, training_data)
-
-    gan.train(training_steps)
-
-    gan.test()
-
-    gan.dump_generator()
-
-
-def train_ae(train_data_path):
-
-    code_size = 1
-
-    training_data = read_data(train_data_path)
-    #training_data = create_synthetic_data(code_size)
-
-    training_steps = 20000
-
-    ae = Autoencoder(code_size, training_data)
-
-    ae.train(training_steps)
-
-    #ae.test()
-
-    ae.dump_decoder()
-
-def train_vae(train_data_path):
-
-    code_size = 1
-
-    training_data = read_data(train_data_path)
-    #training_data = create_synthetic_data(code_size)
-
-    training_steps = 20000
-
-    vae = VAE(code_size, training_data)
-
-    vae.train(training_steps)
-
-    #vae.test()
-
-    vae.dump_decoder()
 
 
 def main():
@@ -186,19 +159,11 @@ def main():
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data/"
     file_name = "best_winner_so_far"
 
-    dummy_env = gym.make("BipedalWalker-v3")
-    state = dummy_env.reset()
-
-    num_inputs = len(state)
-    num_outputs = len(dummy_env.action_space.high)
-    num_hidden_layers = 0
-    neurons_per_hidden_layer = 0
-
     randomise_hyperparams = False
 
     if len(sys.argv)==1:
 
-        num_runs = 25
+        num_runs = 1
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path)
@@ -207,25 +172,7 @@ def main():
         for i in range(num_runs):
             print("Evo run: ", i)
 
-            #Generate new domain hyperparams
-            if randomise_hyperparams:
-
-                #Range is [2., 6.] - does not include 6.5
-                incremented_speeds = np.arange(2., 6.5, 0.5)
-                selected_speed = random.choice(incremented_speeds)
-
-                env_kwargs = {
-                    #'speed_knee' : random.uniform(2., 6.)
-                    'speed_knee' : selected_speed
-                }
-
-            else:
-
-                env_kwargs = {
-                    #'speed_knee' : 6.
-                    #'speed_knee' : 4.5
-                    'speed_knee' : 4.75
-                }
+            env_kwargs = get_env_kwargs(randomise_hyperparams, env_name)
 
             toolbox.register("evaluate", evaluate,
                              num_inputs=num_inputs, num_outputs=num_outputs,
@@ -233,9 +180,11 @@ def main():
                              neurons_per_hidden_layer=neurons_per_hidden_layer,
                              render=render, genotype_dir=None, env_kwargs=env_kwargs)
 
+            domain_params = get_domain_params(env_kwargs, env_name)
+
             winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
                              neurons_per_hidden_layer, dir_exp_path, file_name, i,
-                             env_kwargs['speed_knee'])
+                             domain_params)
 
             #Reset strategy
             strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
@@ -249,10 +198,7 @@ def main():
 
         print("Individual run")
 
-        env_kwargs = {
-            #'speed_knee' : 6.
-            'speed_knee' : 4.75
-        }
+        env_kwargs = get_env_kwargs(False, env_name)
 
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
@@ -267,7 +213,15 @@ def main():
 #Some bug in DEAP means that I have to define toolbox before if __name__ == "__main__"
 #apparently
 
-dummy_env = gym.make("BipedalWalker-v3")
+#env_name = 'BipedalWalker-v3'
+#env_name = 'HalfCheetah-v2'
+#env_name = 'LunarLanderContinuous-v2'
+#env_name = 'HumanoidPyBulletEnv-v0'
+#env_name = 'HalfCheetahPyBulletEnv-v0'
+#env_name = 'InvertedDoublePendulum-v2'
+env_name = 'MountainCarContinuous-v0'
+
+dummy_env = gym.make(env_name)
 state = dummy_env.reset()
 
 num_inputs = len(state)
@@ -276,7 +230,7 @@ num_hidden_layers = 0
 neurons_per_hidden_layer = 0
 
 render = False
-use_decoder = True
+use_decoder = False
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder)

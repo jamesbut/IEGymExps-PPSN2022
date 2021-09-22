@@ -60,7 +60,8 @@ def create_exp_dir_name(base_path):
 
     exp_full_dirs = glob(base_path + "*")
 
-    max_exp_num = None
+    #max_exp_num = None
+    max_exp_num = 0
 
     if len(exp_full_dirs) == 0:
         max_exp_num = 0
@@ -71,7 +72,10 @@ def create_exp_dir_name(base_path):
             #Get exp numbers in directory
             split_path = ed.split("/")
             exp_string = split_path[-1]
-            exp_num = int(exp_string.split("_")[-1])
+            try:
+                exp_num = int(exp_string.split("_")[-1])
+            except ValueError:
+                continue
 
             #Find largest exp number
             if max_exp_num is None:
