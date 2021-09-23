@@ -9,7 +9,8 @@ class NeuralNetwork():
 
     def __init__(self, num_inputs, num_outputs,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
-                 genotype=None, genotype_dir=None, decoder=False):
+                 genotype=None, genotype_dir=None, decoder=False,
+                 bias=True):
 
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -17,7 +18,7 @@ class NeuralNetwork():
         self.neurons_per_hidden_layer = neurons_per_hidden_layer
 
         #Build neural net
-        self._build_nn()
+        self._build_nn(bias)
 
         self.decoder = None
         if decoder:
@@ -44,24 +45,29 @@ class NeuralNetwork():
 
 
 
-    def _build_nn(self):
+    def _build_nn(self, bias=True):
 
         layers = []
         if self.num_hidden_layers == 0:
-            layers.append(torch.nn.Linear(self.num_inputs, self.num_outputs))
+            layers.append(torch.nn.Linear(self.num_inputs, self.num_outputs,
+                                          bias=bias))
 
         else:
-            layers.append(torch.nn.Linear(self.num_inputs, self.neurons_per_hidden_layer))
+            layers.append(torch.nn.Linear(self.num_inputs,
+                                          self.neurons_per_hidden_layer,
+                                          bias=bias))
             #Hidden layers have ReLU activation
             layers.append(torch.nn.ReLU())
 
             for i in range(self.num_hidden_layers-1):
                 layers.append(torch.nn.Linear(self.neurons_per_hidden_layer,
-                                              self.neurons_per_hidden_layer))
+                                              self.neurons_per_hidden_layer,
+                                              bias=bias))
                 layers.append(torch.ReLU())
 
             layers.append(torch.nn.Linear(self.neurons_per_hidden_layer,
-                                          self.num_outputs))
+                                          self.num_outputs,
+                                          bias=bias))
 
         #Final layer goes through Sigmoid
         layers.append(torch.nn.Sigmoid())

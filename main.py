@@ -44,7 +44,8 @@ def run(genome, num_inputs, num_outputs,
 
     nn = NeuralNetwork(num_inputs, num_outputs,
                        num_hidden_layers, neurons_per_hidden_layer,
-                       genotype=genome, genotype_dir=genotype_dir, decoder=use_decoder)
+                       genotype=genome, genotype_dir=genotype_dir,
+                       decoder=use_decoder, bias=bias)
 
     reward = 0
     done = False
@@ -252,14 +253,18 @@ num_inputs = len(state)
 num_outputs = len(dummy_env.action_space.high)
 num_hidden_layers = 0
 neurons_per_hidden_layer = 0
+bias=False
 
 render = False
 use_decoder = False
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                         neurons_per_hidden_layer, decoder=use_decoder)
+                         neurons_per_hidden_layer, decoder=use_decoder,
+                         bias=bias)
 #num_weights = dummy_nn.get_num_weights()
 num_genes = dummy_nn.get_genotype_size()
+print("Num genes:", num_genes)
+quit()
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
