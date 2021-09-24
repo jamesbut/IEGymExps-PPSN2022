@@ -27,12 +27,14 @@ def get_env_kwargs(randomise, env_name):
 
         elif env_name == 'MountainCarContinuous-v0':
             #Range is [0.0020, 0.0021, 0.0022, 0.0023, 0.0024, 0.0025]
-            param_range = np.arange(0.002, 0.0026, 0.0001)
+            #param_range = np.arange(0.002, 0.0026, 0.0001)
+
+            param_range = [0.0008, 0.0012, 0.0016]
             selected_param = random.choice(param_range)
 
-            env_kwargs = {
+            env_kwargs = [{
                 'power' : selected_param
-            }
+            }]
 
         else:
             env_kwargs = None
@@ -56,14 +58,6 @@ def get_env_kwargs(randomise, env_name):
                     }
                 )
 
-            '''
-            env_kwargs = {
-                #'power' : 0.0015
-                #'power' : 0.0012
-                'power' : [0.0011, 0.0012, 0.0013]
-            }
-            '''
-
         else:
             env_kwargs = None
 
@@ -75,9 +69,6 @@ def get_domain_params(env_kwargs, env_name):
     if env_name == 'BipedalWalker-v3':
         return env_kwargs['speed_knee']
     elif env_name == 'MountainCarContinuous-v0':
-        #if len(env_kwargs) == 1:
-        #    return env_kwargs['power']
-        #else:
         kwargs = []
         for val in env_kwargs:
             kwargs.append(val['power'])

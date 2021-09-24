@@ -128,7 +128,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 5
+    num_gens = 100
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -189,11 +189,11 @@ def main():
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data"
     file_name = "best_winner_so_far"
 
-    randomise_hyperparams = False
+    randomise_hyperparams = True
 
     if len(sys.argv)==1:
 
-        num_runs = 1
+        num_runs = 2000
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path)
