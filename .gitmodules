@@ -4,3 +4,6 @@
 [submodule "lib/pybullet-gym"]
 	path = lib/pybullet-gym
 	url = https://github.com/jamesbut/pybullet-gym.git
+[submodule "lib/deap"]
+	path = lib/deap
+	url = https://github.com/jamesbut/deap.git

@@ -39,7 +39,7 @@ in the hall of fame every n generations
 """
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                      verbose=__debug__, dump_every=None, obs_normalise=None,
-                     domain_params_in_obs=None, dummy_nn=None):
+                     domain_params_in_obs=None, dummy_nn=None, completion_fitness=None):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -57,12 +57,6 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
 
         if halloffame is not None:
             halloffame.update(population)
-
-        # Dump best agent
-        #if dump_every is not None:
-        #    if gen % dump_every == 0:
-        #        dummy_nn.set_weights(halloffame[0])
-        #        dummy_nn.save_genotype(file_name_suffix="_gen_" + str(gen))
 
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
@@ -83,4 +77,12 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                 best_fitness_so_far = record['max']
         best_fitnesses.append(best_fitness_so_far)
 
-    return population, logbook, avg_fitnesses, best_fitnesses
+        #End if completion fitness has been achieved
+        if completion_fitness is not None:
+            if best_fitness_so_far >= completion_fitness:
+                print("WINNER FOUND!")
+                return population, logbook, avg_fitnesses, best_fitnesses, True
+
+    print("No winner found :(")
+
+    return population, logbook, avg_fitnesses, best_fitnesses, False

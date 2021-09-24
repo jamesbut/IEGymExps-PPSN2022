@@ -5,7 +5,7 @@ def get_kwarg_values(env_name):
     if env_name == 'BipedalWalkerv3':
         return 4.75
     elif env_name == 'MountainCarContinuous-v0':
-        return [0.0012]
+        return [0.0008]
         #return [0.0012, 0.0012, 0.0012]
         #return [0.0011, 0.0012, 0.0013]
         #return [0.0008, 0.0012, 0.0016]
@@ -81,5 +81,6 @@ def get_domain_params(env_kwargs, env_name):
         kwargs = []
         for val in env_kwargs:
             kwargs.append(val['power'])
+        return kwargs
     else:
         return None

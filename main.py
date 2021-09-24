@@ -55,9 +55,7 @@ def run(genome, num_inputs, num_outputs,
 
     state = env.reset()
 
-    step=0
     while not done:
-        step += 1
 
         if render:
             env.render()
@@ -130,17 +128,26 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 50
+    num_gens = 5
     dump_every = 25
-    population, logbook, avg_fitnesses, best_fitnesses = evo_utils.eaGenerateUpdate(
-        toolbox, ngen=num_gens, stats=stats, halloffame=hof,
-        dump_every=dump_every, dummy_nn=dummy_nn)
+    population, logbook, avg_fitnesses, best_fitnesses, complete = \
+        evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
+                                   dump_every=dump_every, dummy_nn=dummy_nn,
+                                   completion_fitness=completion_fitness)
+
+
+    dir_path += str(uuid.uuid4()) + '/'
+    print("File name: ", file_name)
+    print("Dir path:", dir_path)
 
     #Save best agent
-    dir_path += str(uuid.uuid4()) + '/'
-    dummy_nn.set_genotype(hof[0])
-    dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
-                           [domain_params])
+    save_winners_only = True
+
+    if ((save_winners_only is False) or
+       (save_winners_only is True and complete)):
+        dummy_nn.set_genotype(hof[0])
+        dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
+                               domain_params)
 
     #Save population statistics
     dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
@@ -246,6 +253,9 @@ def main():
 #env_name = 'InvertedDoublePendulum-v2'
 env_name = 'MountainCarContinuous-v0'
 
+#completion_fitness = None
+completion_fitness = -0.5
+
 dummy_env = gym.make(env_name)
 state = dummy_env.reset()
 
@@ -263,8 +273,6 @@ dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          bias=bias)
 #num_weights = dummy_nn.get_num_weights()
 num_genes = dummy_nn.get_genotype_size()
-print("Num genes:", num_genes)
-quit()
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -283,7 +291,12 @@ init_sigma = 1.0
 #Number of children to produce at each generation
 #lambda_ = 20 * num_weights
 lambda_ = 100
-strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
+
+lb = [-10., -10.]
+ub = [10., 120.]
+
+strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
+                        lb_=lb, ub_=ub)
 
 toolbox.register("generate", strategy.generate, creator.Individual)
 toolbox.register("update", strategy.update)
