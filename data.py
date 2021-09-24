@@ -58,7 +58,7 @@ def dump_data(data, dir_path, file_name):
 #exp_*next integer*
 def create_exp_dir_name(base_path):
 
-    exp_full_dirs = glob(base_path + "*")
+    exp_full_dirs = glob(base_path + "/*")
 
     #max_exp_num = None
     max_exp_num = 0

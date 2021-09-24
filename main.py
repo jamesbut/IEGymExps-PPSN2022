@@ -188,7 +188,7 @@ def main():
         train_gan(sys.argv[1])
         return
 
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data/"
+    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data"
     file_name = "best_winner_so_far"
 
     randomise_hyperparams = False
