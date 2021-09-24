@@ -1,7 +1,6 @@
 from neural_network import NeuralNetwork
 from decoder import Decoder
 import gym
-import pybulletgym
 from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np
@@ -34,10 +33,8 @@ def run(genome, num_inputs, num_outputs,
         render=False, genotype_dir=None, env_kwargs=None):
 
     if env_kwargs is not None:
-        #env = gym.make("BipedalWalker-v3", **env_kwargs)
         env = gym.make(env_name, **env_kwargs)
     else:
-        #env = gym.make("BipedalWalker-v3")
         env = gym.make(env_name)
 
     env.seed(108)
@@ -110,6 +107,8 @@ def evaluate(genome, num_inputs, num_outputs,
 
 def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer,
             dir_path, file_name, run_num, domain_params):
+
+    print("Domain params:", domain_params)
 
     #np.random.seed(108)
 
@@ -250,6 +249,9 @@ def main():
 #env_name = 'HalfCheetahPyBulletEnv-v0'
 #env_name = 'InvertedDoublePendulum-v2'
 env_name = 'MountainCarContinuous-v0'
+
+if 'PyBulletEnv' in env_name:
+    import pybulletgym
 
 #completion_fitness = None
 completion_fitness = 2.2
