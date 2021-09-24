@@ -44,6 +44,9 @@ def read_data(data_dir):
 
 def dump_data(data, dir_path, file_name):
 
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     file_path = dir_path + file_name
 
     with open(file_path, 'w') as f:

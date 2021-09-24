@@ -137,8 +137,6 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
 
     dir_path += str(uuid.uuid4()) + '/'
-    print("File name: ", file_name)
-    print("Dir path:", dir_path)
 
     #Save best agent
     save_winners_only = True
@@ -149,9 +147,9 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
         dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
                                domain_params)
 
-    #Save population statistics
-    dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
-    dump_data(best_fitnesses, dir_path, 'best_fitnesses')
+        #Save population statistics
+        dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
+        dump_data(best_fitnesses, dir_path, 'best_fitnesses')
 
     if parallelise:
         pool.close()
@@ -254,7 +252,7 @@ def main():
 env_name = 'MountainCarContinuous-v0'
 
 #completion_fitness = None
-completion_fitness = -0.5
+completion_fitness = 2.2
 
 dummy_env = gym.make(env_name)
 state = dummy_env.reset()
