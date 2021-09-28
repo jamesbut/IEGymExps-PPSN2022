@@ -1,3 +1,8 @@
+from data import read_data
+from generative_models.gan import *
+from generative_models.autoencoder import *
+from generative_models.vae import *
+
 def train_gan(train_data_path):
 
     training_data = read_data(train_data_path)

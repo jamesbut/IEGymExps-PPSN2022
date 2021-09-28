@@ -7,12 +7,10 @@ import numpy as np
 import uuid
 import sys
 import random
-from generative_models.gan import *
 from data import *
-from generative_models.autoencoder import *
-from generative_models.vae import *
 from formatting import *
 from domain_params import *
+from model_training import *
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -180,7 +178,7 @@ def main():
         train_vae(sys.argv[1])
         return
 
-    gan_train = False
+    gan_train = True
     if gan_train:
         train_gan(sys.argv[1])
         return
