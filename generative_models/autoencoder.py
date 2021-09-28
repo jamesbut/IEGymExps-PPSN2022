@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from generative_models.batch_utils import generate_batches
 
 class Encoder(nn.Module):
 
@@ -52,24 +53,31 @@ class Autoencoder(nn.Module):
 
         return output
 
-    def train(self, num_epochs, batch_size=0):
+    def train(self, num_epochs, batch_size):
 
-        loss = nn.MSELoss()
+        loss_fn = nn.MSELoss()
+
+        batches = generate_batches(self.training_data, batch_size, shuffle=True)
 
         for epoch in range(num_epochs):
+            loss = 0
+            for batch in batches:
 
-            self.optimiser.zero_grad()
+                self.optimiser.zero_grad()
 
-            outputs = self(self.training_data)
+                outputs = self(batch)
 
-            train_loss = loss(outputs, self.training_data)
+                train_loss = loss_fn(outputs, batch)
 
-            train_loss.backward()
+                train_loss.backward()
 
-            self.optimiser.step()
+                self.optimiser.step()
 
-            print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs,
-                                                        train_loss))
+                loss += train_loss.item()
+
+            loss = loss / len(batches)
+
+            print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs, loss))
 
     def test(self):
         self(self.training_data, verbosity=True)

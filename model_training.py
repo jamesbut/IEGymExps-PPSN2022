@@ -22,15 +22,15 @@ def train_gan(train_data_path):
 def train_ae(train_data_path):
 
     code_size = 1
+    training_steps = 20000
+    batch_size=256
 
     training_data = read_data(train_data_path)
     #training_data = create_synthetic_data(code_size)
 
-    training_steps = 20000
-
     ae = Autoencoder(code_size, training_data)
 
-    ae.train(training_steps)
+    ae.train(training_steps, batch_size)
 
     #ae.test()
 

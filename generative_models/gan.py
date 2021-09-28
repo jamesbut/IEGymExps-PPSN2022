@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from generative_models.batch_utils import generate_batches
 
 class Generator(nn.Module):
 
@@ -43,9 +44,12 @@ class GAN():
 
         self.code_size = code_size
 
-    def train(self, training_steps, batch_size=0):
+    def train(self, training_steps, batch_size=256):
 
         loss = nn.BCELoss()
+
+        #Generate batches
+        #batches = generate_batches(self.training_data, batch_size)
 
         for i in range(training_steps):
 
