@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from generative_models.batch_utils import generate_batches
 
 class Encoder(nn.Module):
 
@@ -89,23 +90,31 @@ class VAE(nn.Module):
 
         return reconstruction_loss + kl_loss
 
-    def train(self, num_epochs, batch_size=0):
+    def train(self, num_epochs, batch_size):
+
+        batches = generate_batches(self.training_data, batch_size, shuffle=True)
 
         for epoch in range(num_epochs):
+            loss = 0
+            for batch in batches:
 
-            self.optimiser.zero_grad()
+                self.optimiser.zero_grad()
 
-            mu, log_var = self.encode(self.training_data)
-            hidden = self.reparametrise(mu, log_var)
-            outputs = self.decode(hidden)
+                mu, log_var = self.encode(batch)
+                hidden = self.reparametrise(mu, log_var)
+                outputs = self.decode(hidden)
 
-            train_loss = self.loss_function(mu, log_var,
-                                            self.training_data, outputs)
-            train_loss.backward()
-            self.optimiser.step()
+                train_loss = self.loss_function(mu, log_var,
+                                                batch, outputs)
 
-            print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs,
-                                                        train_loss))
+                train_loss.backward()
+                self.optimiser.step()
+
+                loss += train_loss.item()
+
+            loss = loss / len(batches)
+
+            print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs, loss))
 
     def test(self):
         self(self.training_data, verbosity=True)

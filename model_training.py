@@ -1,4 +1,4 @@
-from data import read_data
+from data import *
 from generative_models.gan import *
 from generative_models.autoencoder import *
 from generative_models.vae import *
@@ -39,15 +39,15 @@ def train_ae(train_data_path):
 def train_vae(train_data_path):
 
     code_size = 1
+    training_steps = 20000
+    batch_size = 256
 
     training_data = read_data(train_data_path)
     #training_data = create_synthetic_data(code_size)
 
-    training_steps = 20000
-
     vae = VAE(code_size, training_data)
 
-    vae.train(training_steps)
+    vae.train(training_steps, batch_size)
 
     #vae.test()
 
