@@ -132,7 +132,6 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
                                    dump_every=dump_every, dummy_nn=dummy_nn,
                                    completion_fitness=completion_fitness)
 
-
     dir_path += str(uuid.uuid4()) + '/'
 
     #Save best agent
@@ -178,7 +177,7 @@ def main():
         train_vae(sys.argv[1])
         return
 
-    gan_train = True
+    gan_train = False
     if gan_train:
         train_gan(sys.argv[1])
         return
@@ -214,7 +213,8 @@ def main():
                              domain_params)
 
             #Reset strategy
-            strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_)
+            strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
+                                    lb_=lb, ub_=ub)
             toolbox.register("generate", strategy.generate, creator.Individual)
             toolbox.register("update", strategy.update)
 
