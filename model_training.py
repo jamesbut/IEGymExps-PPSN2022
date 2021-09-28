@@ -5,14 +5,16 @@ from generative_models.vae import *
 
 def train_gan(train_data_path):
 
-    training_data = read_data(train_data_path)
-
     code_size = 1
     training_steps = 20000
+    batch_size = 256
+
+    #training_data = read_data(train_data_path)
+    training_data = create_synthetic_data(code_size)
 
     gan = GAN(code_size, training_data)
 
-    gan.train(training_steps)
+    gan.train(training_steps, batch_size)
 
     gan.test()
 

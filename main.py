@@ -173,12 +173,12 @@ def main():
         train_ae(sys.argv[1])
         return
 
-    vae_train = True
+    vae_train = False
     if vae_train:
         train_vae(sys.argv[1])
         return
 
-    gan_train = False
+    gan_train = True
     if gan_train:
         train_gan(sys.argv[1])
         return

@@ -44,50 +44,59 @@ class GAN():
 
         self.code_size = code_size
 
-    def train(self, training_steps, batch_size=256):
+    def train(self, training_steps, batch_size):
 
         loss = nn.BCELoss()
 
         #Generate batches
-        #batches = generate_batches(self.training_data, batch_size)
+        batches = generate_batches(self.training_data, batch_size, shuffle=True)
 
         for i in range(training_steps):
+            d_total_loss = 0
+            g_total_loss = 0
+            for batch in batches:
 
-            self.discriminator.zero_grad()
+                self.discriminator.zero_grad()
 
-            #Train discriminator on real data
-            d_real_output = self.discriminator(self.training_data)
+                #Train discriminator on real data
+                d_real_output = self.discriminator(batch)
 
-            true_labels = torch.Tensor([[1.] * self.training_data.size(0)]).T
-            d_real_loss = loss(d_real_output, true_labels)
-            d_real_loss.backward()
+                true_labels = torch.Tensor([[1.] * batch.size(0)]).T
+                d_real_loss = loss(d_real_output, true_labels)
+                d_real_loss.backward()
 
-            #Generate fake data using generator
-            noise = torch.randn(self.training_data.size(0), self.code_size)
-            fake_data = self.generator(noise)
+                #Generate fake data using generator
+                noise = torch.randn(batch.size(0), self.code_size)
+                fake_data = self.generator(noise)
 
-            #Train discriminator on false data
-            d_fake_output = self.discriminator(fake_data.detach())
+                #Train discriminator on false data
+                d_fake_output = self.discriminator(fake_data.detach())
 
-            false_labels = torch.Tensor([[0.] * self.training_data.size(0)]).T
-            d_fake_loss = loss(d_fake_output, false_labels)
-            d_fake_loss.backward()
+                false_labels = torch.Tensor([[0.] * batch.size(0)]).T
+                d_fake_loss = loss(d_fake_output, false_labels)
+                d_fake_loss.backward()
 
-            self.d_optimiser.step()
+                self.d_optimiser.step()
 
-            #Train generator
-            self.generator.zero_grad()
-            d_output = self.discriminator(fake_data)
-            g_loss = loss(d_output, true_labels)
-            g_loss.backward()
+                #Train generator
+                self.generator.zero_grad()
+                d_output = self.discriminator(fake_data)
+                g_loss = loss(d_output, true_labels)
+                g_loss.backward()
 
-            self.g_optimiser.step()
+                self.g_optimiser.step()
+
+                d_total_loss += d_real_loss + d_fake_loss
+                g_total_loss += g_loss
 
 
             #Print loss
-            d_loss = (d_real_loss + d_fake_loss) / 2
-            print("Step: {}    D loss: {}       G loss: {}".format(i, d_loss, g_loss))
-
+            #d_loss = (d_real_loss + d_fake_loss) / 2
+            d_avg_loss = d_total_loss / (2 * len(batches))
+            g_avg_loss = g_total_loss / len(batches)
+            print("Step: {}    D loss: {}       G loss: {}".format(i,
+                                                                   d_avg_loss,
+                                                                   g_avg_loss))
 
     def test(self):
 
