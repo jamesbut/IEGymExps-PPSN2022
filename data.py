@@ -4,9 +4,8 @@ import csv
 import torch
 from glob import glob
 
-def get_train_folders(folders_dir):
+def get_train_folders(folders_dir, dir_path):
 
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
     dir_path += folders_dir
 
     #Get all folder names
@@ -14,9 +13,10 @@ def get_train_folders(folders_dir):
 
     return folder_names
 
-def read_data(data_dir):
+def read_data(data_dir, as_torch_tensor=True,
+              dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
 
-    folder_paths = get_train_folders(data_dir)
+    folder_paths = get_train_folders(data_dir, dir_path)
 
     data = []
 
@@ -40,7 +40,10 @@ def read_data(data_dir):
 
             sys.exit("Could not find file named: " + fp)
 
-    return torch.Tensor(data)
+    if as_torch_tensor:
+        return torch.Tensor(data)
+    else:
+        return data
 
 def dump_data(data, dir_path, file_name):
 
