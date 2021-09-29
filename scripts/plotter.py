@@ -15,6 +15,7 @@ def read_data(data_dir):
     folder_paths = get_train_folders(data_dir, dir_path)
 
     data = []
+    params_included = False
 
     for fp in folder_paths:
         fp += "/best_winner_so_far"
@@ -24,38 +25,43 @@ def read_data(data_dir):
 
                 csv_reader = csv.reader(data_file, delimiter=',')
 
-                #Get first row
-                genes = next(csv_reader)
-                #Convert to floats
-                genes = [float(i) for i in genes]
-                #Remove fitness
-                del genes[0]
+                d = []
+                for i, row in enumerate(csv_reader):
+                    #Convert to floats
+                    row = [float(i) for i in row]
+                    #Delete fitness in first row
+                    if i == 0:
+                        del row[0]
 
-                #Get second row
-                params = next(csv_reader)
-                params = [float(i) for i in params]
+                    d += row
 
-                data.append(genes + params)
+                    if i == 1:
+                        params_included = True
+
+                data.append(d)
 
         except FileNotFoundError:
-
             sys.exit("Could not find file named: " + fp)
 
-    return np.array(data)
+    return np.array(data), params_included
 
 
-def plot_data(data):
+def plot_data(data, params_included):
 
-    plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap='plasma')
-    cbar = plt.colorbar()
+    if params_included:
+        plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap='plasma')
+        cbar = plt.colorbar()
+    else:
+        plt.scatter(data[:,0], data[:,1])
+
     plt.show()
 
 
 if __name__ == '__main__':
 
 
-    data = read_data(sys.argv[1])
+    data, params_included = read_data(sys.argv[1])
 
     print(data)
 
-    plot_data(data)
+    plot_data(data, params_included)

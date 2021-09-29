@@ -23,7 +23,7 @@ def train_gan(train_data_path):
 
 def train_ae(train_data_path):
 
-    code_size = 1
+    code_size = 2
     training_steps = 20000
     batch_size=256
 
@@ -34,9 +34,10 @@ def train_ae(train_data_path):
 
     ae.train(training_steps, batch_size)
 
-    #ae.test()
-
     ae.dump_decoder()
+
+    ae.test()
+
 
 def train_vae(train_data_path):
 
