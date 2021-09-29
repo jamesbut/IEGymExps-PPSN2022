@@ -65,8 +65,8 @@ class GAN():
         if read_generator:
             self.generator = torch.load('generator.pt')
 
-        self.g_optimiser = torch.optim.Adam(self.generator.parameters(), lr=0.001)
-        self.d_optimiser = torch.optim.Adam(self.discriminator.parameters(), lr=0.001)
+        self.g_optimiser = torch.optim.RMSprop(self.generator.parameters(), lr=2e-4)
+        self.d_optimiser = torch.optim.RMSprop(self.discriminator.parameters(), lr=5e-4)
 
         self.training_data = training_data
 
