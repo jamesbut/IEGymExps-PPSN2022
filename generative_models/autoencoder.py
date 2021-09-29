@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from generative_models.batch_utils import generate_batches
+from generative_models.model_testing import code_in_range
+from scripts.plotter import read_and_plot
 
 class Encoder(nn.Module):
 
@@ -25,7 +27,7 @@ class Decoder(nn.Module):
 
 class Autoencoder(nn.Module):
 
-    def __init__(self, code_size, training_data):
+    def __init__(self, code_size, training_data, read_decoder=False):
         super().__init__()
 
         self.training_data = training_data
@@ -33,7 +35,12 @@ class Autoencoder(nn.Module):
         self.encoder = Encoder(training_data.size(1), code_size)
         self.decoder = Decoder(code_size, training_data.size(1))
 
+        if read_decoder:
+            self.decoder = torch.load('generator.pt')
+
         self.optimiser = torch.optim.Adam(self.parameters(), lr=1e-3)
+
+        self.code_size = code_size
 
     def forward(self, inputs, verbosity=False):
 
@@ -78,6 +85,15 @@ class Autoencoder(nn.Module):
             loss = loss / len(batches)
 
             print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs, loss))
+
+    def test_decoder(self, plot=False, train_data_dir=None):
+        test_code = code_in_range(self.code_size, 0., 1., step_size=0.002)
+        output = self.decoder(test_code)
+        print(output)
+
+        if plot:
+            read_and_plot(train_data_dir, test_data=output.detach().numpy(),
+                          parent_dir=True)
 
     def test(self):
         self(self.training_data, verbosity=True)

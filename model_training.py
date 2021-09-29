@@ -24,25 +24,31 @@ def train_gan(train_data_path):
 def train_ae(train_data_path):
 
     code_size = 2
-    training_steps = 20000
+    training_steps = 2000
     batch_size=256
 
     training_data = read_data(train_data_path)
     #training_data = create_synthetic_data(code_size)
 
-    ae = Autoencoder(code_size, training_data)
+    test=True
 
-    ae.train(training_steps, batch_size)
+    if not test:
 
-    ae.dump_decoder()
+        ae = Autoencoder(code_size, training_data, read_decoder=False)
+        ae.train(training_steps, batch_size)
+        ae.dump_decoder()
+        ae.test_decoder(plot=True, train_data_dir=train_data_path)
 
-    ae.test()
+    else:
+
+        ae = Autoencoder(code_size, training_data, read_decoder=True)
+        ae.test_decoder(plot=True, train_data_dir=train_data_path)
 
 
 def train_vae(train_data_path):
 
     code_size = 1
-    training_steps = 20000
+    training_steps = 200
     batch_size = 256
 
     training_data = read_data(train_data_path)
