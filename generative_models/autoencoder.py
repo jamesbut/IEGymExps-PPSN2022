@@ -114,8 +114,8 @@ class Autoencoder(nn.Module):
             print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs, loss))
 
     def test_decoder(self, plot=False, train_data_dir=None):
-        test_code = code_in_range(self.code_size, 0., 1., step_size=0.002)
-        output = self.decoder(test_code)
+        code_range = code_in_range(self.code_size, 0., 1., step_size=0.002)
+        output = self.decoder(code_range)
         print(output)
 
         if plot:

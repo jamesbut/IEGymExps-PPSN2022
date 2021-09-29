@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from generative_models.batch_utils import generate_batches
+from generative_models.model_testing import code_in_range
+from scripts.plotter import read_and_plot
 
 class Generator(nn.Module):
 
@@ -32,10 +34,13 @@ class Discriminator(nn.Module):
 
 class GAN():
 
-    def __init__(self, code_size, training_data):
+    def __init__(self, code_size, training_data, read_generator=False):
 
         self.generator = Generator(code_size, training_data.size(1))
         self.discriminator = Discriminator(training_data.size(1))
+
+        if read_generator:
+            self.generator = torch.load('generator.pt')
 
         self.g_optimiser = torch.optim.Adam(self.generator.parameters(), lr=0.001)
         self.d_optimiser = torch.optim.Adam(self.discriminator.parameters(), lr=0.001)
@@ -91,21 +96,29 @@ class GAN():
 
 
             #Print loss
-            #d_loss = (d_real_loss + d_fake_loss) / 2
             d_avg_loss = d_total_loss / (2 * len(batches))
             g_avg_loss = g_total_loss / len(batches)
             print("Step: {}    D loss: {}       G loss: {}".format(i,
                                                                    d_avg_loss,
                                                                    g_avg_loss))
 
-    def test(self):
+    def test(self, rand_code=False, plot=False, train_data_dir=None):
 
-        #Generate fake data using generator
-        noise = torch.randn(self.training_data.size(0), self.code_size)
-        fake_data = self.generator(noise)
+        if rand_code:
+            #Generate fake data using generator
+            noise = torch.randn(self.training_data.size(0), self.code_size)
+            fake_data = self.generator(noise)
 
-        print("Testing...\nFake data:")
+        else:
+
+            code_range = code_in_range(self.code_size, -4., 4., step_size=0.01)
+            fake_data = self.generator(code_range)
+
         print(fake_data)
+
+        if plot:
+            read_and_plot(train_data_dir, test_data=fake_data.detach().numpy(),
+                          parent_dir=True)
 
     def dump_generator(self):
         torch.save(self.generator, "generator.pt")

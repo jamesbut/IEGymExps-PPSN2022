@@ -5,20 +5,28 @@ from generative_models.vae import *
 
 def train_gan(train_data_path):
 
-    code_size = 1
+    code_size = 2
+    #Set to none if no hidden layer required
+    num_hidden_neurons = None
     training_steps = 20000
     batch_size = 256
 
-    #training_data = read_data(train_data_path)
-    training_data = create_synthetic_data(code_size)
+    training_data = read_data(train_data_path)
+    #training_data = create_synthetic_data(code_size)
 
-    gan = GAN(code_size, training_data)
+    test = False
 
-    gan.train(training_steps, batch_size)
+    if not test:
 
-    gan.test()
+        gan = GAN(code_size, training_data)
+        gan.train(training_steps, batch_size)
+        gan.dump_generator()
+        gan.test(plot=True, train_data_dir=train_data_path)
 
-    gan.dump_generator()
+    else:
+
+        gan = GAN(code_size, training_data, read_generator=True)
+        gan.test(plot=True, train_data_dir=train_data_path)
 
 
 def train_ae(train_data_path):

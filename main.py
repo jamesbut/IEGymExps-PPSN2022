@@ -167,7 +167,7 @@ def indv_run(num_inputs, num_outputs,
 
 def main():
 
-    ae_train = True
+    ae_train = False
     if ae_train:
         train_ae(sys.argv[1])
         return
@@ -177,7 +177,7 @@ def main():
         train_vae(sys.argv[1])
         return
 
-    gan_train = False
+    gan_train = True
     if gan_train:
         train_gan(sys.argv[1])
         return
