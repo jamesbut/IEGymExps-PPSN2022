@@ -1,39 +1,66 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
 from scripts.plotter import read_and_plot
 
 class Encoder(nn.Module):
 
-    def __init__(self, num_inputs, code_size):
+    def __init__(self, num_inputs, code_size, num_hidden_neurons=None):
         super(Encoder, self).__init__()
 
-        self.l1 = nn.Linear(num_inputs, code_size)
+        self.num_hidden_neurons = num_hidden_neurons
+
+        if self.num_hidden_neurons is None:
+            self.l1 = nn.Linear(num_inputs, code_size)
+
+        else:
+            self.l1 = nn.Linear(num_inputs, num_hidden_neurons)
+            self.l2 = nn.Linear(num_hidden_neurons, code_size)
+
 
     def forward(self, x):
-        return self.l1(x)
+
+        if self.num_hidden_neurons is None:
+            return self.l1(x)
+
+        else:
+            return self.l2(F.relu(self.l1(x)))
 
 class Decoder(nn.Module):
 
-    def __init__(self, code_size, num_outputs):
+    def __init__(self, code_size, num_outputs, num_hidden_neurons=None):
         super(Decoder, self).__init__()
 
-        self.l1 = nn.Linear(code_size, num_outputs)
+        self.num_hidden_neurons = num_hidden_neurons
+
+        if self.num_hidden_neurons is None:
+            self.l1 = nn.Linear(code_size, num_outputs)
+
+        else:
+            self.l1 = nn.Linear(code_size, num_hidden_neurons)
+            self.l2 = nn.Linear(num_hidden_neurons, num_outputs)
 
     def forward(self, x):
-        return self.l1(x)
+
+        if self.num_hidden_neurons is None:
+            return self.l1(x)
+
+        else:
+            return self.l2(F.relu(self.l1(x)))
 
 
 class Autoencoder(nn.Module):
 
-    def __init__(self, code_size, training_data, read_decoder=False):
+    def __init__(self, code_size, training_data, read_decoder=False,
+                 num_hidden_neurons=None):
         super().__init__()
 
         self.training_data = training_data
 
-        self.encoder = Encoder(training_data.size(1), code_size)
-        self.decoder = Decoder(code_size, training_data.size(1))
+        self.encoder = Encoder(training_data.size(1), code_size, num_hidden_neurons)
+        self.decoder = Decoder(code_size, training_data.size(1), num_hidden_neurons)
 
         if read_decoder:
             self.decoder = torch.load('generator.pt')

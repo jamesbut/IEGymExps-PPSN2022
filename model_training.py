@@ -24,6 +24,7 @@ def train_gan(train_data_path):
 def train_ae(train_data_path):
 
     code_size = 2
+    num_hidden_neurons = 32
     training_steps = 2000
     batch_size=256
 
@@ -34,14 +35,16 @@ def train_ae(train_data_path):
 
     if not test:
 
-        ae = Autoencoder(code_size, training_data, read_decoder=False)
+        ae = Autoencoder(code_size, training_data, read_decoder=False,
+                         num_hidden_neurons=num_hidden_neurons)
         ae.train(training_steps, batch_size)
         ae.dump_decoder()
         ae.test_decoder(plot=True, train_data_dir=train_data_path)
 
     else:
 
-        ae = Autoencoder(code_size, training_data, read_decoder=True)
+        ae = Autoencoder(code_size, training_data, read_decoder=True,
+                         num_hidden_neurons=num_hidden_neurons)
         ae.test_decoder(plot=True, train_data_dir=train_data_path)
 
 
