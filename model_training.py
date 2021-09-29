@@ -7,8 +7,8 @@ def train_gan(train_data_path):
 
     code_size = 2
     #Set to none if no hidden layer required
-    num_hidden_neurons = None
-    training_steps = 20000
+    num_hidden_neurons = 64
+    training_steps = 2000
     batch_size = 256
 
     training_data = read_data(train_data_path)
@@ -18,14 +18,17 @@ def train_gan(train_data_path):
 
     if not test:
 
-        gan = GAN(code_size, training_data)
+        gan = GAN(code_size, training_data, read_generator=False,
+                  num_hidden_neurons=num_hidden_neurons)
         gan.train(training_steps, batch_size)
         gan.dump_generator()
         gan.test(plot=True, train_data_dir=train_data_path)
+        #gan.test(plot=True)
 
     else:
 
-        gan = GAN(code_size, training_data, read_generator=True)
+        gan = GAN(code_size, training_data, read_generator=True,
+                  num_hidden_neurons=num_hidden_neurons)
         gan.test(plot=True, train_data_dir=train_data_path)
 
 

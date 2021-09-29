@@ -49,22 +49,32 @@ def read_data(data_dir, parent_dir=False):
     return np.array(data), params_included
 
 
-def plot_data(data, params_included, test_data=None):
+def plot_data(train_data=None, params_included=None, test_data=None):
 
-    if params_included:
-        plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap='plasma')
-        cbar = plt.colorbar()
-    else:
-        plt.scatter(data[:,0], data[:,1])
+    if train_data is not None:
+        if params_included:
+            plt.scatter(train_data[:,0], train_data[:,1],
+                        c=train_data[:,2], cmap='plasma')
+            cbar = plt.colorbar()
+        else:
+            plt.scatter(train_data[:,0], train_data[:,1])
 
     if test_data is not None:
         plt.scatter(test_data[:,0], test_data[:,1])
 
     plt.show()
 
-def read_and_plot(train_data_dir, test_data=None, parent_dir=False):
-    data, params_included = read_data(train_data_dir, parent_dir)
-    plot_data(data, params_included, test_data)
+def read_and_plot(train_data_dir=None, test_data=None, parent_dir=False):
+
+    train_data = None
+    params_included = None
+
+    #Get training data
+    if train_data_dir is not None:
+        train_data, params_included = read_data(train_data_dir, parent_dir)
+
+    #Plot training and/or test data
+    plot_data(train_data, params_included, test_data)
 
 if __name__ == '__main__':
 

@@ -1,43 +1,66 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
 from scripts.plotter import read_and_plot
 
 class Generator(nn.Module):
 
-    def __init__(self, num_inputs, num_outputs):
-
+    def __init__(self, code_size, num_outputs, num_hidden_neurons=None):
         super(Generator, self).__init__()
 
-        self.l1 = nn.Linear(num_inputs, num_outputs)
+        self.num_hidden_neurons = num_hidden_neurons
+
+        if self.num_hidden_neurons is None:
+            self.l1 = nn.Linear(code_size, num_outputs)
+
+        else:
+            self.l1 = nn.Linear(code_size, self.num_hidden_neurons)
+            self.l2 = nn.Linear(self.num_hidden_neurons, num_outputs)
 
 
     def forward(self, x):
-        return self.l1(x)
+
+        if self.num_hidden_neurons is None:
+            return self.l1(x)
+
+        else:
+            return self.l2(F.relu(self.l1(x)))
 
 
 class Discriminator(nn.Module):
 
-    def __init__(self, num_inputs):
-
+    def __init__(self, num_inputs, num_hidden_neurons=None):
         super(Discriminator, self).__init__()
 
-        self.l1 = nn.Linear(num_inputs, 1)
-        self.activation = nn.Sigmoid()
+        self.num_hidden_neurons = num_hidden_neurons
+
+        if self.num_hidden_neurons is None:
+            self.l1 = nn.Linear(num_inputs, 1)
+
+        else:
+            self.l1 = nn.Linear(num_inputs, self.num_hidden_neurons)
+            self.l2 = nn.Linear(self.num_hidden_neurons, 1)
 
 
     def forward(self, x):
-        return self.activation(self.l1(x))
+
+        if self.num_hidden_neurons is None:
+            return F.sigmoid(self.l1(x))
+
+        else:
+            return F.sigmoid(self.l2(F.relu(self.l1(x))))
 
 
 
 class GAN():
 
-    def __init__(self, code_size, training_data, read_generator=False):
+    def __init__(self, code_size, training_data, read_generator=False,
+                 num_hidden_neurons=None):
 
-        self.generator = Generator(code_size, training_data.size(1))
-        self.discriminator = Discriminator(training_data.size(1))
+        self.generator = Generator(code_size, training_data.size(1), num_hidden_neurons)
+        self.discriminator = Discriminator(training_data.size(1), num_hidden_neurons)
 
         if read_generator:
             self.generator = torch.load('generator.pt')
