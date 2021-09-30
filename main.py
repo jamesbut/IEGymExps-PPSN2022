@@ -27,8 +27,8 @@ def reset_env(env):
         state = env.reset()
         return state
 
-def run(genome, num_inputs, num_outputs,
-        num_hidden_layers, neurons_per_hidden_layer,
+def run(genome=None, num_inputs=None, num_outputs=None,
+        num_hidden_layers=None, neurons_per_hidden_layer=None,
         render=False, genotype_dir=None, env_kwargs=None):
 
     if env_kwargs is not None:
@@ -79,8 +79,8 @@ def run(genome, num_inputs, num_outputs,
     return reward
 
 
-def evaluate(genome, num_inputs, num_outputs,
-             num_hidden_layers, neurons_per_hidden_layer,
+def evaluate(genome=None, num_inputs=None, num_outputs=None,
+             num_hidden_layers=None, neurons_per_hidden_layer=None,
              render=False, genotype_dir=None, env_kwargs=None,
              verbosity=False):
 
@@ -126,7 +126,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 25
+    num_gens = 1
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -157,7 +157,7 @@ def indv_run(num_inputs, num_outputs,
              num_hidden_layers, neurons_per_hidden_layer,
              genotype=None, genotype_dir=None, env_kwargs=None):
 
-    render = True
+    render = False
 
     reward = evaluate(genotype, num_inputs, num_outputs,
                       num_hidden_layers, neurons_per_hidden_layer,
@@ -191,7 +191,7 @@ def main():
         num_runs = 1
 
         #Create experiment path
-        exp_dir_name = create_exp_dir_name(dir_path)
+        exp_dir_name = create_exp_dir_name(dir_path + 'python_data')
         dir_exp_path = dir_path + 'python_data/' + exp_dir_name + '/'
 
         for i in range(num_runs):
@@ -266,7 +266,7 @@ neurons_per_hidden_layer = 0
 bias=False
 
 render = False
-use_decoder = True
+use_decoder = False
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder,
@@ -287,7 +287,6 @@ toolbox.register("evaluate", evaluate,
 #Initial location of distribution centre
 centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                               dir_path=dir_path, file_name=file_name)
-quit()
 #Initial standard deviation of the distribution
 init_sigma = 1.0
 #Number of children to produce at each generation

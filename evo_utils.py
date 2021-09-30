@@ -95,7 +95,7 @@ import sys
 #This is to start off the search at the point of an already evolved organism.
 def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
 
-    print(args)
+    #print('args:', args)
 
     if '-cmaes_centroid' in args:
         print("HELL YEAH!!")
@@ -114,6 +114,6 @@ def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
         #Read in genotype of organism
 
     else:
-        print("No :(")
+        #print("No :(")
         return [0.] * num_genes
 

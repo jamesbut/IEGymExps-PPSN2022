@@ -3,11 +3,12 @@ import torch
 import csv
 import os
 import shutil
+import json
 from decoder import Decoder
 
 class NeuralNetwork():
 
-    def __init__(self, num_inputs, num_outputs,
+    def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
                  genotype=None, genotype_dir=None, decoder=False,
                  bias=True):
@@ -16,17 +17,26 @@ class NeuralNetwork():
         self.num_outputs = num_outputs
         self.num_hidden_layers = num_hidden_layers
         self.neurons_per_hidden_layer = neurons_per_hidden_layer
+        self.bias = bias
+
+        #Read genotype and metadata from files
+        if genotype_dir is not None:
+            genotype = self._read_genotype(genotype_dir)
+
+            metadata = self._read_metadata(genotype_dir)
+
+            self.num_inputs = metadata['num_inputs']
+            self.num_outputs = metadata['num_outputs']
+            self.num_hidden_layers = metadata['num_hidden_layers']
+            self.neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
+            self.bias = metadata['bias']
 
         #Build neural net
-        self._build_nn(bias)
+        self._build_nn(self.bias)
 
         self.decoder = None
         if decoder:
             self.decoder = Decoder("generator.pt")
-
-        #Read genotype from file
-        if genotype_dir is not None:
-            genotype = self._read_genotype(genotype_dir)
 
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
@@ -165,6 +175,23 @@ class NeuralNetwork():
             if domain_params is not None:
                 csv_writer.writerow(domain_params)
 
+        #Also save metadata
+        self._save_metadata(file_path)
+
+    def _save_metadata(self, genotype_filepath):
+        metadata_filepath = genotype_filepath + '_metadata.json'
+
+        metadata = {}
+
+        metadata['num_inputs'] = self.num_inputs
+        metadata['num_outputs'] = self.num_outputs
+        metadata['num_hidden_layers'] = self.num_hidden_layers
+        metadata['neurons_per_hidden_layer'] = self.neurons_per_hidden_layer
+        metadata['bias'] = self.bias
+
+        with open(metadata_filepath, 'w') as f:
+            json.dump(metadata, f)
+
     def _read_genotype(self, genotype_filepath):
         with open(genotype_filepath, 'r') as genotype_file:
             reader = csv.reader(genotype_file)
@@ -174,3 +201,12 @@ class NeuralNetwork():
         del genotype[0]
 
         return genotype
+
+    def _read_metadata(self, genotype_filepath):
+        metadata_filepath = genotype_filepath + '_metadata.json'
+
+        with open(metadata_filepath, 'r') as f:
+            metadata = json.load(f)
+
+        return metadata
+
