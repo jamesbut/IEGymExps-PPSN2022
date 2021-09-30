@@ -11,6 +11,7 @@ from data import *
 from formatting import *
 from domain_params import *
 from model_training import *
+from evo_utils import get_cmaes_centroid
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -182,8 +183,6 @@ def main():
         train_gan(sys.argv[1])
         return
 
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data"
-    file_name = "best_winner_so_far"
 
     randomise_hyperparams = False
 
@@ -193,7 +192,7 @@ def main():
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path)
-        dir_exp_path = dir_path + '/' + exp_dir_name + '/'
+        dir_exp_path = dir_path + 'python_data/' + exp_dir_name + '/'
 
         for i in range(num_runs):
             print("Evo run: ", i)
@@ -230,12 +229,15 @@ def main():
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
 
-        indv_full_path = dir_path + indv_dir + "/" + file_name
+        indv_full_path = dir_path + 'python_data/' + indv_dir + "/" + file_name
 
         indv_run(num_inputs, num_outputs, num_hidden_layers,
                  neurons_per_hidden_layer, genotype_dir=indv_full_path,
                  env_kwargs=env_kwargs)
 
+
+dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
+file_name = "best_winner_so_far"
 
 #Some bug in DEAP means that I have to define toolbox before if __name__ == "__main__"
 #apparently
@@ -283,7 +285,9 @@ toolbox.register("evaluate", evaluate,
                  render=render, genotype_dir=None)
 
 #Initial location of distribution centre
-centroid = [0.0] * num_genes
+centroid = get_cmaes_centroid(num_genes, sys.argv[:],
+                              dir_path=dir_path, file_name=file_name)
+quit()
 #Initial standard deviation of the distribution
 init_sigma = 1.0
 #Number of children to produce at each generation

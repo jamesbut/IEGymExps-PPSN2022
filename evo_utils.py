@@ -86,3 +86,34 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     print("No winner found :(")
 
     return population, logbook, avg_fitnesses, best_fitnesses, False
+
+
+import sys
+
+#This function parses args for '-cmaes_centroid' and then takes the next argument
+#after that, which should be an organism directory, and uses that as the centroid.
+#This is to start off the search at the point of an already evolved organism.
+def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
+
+    print(args)
+
+    if '-cmaes_centroid' in args:
+        print("HELL YEAH!!")
+
+        try:
+            org_dir = args[args.index('-cmaes_centroid')+1]
+        except:
+            print('Please provide organism directory after -cmaes_centroid '
+                  '(relative to ..../data/)')
+            sys.exit(1)
+
+        #Build path of organism
+        org_path = dir_path + org_dir + '/' + file_name
+        print("Org path:", org_path)
+
+        #Read in genotype of organism
+
+    else:
+        print("No :(")
+        return [0.] * num_genes
+
