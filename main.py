@@ -125,7 +125,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 100
+    num_gens = 25
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -135,7 +135,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     dir_path += str(uuid.uuid4()) + '/'
 
     #Save best agent
-    save_winners_only = True
+    save_winners_only = False
 
     if ((save_winners_only is False) or
        (save_winners_only is True and complete)):
@@ -177,7 +177,7 @@ def main():
         train_vae(sys.argv[1])
         return
 
-    gan_train = True
+    gan_train = False
     if gan_train:
         train_gan(sys.argv[1])
         return
@@ -185,11 +185,11 @@ def main():
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/python_data"
     file_name = "best_winner_so_far"
 
-    randomise_hyperparams = True
+    randomise_hyperparams = False
 
     if len(sys.argv)==1:
 
-        num_runs = 2000
+        num_runs = 1
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path)
@@ -251,8 +251,8 @@ env_name = 'MountainCarContinuous-v0'
 if 'PyBulletEnv' in env_name:
     import pybulletgym
 
-#completion_fitness = None
-completion_fitness = 2.2
+completion_fitness = None
+#completion_fitness = 2.2
 
 dummy_env = gym.make(env_name)
 state = dummy_env.reset()
@@ -264,7 +264,7 @@ neurons_per_hidden_layer = 0
 bias=False
 
 render = False
-use_decoder = False
+use_decoder = True
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder,
