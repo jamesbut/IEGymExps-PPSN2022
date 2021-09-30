@@ -73,7 +73,7 @@ class NeuralNetwork():
                 layers.append(torch.nn.Linear(self.neurons_per_hidden_layer,
                                               self.neurons_per_hidden_layer,
                                               bias=bias))
-                layers.append(torch.ReLU())
+                layers.append(torch.nn.ReLU())
 
             layers.append(torch.nn.Linear(self.neurons_per_hidden_layer,
                                           self.num_outputs,

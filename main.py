@@ -271,6 +271,8 @@ toolbox.register("evaluate", evaluate,
 #Initial location of distribution centre
 centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                               dir_path=dir_path, file_name=file_name)
+print("centroid:", centroid)
+quit()
 #Initial standard deviation of the distribution
 init_sigma = 1.0
 #Number of children to produce at each generation
