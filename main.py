@@ -16,17 +16,6 @@ from evo_utils import get_cmaes_centroid
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
 
-def reset_env(env):
-
-    #Check for pybullet env
-    if 'PyBulletEnv' in env_name:
-        state = env.reset()
-        delete_last_lines(2)
-        return state
-    else:
-        state = env.reset()
-        return state
-
 def run(genome=None, num_inputs=None, num_outputs=None,
         num_hidden_layers=None, neurons_per_hidden_layer=None,
         render=False, genotype_dir=None, env_kwargs=None):
@@ -153,15 +142,12 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
     return dummy_nn
 
-def indv_run(num_inputs, num_outputs,
-             num_hidden_layers, neurons_per_hidden_layer,
-             genotype=None, genotype_dir=None, env_kwargs=None):
+def indv_run(genotype_dir=None, env_kwargs=None):
 
     render = False
 
-    reward = evaluate(genotype, num_inputs, num_outputs,
-                      num_hidden_layers, neurons_per_hidden_layer,
-                      render, genotype_dir, env_kwargs, verbosity=True)
+    reward = evaluate(render=render, genotype_dir=genotype_dir,
+                      env_kwargs=env_kwargs, verbosity=True)
 
     print("Reward: ", reward)
 
@@ -231,9 +217,7 @@ def main():
 
         indv_full_path = dir_path + 'python_data/' + indv_dir + "/" + file_name
 
-        indv_run(num_inputs, num_outputs, num_hidden_layers,
-                 neurons_per_hidden_layer, genotype_dir=indv_full_path,
-                 env_kwargs=env_kwargs)
+        indv_run(genotype_dir=indv_full_path, env_kwargs=env_kwargs)
 
 
 dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
