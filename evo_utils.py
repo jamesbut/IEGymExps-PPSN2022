@@ -38,8 +38,8 @@ This function is just a copy of the function in DEAP but it dumps the best genot
 in the hall of fame every n generations
 """
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
-                     verbose=__debug__, dump_every=None, obs_normalise=None,
-                     domain_params_in_obs=None, dummy_nn=None, completion_fitness=None):
+                     verbose=__debug__, dump_every=None, dummy_nn=None,
+                     completion_fitness=None):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -97,10 +97,7 @@ def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
     import sys
     from neural_network import NeuralNetwork
 
-    #print('args:', args)
-
     if '-cmaes_centroid' in args:
-        print("HELL YEAH!!")
 
         try:
             org_dir = args[args.index('-cmaes_centroid')+1]
@@ -119,6 +116,5 @@ def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
         return weights
 
     else:
-        print("No :(")
         return [0.] * num_genes
 

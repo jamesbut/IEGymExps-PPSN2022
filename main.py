@@ -115,7 +115,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 1
+    num_gens = 10
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -172,7 +172,7 @@ def main():
 
     randomise_hyperparams = False
 
-    if len(sys.argv)==1:
+    if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
         num_runs = 1
 
@@ -271,8 +271,8 @@ toolbox.register("evaluate", evaluate,
 #Initial location of distribution centre
 centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                               dir_path=dir_path, file_name=file_name)
-print("centroid:", centroid)
-quit()
+#print("centroid:", centroid)
+
 #Initial standard deviation of the distribution
 init_sigma = 1.0
 #Number of children to produce at each generation

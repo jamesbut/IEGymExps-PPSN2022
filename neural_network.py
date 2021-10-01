@@ -54,7 +54,6 @@ class NeuralNetwork():
             self.genotype = self.get_weights()
 
 
-
     def _build_nn(self, bias=True):
 
         layers = []
