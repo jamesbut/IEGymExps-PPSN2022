@@ -8,20 +8,22 @@ def get_train_folders(folders_dir, dir_path):
 
     dir_path += folders_dir
 
-    #Get all folder names
-    folder_names = [x[0] for x in os.walk(dir_path)][1:]
+    if os.path.isdir(dir_path):
+        #Get all folder names
+        folder_names = [x[0] for x in os.walk(dir_path)][1:]
+
+    else:
+        raise NotADirectoryError("{} is not a directory".format(dir_path))
 
     return folder_names
 
 def read_data(data_dir, as_torch_tensor=True,
               dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
 
-    folder_paths = get_train_folders(data_dir, dir_path)
-
-    if len(folder_paths) == 0:
-        print("No folders where you have specified read from")
-        print("data_dir:", data_dir)
-        print("dir_path:", dir_path)
+    try:
+        folder_paths = get_train_folders(data_dir, dir_path)
+    except NotADirectoryError as e:
+        print(e)
         sys.exit(1)
 
     data = []

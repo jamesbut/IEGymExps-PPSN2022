@@ -15,7 +15,11 @@ def read_data(data_dir, parent_dir=False):
     else:
         dir_path = "../../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
 
-    folder_paths = get_train_folders(data_dir, dir_path)
+    try:
+        folder_paths = get_train_folders(data_dir, dir_path)
+    except NotADirectoryError as e:
+        print(e)
+        sys.exit(1)
 
     data = []
     params_included = False
