@@ -14,7 +14,7 @@ def train_gan(train_data_path):
     training_data = read_data(train_data_path)
     #training_data = create_synthetic_data(code_size)
 
-    test = True
+    test = False
 
     if not test:
 

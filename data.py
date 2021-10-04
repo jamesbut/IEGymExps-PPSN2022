@@ -18,6 +18,12 @@ def read_data(data_dir, as_torch_tensor=True,
 
     folder_paths = get_train_folders(data_dir, dir_path)
 
+    if len(folder_paths) == 0:
+        print("No folders where you have specified read from")
+        print("data_dir:", data_dir)
+        print("dir_path:", dir_path)
+        sys.exit(1)
+
     data = []
 
     for fp in folder_paths:
