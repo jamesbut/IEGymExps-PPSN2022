@@ -140,7 +140,7 @@ class GAN():
         print(fake_data)
 
         if plot:
-            read_and_plot(train_data_dir, test_data=fake_data.detach().numpy(),
+            read_and_plot(train_data_dir, test_genotypes=fake_data.detach().numpy(),
                           parent_dir=True)
 
     def dump_generator(self):
