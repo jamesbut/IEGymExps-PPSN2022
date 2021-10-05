@@ -44,8 +44,13 @@ def __read_data(data_dir, parent_dir=False):
                         genotypes.append(row[1:])
 
                     #Second row is parameters, if they are there
-                    else:
+                    elif i == 1:
                         params.append(row)
+
+                    #If an IE was used the phenotype is on the third row
+                    elif i == 2:
+                        del genotypes[-1]
+                        genotypes.append(row)
 
         except FileNotFoundError:
             sys.exit("Could not find file named: " + fp)

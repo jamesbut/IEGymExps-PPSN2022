@@ -22,7 +22,6 @@ class NeuralNetwork():
         #Read genotype and metadata from files
         if genotype_dir is not None:
             genotype = self._read_genotype(genotype_dir)
-
             metadata = self._read_metadata(genotype_dir)
 
             self.num_inputs = metadata['num_inputs']
@@ -173,6 +172,11 @@ class NeuralNetwork():
             #Add domain hyperparameters on next line for cGAN
             if domain_params is not None:
                 csv_writer.writerow(domain_params)
+
+            #Also save phenotype if there is a decoder
+            if self.decoder is not None:
+                phenotype = self.decoder.decode(self.genotype)
+                csv_writer.writerow(phenotype)
 
         #Also save metadata
         self._save_metadata(file_path)

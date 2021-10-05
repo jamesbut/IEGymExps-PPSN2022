@@ -215,7 +215,7 @@ def main():
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
 
-        indv_full_path = dir_path + 'python_data/' + indv_dir + "/" + file_name
+        indv_full_path = dir_path + '/' + indv_dir + "/" + file_name
 
         indv_run(genotype_dir=indv_full_path, env_kwargs=env_kwargs)
 
@@ -250,7 +250,7 @@ neurons_per_hidden_layer = 0
 bias=False
 
 render = False
-use_decoder = False
+use_decoder = True
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder,
