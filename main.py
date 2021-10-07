@@ -250,7 +250,7 @@ neurons_per_hidden_layer = 0
 bias=False
 
 render = False
-use_decoder = True
+use_decoder = False
 
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder,
@@ -274,6 +274,7 @@ centroid = get_cmaes_centroid(num_genes, sys.argv[:],
 #print("centroid:", centroid)
 
 #Initial standard deviation of the distribution
+#init_sigma = 1.0
 init_sigma = 1.0
 #Number of children to produce at each generation
 #lambda_ = 20 * num_weights

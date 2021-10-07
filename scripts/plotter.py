@@ -56,7 +56,8 @@ def __read_data(data_dir, parent_dir=False):
             sys.exit("Could not find file named: " + fp)
 
     return np.array(fitnesses), np.array(genotypes), \
-           np.array(params) if params else None
+           np.array(params) if params else None, \
+           folder_paths
 
 
 def __plot_data(train_genotypes=None, params=None, test_genotypes=None):
@@ -75,28 +76,37 @@ def __plot_data(train_genotypes=None, params=None, test_genotypes=None):
     plt.show()
 
 
-def __fitness_analysis(fitnesses):
+def __fitness_analysis(fitnesses, folder_paths):
 
-    max_fitness = np.max(fitnesses)
-    min_fitness = np.min(fitnesses)
+    max_arg = np.argmax(fitnesses)
+    max_fitness = fitnesses[max_arg]
+    max_file = folder_paths[max_arg]
+
+    print("Max fitness: {}              File: {}".format(max_fitness, max_file))
+
+    min_arg = np.argmin(fitnesses)
+    min_fitness = fitnesses[min_arg]
+    min_file = folder_paths[min_arg]
+
+    print("Min fitness: {}              File: {}".format(min_fitness, min_file))
+
     mean_fitness = np.mean(fitnesses)
-
-    print("Max fitness:", max_fitness)
-    print("Min fitness:", min_fitness)
     print("Mean fitness:", mean_fitness)
+
 
 def read_and_plot(train_data_dir=None, test_genotypes=None, parent_dir=False):
 
     #Read training data
     if train_data_dir is not None:
-        fitnesses, genotypes, params = __read_data(train_data_dir, parent_dir)
+        fitnesses, genotypes, params, folder_paths = \
+            __read_data(train_data_dir, parent_dir)
 
     print("Fitnesses:\n", fitnesses)
     print("Genotypes:\n", genotypes)
     print("Params:\n", params)
 
     #Provide fitness analysis
-    __fitness_analysis(fitnesses)
+    __fitness_analysis(fitnesses, folder_paths)
 
     #Plot training and/or test data
     __plot_data(genotypes, params, test_genotypes)
