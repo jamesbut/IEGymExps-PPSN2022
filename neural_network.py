@@ -11,7 +11,7 @@ class NeuralNetwork():
     def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
                  genotype=None, genotype_dir=None, decoder=False,
-                 bias=True):
+                 bias=True, w_lb=None, w_ub=None):
 
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -33,6 +33,7 @@ class NeuralNetwork():
         #Build neural net
         self._build_nn(self.bias)
 
+        #Decoder is used in set_genotype
         self.decoder = None
         if decoder:
             self.decoder = Decoder("generator.pt")
@@ -40,17 +41,9 @@ class NeuralNetwork():
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
         if genotype is not None:
-            #If decoder is true, read in and use decoder to set weights
-            if decoder:
-                weights = self.decoder.decode(genotype)
-                self.set_weights(weights)
-            else:
-                self.set_weights(genotype)
-
-            self.genotype = genotype
-
+            self.set_genotype(genotype, w_lb, w_ub)
         else:
-            self.genotype = self.get_weights()
+            self.set_genotype(self.get_weights(), w_lb, w_ub)
 
 
     def _build_nn(self, bias=True):
@@ -113,13 +106,18 @@ class NeuralNetwork():
             .format(weights_len, num_weights_required)
 
     #Sets a list of weights
-    def set_weights(self, new_weights):
+    #This also checks the new weights against a weight lower and upper bound
+    def set_weights(self, new_weights, w_lb=None, w_ub=None):
 
         #Check new weights is of correct size
         num_weights_required = self.get_num_weights()
         assert num_weights_required == len(new_weights), \
                                        self._set_weights_err_msg(len(new_weights), \
                                                                  num_weights_required)
+
+        #Bound weights
+        if (w_lb is not None) or (w_ub is not None):
+            new_weights = self._bound_weights(new_weights, w_lb, w_ub)
 
         weight_index = 0
         for layer in self.nn:
@@ -135,15 +133,37 @@ class NeuralNetwork():
 
     #Set genotype - this uses a decoder if there is one as opposed to set_weights
     #which just sets the NN weights
-    def set_genotype(self, genotype):
+    def set_genotype(self, genotype, w_lb=None, w_ub=None):
 
         self.genotype = genotype
 
         if self.decoder is not None:
             weights = self.decoder.decode(genotype)
-            self.set_weights(weights)
+            self.set_weights(weights, w_lb, w_ub)
         else:
-            self.set_weights(genotype)
+            self.set_weights(genotype, w_lb, w_ub)
+
+    #Bound weights between upper and lower bounds
+    def _bound_weights(self, weights, w_lb, w_ub):
+
+        #Check bounds are the same size as weights
+        if len(weights) is not len(w_lb):
+            print("neural_network.py _bounds_weights(): weights length is not the "
+                  "same as weights lower bound length")
+            sys.exit(1)
+        if len(weights) is not len(w_ub):
+            print("neural_network.py _bounds_weights(): weights length is not the "
+                  "same as weights upper bound length")
+            sys.exit(1)
+
+        #If weight exceeds bounds, set weight to bound
+        for i in range(len(weights)):
+            if weights[i] < w_lb[i]:
+                weights[i] = w_lb[i]
+            if weights[i] > w_ub[i]:
+                weights[i] = w_ub[i]
+
+        return weights
 
     #Return weights as a 1d list
     def get_weights(self):

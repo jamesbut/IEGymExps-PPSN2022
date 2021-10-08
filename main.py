@@ -144,7 +144,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
 def indv_run(genotype_dir=None, env_kwargs=None):
 
-    render = True
+    render = False
 
     reward = evaluate(render=render, genotype_dir=genotype_dir,
                       env_kwargs=env_kwargs, verbosity=True)
@@ -174,7 +174,7 @@ def main():
 
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
-        num_runs = 3
+        num_runs = 1
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path + 'python_data')
@@ -249,14 +249,29 @@ num_hidden_layers = 0
 neurons_per_hidden_layer = 0
 bias=False
 
+#w_lb = [-10., -10.]
+#w_ub = [10., 120.]
+w_lb = [-10., -2.]
+w_ub = [1., 10.]
+
 render = False
 use_decoder = False
 
+#dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
+#                         neurons_per_hidden_layer, decoder=use_decoder,
+#                         bias=bias)
+
+g = [5.0, -6.0]
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder,
-                         bias=bias)
+                         bias=bias, genotype=g, w_lb=w_lb, w_ub=w_ub)
 #num_weights = dummy_nn.get_num_weights()
 num_genes = dummy_nn.get_genotype_size()
+
+weights = dummy_nn.get_weights()
+print("Weights:", weights)
+
+quit()
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -274,17 +289,13 @@ centroid = get_cmaes_centroid(num_genes, sys.argv[:],
 #print("centroid:", centroid)
 
 #Initial standard deviation of the distribution
-#init_sigma = 1.0
 init_sigma = 1.0
 #Number of children to produce at each generation
 #lambda_ = 20 * num_weights
 lambda_ = 100
 
-lb = [-10., -10.]
-ub = [10., 120.]
-
 strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
-                        lb_=lb, ub_=ub)
+                        lb_=w_lb, ub_=w_ub)
 
 toolbox.register("generate", strategy.generate, creator.Individual)
 toolbox.register("update", strategy.update)
