@@ -30,7 +30,8 @@ def run(genome=None, num_inputs=None, num_outputs=None,
     nn = NeuralNetwork(num_inputs, num_outputs,
                        num_hidden_layers, neurons_per_hidden_layer,
                        genotype=genome, genotype_dir=genotype_dir,
-                       decoder=use_decoder, bias=bias)
+                       decoder=use_decoder, bias=bias, w_lb=w_lb, w_ub=w_ub,
+                       enforce_wb=enforce_wb)
 
     reward = 0
     done = False
@@ -115,7 +116,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 100
+    num_gens = 10
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -129,18 +130,21 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
     if ((save_winners_only is False) or
        (save_winners_only is True and complete)):
-        dummy_nn.set_genotype(hof[0])
-        dummy_nn.save_genotype(dir_path, file_name, hof[0].fitness.getValues()[0],
-                               domain_params)
+        dummy_nn.set_genotype(hof[0], w_lb, w_ub, enforce_wb)
+        g_saved = dummy_nn.save_genotype(dir_path, file_name,
+                                         hof[0].fitness.getValues()[0],
+                                         domain_params, save_if_wb_exceeded)
 
         #Save population statistics
-        dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
-        dump_data(best_fitnesses, dir_path, 'best_fitnesses')
+        if g_saved:
+            dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
+            dump_data(best_fitnesses, dir_path, 'best_fitnesses')
 
     if parallelise:
         pool.close()
 
     return dummy_nn
+
 
 def indv_run(genotype_dir=None, env_kwargs=None):
 
@@ -199,7 +203,7 @@ def main():
 
             #Reset strategy
             strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
-                                    lb_=lb, ub_=ub)
+                                    lb_=w_lb, ub_=w_ub)
             toolbox.register("generate", strategy.generate, creator.Individual)
             toolbox.register("update", strategy.update)
 
@@ -249,29 +253,27 @@ num_hidden_layers = 0
 neurons_per_hidden_layer = 0
 bias=False
 
-#w_lb = [-10., -10.]
-#w_ub = [10., 120.]
-w_lb = [-10., -2.]
-w_ub = [1., 10.]
+#Weight bounds
+w_lb = [-10., -10.]
+w_ub = [10., 120.]
+#Enforce the weight bounds
+#If this is turned off the weight bounds are not applied
+enforce_wb = False
+#If this is turned off the genome is not saved if weight bounds are exceeded
+save_if_wb_exceeded = True
+
+#Gene bounds
+g_lb = [-10., -10.]
+g_ub = [10., 120.]
 
 render = False
 use_decoder = False
 
-#dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-#                         neurons_per_hidden_layer, decoder=use_decoder,
-#                         bias=bias)
-
-g = [5.0, -6.0]
 dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                          neurons_per_hidden_layer, decoder=use_decoder,
-                         bias=bias, genotype=g, w_lb=w_lb, w_ub=w_ub)
+                         bias=bias)
 #num_weights = dummy_nn.get_num_weights()
 num_genes = dummy_nn.get_genotype_size()
-
-weights = dummy_nn.get_weights()
-print("Weights:", weights)
-
-quit()
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -289,13 +291,13 @@ centroid = get_cmaes_centroid(num_genes, sys.argv[:],
 #print("centroid:", centroid)
 
 #Initial standard deviation of the distribution
-init_sigma = 1.0
+init_sigma = 10.0
 #Number of children to produce at each generation
 #lambda_ = 20 * num_weights
-lambda_ = 100
+lambda_ = 10
 
 strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
-                        lb_=w_lb, ub_=w_ub)
+                        lb_=g_lb, ub_=g_ub)
 
 toolbox.register("generate", strategy.generate, creator.Individual)
 toolbox.register("update", strategy.update)

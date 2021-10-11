@@ -11,7 +11,7 @@ class NeuralNetwork():
     def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
                  genotype=None, genotype_dir=None, decoder=False,
-                 bias=True, w_lb=None, w_ub=None):
+                 bias=True, w_lb=None, w_ub=None, enforce_wb=True):
 
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -41,9 +41,9 @@ class NeuralNetwork():
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
         if genotype is not None:
-            self.set_genotype(genotype, w_lb, w_ub)
+            self.set_genotype(genotype, w_lb, w_ub, enforce_wb)
         else:
-            self.set_genotype(self.get_weights(), w_lb, w_ub)
+            self.set_genotype(self.get_weights(), w_lb, w_ub, enforce_wb)
 
 
     def _build_nn(self, bias=True):
@@ -107,7 +107,7 @@ class NeuralNetwork():
 
     #Sets a list of weights
     #This also checks the new weights against a weight lower and upper bound
-    def set_weights(self, new_weights, w_lb=None, w_ub=None):
+    def set_weights(self, new_weights, w_lb=None, w_ub=None, enforce_wb=True):
 
         #Check new weights is of correct size
         num_weights_required = self.get_num_weights()
@@ -116,7 +116,7 @@ class NeuralNetwork():
                                                                  num_weights_required)
 
         #Bound weights
-        if (w_lb is not None) or (w_ub is not None):
+        if ((w_lb is not None) or (w_ub is not None)) and enforce_wb:
             new_weights = self._bound_weights(new_weights, w_lb, w_ub)
 
         weight_index = 0
@@ -133,37 +133,58 @@ class NeuralNetwork():
 
     #Set genotype - this uses a decoder if there is one as opposed to set_weights
     #which just sets the NN weights
-    def set_genotype(self, genotype, w_lb=None, w_ub=None):
+    def set_genotype(self, genotype, w_lb=None, w_ub=None, enforce_wb=True):
 
         self.genotype = genotype
 
+        self.w_lb = w_lb
+        self.w_ub = w_ub
+        self.enforce_wb = enforce_wb
+
         if self.decoder is not None:
             weights = self.decoder.decode(genotype)
-            self.set_weights(weights, w_lb, w_ub)
+            self.set_weights(weights, w_lb, w_ub, enforce_wb)
         else:
-            self.set_weights(genotype, w_lb, w_ub)
+            self.set_weights(genotype, w_lb, w_ub, enforce_wb)
 
     #Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):
 
+        self._check_bounds_size(weights, w_lb, w_ub)
+
+        #If weight exceeds bounds, set weight to bound
+        weights = np.maximum(weights, w_lb)
+        weights = np.minimum(weights, w_ub)
+
+        return weights
+
+    #Returns True if ANY weight exceeds its bound
+    def _bounds_exceeded(self, weights, w_lb, w_ub):
+
+        #Return False if bounds are None
+        if w_lb is None and w_ub is None:
+            return False
+
+        #I know this is very C, but I couldn't think of another way and it just makes
+        #sense :/
+        for i in range(len(weights)):
+            if weights[i] <= w_lb[i]:
+                return True
+            if weights[i] >= w_ub[i]:
+                return True
+        return False
+
+    def _check_bounds_size(self, weights, w_lb, w_ub):
+
         #Check bounds are the same size as weights
         if len(weights) is not len(w_lb):
-            print("neural_network.py _bounds_weights(): weights length is not the "
+            print("neural_network.py _check_bounds_size(): weights length is not the "
                   "same as weights lower bound length")
             sys.exit(1)
         if len(weights) is not len(w_ub):
-            print("neural_network.py _bounds_weights(): weights length is not the "
+            print("neural_network.py _check_bounds_size(): weights length is not the "
                   "same as weights upper bound length")
             sys.exit(1)
-
-        #If weight exceeds bounds, set weight to bound
-        for i in range(len(weights)):
-            if weights[i] < w_lb[i]:
-                weights[i] = w_lb[i]
-            if weights[i] > w_ub[i]:
-                weights[i] = w_ub[i]
-
-        return weights
 
     #Return weights as a 1d list
     def get_weights(self):
@@ -173,7 +194,16 @@ class NeuralNetwork():
                 weights += params.flatten().tolist()
         return weights
 
-    def save_genotype(self, dir_path, file_name, fitness, domain_params=None):
+    #Return bool for success or fail
+    def save_genotype(self, dir_path, file_name, fitness, domain_params=None,
+                      save_if_bounds_exceeded=False):
+
+        #If bounds were exceeded do not save
+        if not save_if_bounds_exceeded:
+            b_exceeded = self._bounds_exceeded(self.get_weights(), self.w_lb, self.w_ub)
+            if b_exceeded:
+                return False
+
         #Save genotype as a csv - it is just a list
         file_path = dir_path + file_name
 
@@ -194,12 +224,13 @@ class NeuralNetwork():
                 csv_writer.writerow(domain_params)
 
             #Also save phenotype if there is a decoder
-            if self.decoder is not None:
-                phenotype = self.decoder.decode(self.genotype)
-                csv_writer.writerow(phenotype)
+            #if self.decoder is not None:
+            csv_writer.writerow(self.get_weights())
 
         #Also save metadata
         self._save_metadata(file_path)
+
+        return True
 
     def _save_metadata(self, genotype_filepath):
         metadata_filepath = genotype_filepath + '_metadata.json'
