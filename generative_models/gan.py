@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
-from scripts.plotter import read_and_plot
+from plotter import read_and_plot
 
 class Generator(nn.Module):
 
@@ -140,7 +140,7 @@ class GAN():
         print(fake_data)
 
         if plot:
-            read_and_plot(train_data_dir, test_genotypes=fake_data.detach().numpy())
+            read_and_plot(train_data_dir, test_data=fake_data.detach().numpy())
 
     def dump_generator(self):
         torch.save(self.generator, "generator.pt")

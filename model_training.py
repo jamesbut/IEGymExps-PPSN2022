@@ -11,7 +11,8 @@ def train_gan(train_data_path):
     training_steps = 2000
     batch_size = 256
 
-    training_data = read_data(train_data_path)
+    _, _, phenotypes, _, _ = read_data(train_data_path)
+    training_data = torch.Tensor(phenotypes)
     #training_data = create_synthetic_data(code_size)
 
     test = False
@@ -39,10 +40,11 @@ def train_ae(train_data_path):
     training_steps = 2000
     batch_size=256
 
-    training_data = read_data(train_data_path)
+    _, _, phenotypes, _, _ = read_data(train_data_path)
+    training_data = torch.Tensor(phenotypes)
     #training_data = create_synthetic_data(code_size)
 
-    test=True
+    test=False
 
     if not test:
 
@@ -65,7 +67,8 @@ def train_vae(train_data_path):
     training_steps = 200
     batch_size = 256
 
-    training_data = read_data(train_data_path)
+    _, _, phenotypes, _, _ = read_data(train_data_path)
+    training_data = torch.Tensor(phenotypes)
     #training_data = create_synthetic_data(code_size)
 
     vae = VAE(code_size, training_data)

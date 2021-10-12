@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
-from scripts.plotter import read_and_plot
+from plotter import read_and_plot
 
 class Encoder(nn.Module):
 

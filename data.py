@@ -1,11 +1,11 @@
 import os
 import sys
 import csv
-import torch
 from glob import glob
+import numpy as np
 
-def get_train_folders(folders_dir,
-                      dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
+def get_sub_folders(folders_dir,
+                    dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
 
     dir_path += folders_dir
 
@@ -18,16 +18,18 @@ def get_train_folders(folders_dir,
 
     return folder_names
 
-def read_data(data_dir, as_torch_tensor=True,
-              dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
+def read_data(data_dir):
 
     try:
-        folder_paths = get_train_folders(data_dir, dir_path)
+        folder_paths = get_sub_folders(data_dir)
     except NotADirectoryError as e:
         print(e)
         sys.exit(1)
 
-    data = []
+    fitnesses = []
+    genotypes = []
+    params = []
+    phenotypes = []
 
     for fp in folder_paths:
         fp += "/best_winner_so_far"
@@ -37,22 +39,38 @@ def read_data(data_dir, as_torch_tensor=True,
 
                 csv_reader = csv.reader(data_file, delimiter=',')
 
-                #Get first row
-                d = next(csv_reader)
-                #Convert to floats
-                d = [float(i) for i in d]
-                #Remove fitness
-                del d[0]
-                data.append(d)
+                for i, row in enumerate(csv_reader):
+
+                    #Convert to floats
+                    row = [float(i) for i in row]
+
+                    #First row is fitness and genotype
+                    if i == 0:
+                        fitnesses.append(row[0])
+                        genotypes.append(row[1:])
+
+                    #Second row is parameters, if they are there
+                    elif i == 1:
+                        params.append(row)
+
+                    #If an IE was used the phenotype is on the third row
+                    elif i == 2:
+                        phenotypes.append(row)
 
         except FileNotFoundError:
-
             sys.exit("Could not find file named: " + fp)
 
-    if as_torch_tensor:
-        return torch.Tensor(data)
-    else:
-        return data
+    #If phenotypes are not in file, make phenotypes equal to the genotypes
+    if not phenotypes:
+        import copy
+        phenotypes = copy.deepcopy(genotypes)
+
+    return np.array(fitnesses), \
+           np.array(genotypes), \
+           np.array(phenotypes) if phenotypes else None, \
+           np.array(params) if params else None, \
+           folder_paths
+
 
 def dump_data(data, dir_path, file_name):
 
@@ -103,9 +121,9 @@ def create_exp_dir_name(base_path):
 
 def create_synthetic_data(code_size, num_data_points=500):
 
-    #return -10. + torch.randn(500, code_size)
+    #return -10. + np.randn(500, code_size)
 
-    means = torch.zeros(500, 2)
+    means = np.zeros(500, 2)
     for i in range(means.size(0)):
         for j in range(means.size(1)):
             if j == 0:
@@ -113,4 +131,4 @@ def create_synthetic_data(code_size, num_data_points=500):
             else:
                 means[i][j] = -10.
 
-    return means + torch.randn(500, 2)
+    return means + np.randn(500, 2)

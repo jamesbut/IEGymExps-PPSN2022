@@ -1,72 +1,23 @@
 import sys
-sys.path.append('..')
-
-from data import get_train_folders
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+from data import read_data
 
 np.set_printoptions(suppress=True)
 
-def __read_data(data_dir):
+def __plot_data(train_phenotypes=None, params=None, test_phenotypes=None):
 
-    try:
-        folder_paths = get_train_folders(data_dir)
-    except NotADirectoryError as e:
-        print(e)
-        sys.exit(1)
-
-    fitnesses = []
-    genotypes = []
-    params = []
-
-    for fp in folder_paths:
-        fp += "/best_winner_so_far"
-
-        try:
-            with open(fp) as data_file:
-
-                csv_reader = csv.reader(data_file, delimiter=',')
-
-                for i, row in enumerate(csv_reader):
-
-                    #Convert to floats
-                    row = [float(i) for i in row]
-
-                    #First row is fitness and genotype
-                    if i == 0:
-                        fitnesses.append(row[0])
-                        genotypes.append(row[1:])
-
-                    #Second row is parameters, if they are there
-                    elif i == 1:
-                        params.append(row)
-
-                    #If an IE was used the phenotype is on the third row
-                    elif i == 2:
-                        del genotypes[-1]
-                        genotypes.append(row)
-
-        except FileNotFoundError:
-            sys.exit("Could not find file named: " + fp)
-
-    return np.array(fitnesses), np.array(genotypes), \
-           np.array(params) if params else None, \
-           folder_paths
-
-
-def __plot_data(train_genotypes=None, params=None, test_genotypes=None):
-
-    if train_genotypes is not None:
+    if train_phenotypes is not None:
         if params is not None:
-            plt.scatter(train_genotypes[:,0], train_genotypes[:,1],
+            plt.scatter(train_phenotypes[:,0], train_phenotypes[:,1],
                         c=params[:,0], cmap='plasma')
             cbar = plt.colorbar()
         else:
-            plt.scatter(train_genotypes[:,0], train_genotypes[:,1])
+            plt.scatter(train_phenotypes[:,0], train_phenotypes[:,1])
 
-    if test_genotypes is not None:
-        plt.scatter(test_genotypes[:,0], test_genotypes[:,1])
+    if test_phenotypes is not None:
+        plt.scatter(test_phenotypes[:,0], test_phenotypes[:,1])
 
     plt.show()
 
@@ -89,21 +40,22 @@ def __fitness_analysis(fitnesses, folder_paths):
     print("Mean fitness:", mean_fitness)
 
 
-def read_and_plot(train_data_dir=None, test_genotypes=None):
+def read_and_plot(data_dir=None, test_data=None):
 
-    #Read training data
-    if train_data_dir is not None:
-        fitnesses, genotypes, params, folder_paths = __read_data(train_data_dir)
+    #Read data
+    if data_dir is not None:
+        fitnesses, genos, phenos, params, folder_paths = read_data(data_dir)
 
     print("Fitnesses:\n", fitnesses)
-    print("Genotypes:\n", genotypes)
-    print("Params:\n", params)
+    print("Genotypes:\n", genos)
+    print("Phenotypes:\n", phenos)
+    print("Params:\n", params[0])
 
     #Provide fitness analysis
     __fitness_analysis(fitnesses, folder_paths)
 
     #Plot training and/or test data
-    __plot_data(genotypes, params, test_genotypes)
+    __plot_data(phenos, params, test_data)
 
 if __name__ == '__main__':
 

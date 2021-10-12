@@ -116,7 +116,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 100
+    num_gens = 10
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -178,7 +178,7 @@ def main():
 
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
-        num_runs = 5
+        num_runs = 1
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path + 'python_data')
