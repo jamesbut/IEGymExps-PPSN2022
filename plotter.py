@@ -8,12 +8,9 @@ import csv
 
 np.set_printoptions(suppress=True)
 
-def __read_data(data_dir, parent_dir=False):
+def __read_data(data_dir):
 
-    if parent_dir:
-        dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
-    else:
-        dir_path = "../../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
+    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
 
     try:
         folder_paths = get_train_folders(data_dir, dir_path)
@@ -94,12 +91,11 @@ def __fitness_analysis(fitnesses, folder_paths):
     print("Mean fitness:", mean_fitness)
 
 
-def read_and_plot(train_data_dir=None, test_genotypes=None, parent_dir=False):
+def read_and_plot(train_data_dir=None, test_genotypes=None):
 
     #Read training data
     if train_data_dir is not None:
-        fitnesses, genotypes, params, folder_paths = \
-            __read_data(train_data_dir, parent_dir)
+        fitnesses, genotypes, params, folder_paths = __read_data(train_data_dir)
 
     print("Fitnesses:\n", fitnesses)
     print("Genotypes:\n", genotypes)

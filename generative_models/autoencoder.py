@@ -119,8 +119,7 @@ class Autoencoder(nn.Module):
         print(output)
 
         if plot:
-            read_and_plot(train_data_dir, test_data=output.detach().numpy(),
-                          parent_dir=True)
+            read_and_plot(train_data_dir, test_data=output.detach().numpy())
 
     def test(self):
         self(self.training_data, verbosity=True)

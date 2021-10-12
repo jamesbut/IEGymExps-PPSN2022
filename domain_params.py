@@ -7,13 +7,7 @@ def get_kwarg_values(env_name):
     elif env_name == 'MountainCarContinuous-v0':
         #return [0.0008, 0.0012, 0.0016]
         #return [0.0008, 0.0010, 0.0012, 0.0014, 0.0016]
-        #return [0.0010, 0.0014]
-        return [0.0010]
-        #return [0.0008]
-        #return [0.0016]
-        #return [0.0016]
-        #return [0.00225]
-        #return [0.0023]
+        return [0.0010, 0.001001]
 
 #Get env kwargs for particular environment
 def get_env_kwargs(randomise, env_name):

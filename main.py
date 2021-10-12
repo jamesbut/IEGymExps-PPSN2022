@@ -116,7 +116,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 10
+    num_gens = 100
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -148,7 +148,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
 
 def indv_run(genotype_dir=None, env_kwargs=None):
 
-    render = False
+    render = True
 
     reward = evaluate(render=render, genotype_dir=genotype_dir,
                       env_kwargs=env_kwargs, verbosity=True)
@@ -178,7 +178,7 @@ def main():
 
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
-        num_runs = 1
+        num_runs = 5
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path + 'python_data')
@@ -258,7 +258,7 @@ w_lb = [-10., -10.]
 w_ub = [10., 120.]
 #Enforce the weight bounds
 #If this is turned off the weight bounds are not applied
-enforce_wb = False
+enforce_wb = True
 #If this is turned off the genome is not saved if weight bounds are exceeded
 save_if_wb_exceeded = True
 
@@ -291,10 +291,10 @@ centroid = get_cmaes_centroid(num_genes, sys.argv[:],
 #print("centroid:", centroid)
 
 #Initial standard deviation of the distribution
-init_sigma = 10.0
+init_sigma = 1.0
 #Number of children to produce at each generation
 #lambda_ = 20 * num_weights
-lambda_ = 10
+lambda_ = 100
 
 strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
                         lb_=g_lb, ub_=g_ub)
