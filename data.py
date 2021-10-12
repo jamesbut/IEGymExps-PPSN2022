@@ -4,7 +4,8 @@ import csv
 import torch
 from glob import glob
 
-def get_train_folders(folders_dir, dir_path):
+def get_train_folders(folders_dir,
+                      dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
 
     dir_path += folders_dir
 

@@ -10,10 +10,8 @@ np.set_printoptions(suppress=True)
 
 def __read_data(data_dir):
 
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
-
     try:
-        folder_paths = get_train_folders(data_dir, dir_path)
+        folder_paths = get_train_folders(data_dir)
     except NotADirectoryError as e:
         print(e)
         sys.exit(1)
