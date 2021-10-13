@@ -74,24 +74,27 @@ def evaluate(genome=None, num_inputs=None, num_outputs=None,
              render=False, genotype_dir=None, env_kwargs=None,
              verbosity=False):
 
-    reward = 0
+    rewards = []
+    #reward = 0
 
     #For a certain number of trials/env arguments
     for kwargs in env_kwargs:
         r = run(genome, num_inputs, num_outputs, num_hidden_layers,
                 neurons_per_hidden_layer, render, genotype_dir, kwargs)
-        reward += r
+        rewards.append(r)
+        #reward += r
 
         if verbosity:
             print(kwargs)
             print("Reward: ", r)
 
-    #print("Reward before:", reward)
     #Average reward over number of trials
-    reward /= len(env_kwargs)
-    #print("Reward after:", reward)
+    #reward /= len(env_kwargs)
 
-    return [reward]
+    avg_reward = sum(rewards) / len(rewards)
+
+    return [avg_reward]
+    #return [avg_reward], rewards
 
 
 def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer,
@@ -116,7 +119,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 10
+    num_gens = 100
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -146,14 +149,16 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     return dummy_nn
 
 
-def indv_run(genotype_dir=None, env_kwargs=None):
+def indv_run(genotype_dir=None, env_kwargs=None, render=True):
 
-    render = True
+    render = False
 
     reward = evaluate(render=render, genotype_dir=genotype_dir,
                       env_kwargs=env_kwargs, verbosity=True)
 
     print("Reward: ", reward)
+
+    return reward
 
 
 def main():
@@ -187,7 +192,7 @@ def main():
         for i in range(num_runs):
             print("Evo run: ", i)
 
-            env_kwargs = get_env_kwargs(randomise_hyperparams, env_name)
+            env_kwargs = get_env_kwargs(env_name, randomise_hyperparams)
 
             toolbox.register("evaluate", evaluate,
                              num_inputs=num_inputs, num_outputs=num_outputs,
@@ -214,11 +219,10 @@ def main():
 
         print("Individual run")
 
-        env_kwargs = get_env_kwargs(False, env_name)
+        env_kwargs = get_env_kwargs(env_name, randomise=False)
 
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
-
         indv_full_path = dir_path + '/' + indv_dir + "/" + file_name
 
         indv_run(genotype_dir=indv_full_path, env_kwargs=env_kwargs)

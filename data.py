@@ -16,12 +16,18 @@ def get_sub_folders(folders_dir,
     else:
         raise NotADirectoryError("{} is not a directory".format(dir_path))
 
-    return folder_names
+    return folder_names, dir_path
 
-def read_data(data_dir):
+def read_data(data_dir, dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
 
+    #Get directories in data_dir
     try:
-        folder_paths = get_sub_folders(data_dir)
+        folder_paths, dir_path = get_sub_folders(data_dir, dir_path)
+
+        #If there are no directories in data_dir, then look for data in data_dir
+        if not folder_paths:
+            folder_paths = [dir_path]
+
     except NotADirectoryError as e:
         print(e)
         sys.exit(1)
@@ -31,11 +37,11 @@ def read_data(data_dir):
     params = []
     phenotypes = []
 
-    for fp in folder_paths:
-        fp += "/best_winner_so_far"
+    for i in range(len(folder_paths)):
+        folder_paths[i] += '/best_winner_so_far'
 
         try:
-            with open(fp) as data_file:
+            with open(folder_paths[i]) as data_file:
 
                 csv_reader = csv.reader(data_file, delimiter=',')
 
@@ -58,7 +64,7 @@ def read_data(data_dir):
                         phenotypes.append(row)
 
         except FileNotFoundError:
-            sys.exit("Could not find file named: " + fp)
+            sys.exit("Could not find file named: " + folder_paths[i])
 
     #If phenotypes are not in file, make phenotypes equal to the genotypes
     if not phenotypes:

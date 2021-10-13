@@ -11,7 +11,7 @@ def get_kwarg_values(env_name):
         return [0.0010]
 
 #Get env kwargs for particular environment
-def get_env_kwargs(randomise, env_name):
+def get_env_kwargs(env_name, randomise=False, domain_params=None):
 
     if randomise:
 
@@ -48,8 +48,12 @@ def get_env_kwargs(randomise, env_name):
 
         elif env_name == 'MountainCarContinuous-v0':
             #Create list of env kwargs for different trials for the same organism
+            if domain_params is not None:
+                env_kwarg_vals = domain_params
+            else:
+                env_kwarg_vals = get_kwarg_values(env_name)
+
             env_kwargs = []
-            env_kwarg_vals = get_kwarg_values(env_name)
             for val in env_kwarg_vals:
                 env_kwargs.append(
                     {
