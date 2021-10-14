@@ -38,8 +38,7 @@ This function is just a copy of the function in DEAP but it dumps the best genot
 in the hall of fame every n generations
 """
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
-                     verbose=__debug__, dump_every=None, dummy_nn=None,
-                     completion_fitness=None):
+                     verbose=__debug__, completion_fitness=None):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -80,7 +79,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         #End if completion fitness has been achieved
         if completion_fitness is not None:
             if best_fitness_so_far >= completion_fitness:
-                print("WINNER FOUND!")
+                print("WINNER FOUND!   fitness:", best_fitness_so_far)
                 return population, logbook, avg_fitnesses, best_fitnesses, True
 
     print("No winner found :(")

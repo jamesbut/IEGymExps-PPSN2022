@@ -16,10 +16,8 @@ from evo_utils import get_cmaes_centroid
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
 
-def run(genome=None, num_inputs=None, num_outputs=None,
-        num_hidden_layers=None, neurons_per_hidden_layer=None, bias=True,
-        w_lb=None, w_ub=None, enforce_wb=False, env_name=None, render=False,
-        genotype_dir=None, env_kwargs=None, use_decoder=False):
+
+def run(network, env_name, env_kwargs=None, render=False):
 
     if env_kwargs is not None:
         env = gym.make(env_name, **env_kwargs)
@@ -27,12 +25,6 @@ def run(genome=None, num_inputs=None, num_outputs=None,
         env = gym.make(env_name)
 
     env.seed(108)
-
-    nn = NeuralNetwork(num_inputs, num_outputs,
-                       num_hidden_layers, neurons_per_hidden_layer,
-                       genotype=genome, genotype_dir=genotype_dir,
-                       decoder=use_decoder, bias=bias, w_lb=w_lb, w_ub=w_ub,
-                       enforce_wb=enforce_wb)
 
     reward = 0
     done = False
@@ -47,7 +39,7 @@ def run(genome=None, num_inputs=None, num_outputs=None,
         if render:
             env.render()
 
-        net_out = nn.forward(state)
+        net_out = network.forward(state)
 
         #Normalise output between action space bounds
         action_vals = net_out * (env.action_space.high - env.action_space.low) + \
@@ -70,19 +62,20 @@ def run(genome=None, num_inputs=None, num_outputs=None,
     return reward
 
 
-def evaluate(genome=None, num_inputs=None, num_outputs=None,
-             num_hidden_layers=None, neurons_per_hidden_layer=None,
-             bias=True, w_lb=None, w_ub=None, enforce_wb=False,
-             env_name=None, render=False, genotype_dir=None, env_kwargs=None,
-             verbosity=False, use_decoder=False, avg_fitnesses=False):
+#Either pass in a genome and a network with the required architecture OR
+#a network with the weights already set
+def evaluate(genome=None, network=None,
+             env_name=None, env_kwargs=None, render=False,
+             verbosity=False, avg_fitnesses=False):
+
+    if genome is not None:
+        network.set_genotype(genome)
 
     rewards = []
 
     #For a certain number of trials/env arguments
     for kwargs in env_kwargs:
-        r = run(genome, num_inputs, num_outputs, num_hidden_layers,
-                neurons_per_hidden_layer, bias, w_lb, w_ub, enforce_wb,
-                env_name, render, genotype_dir, kwargs, use_decoder)
+        r = run(network, env_name, kwargs, render)
         rewards.append(r)
 
         if verbosity:
@@ -95,7 +88,7 @@ def evaluate(genome=None, num_inputs=None, num_outputs=None,
         return rewards
 
 
-def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
+def evo_run(env_name, completion_fitness, dir_path, file_name):
 
     '''
     Define neural controller according to environment
@@ -118,31 +111,19 @@ def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
     #If this is turned off the genome is not saved if weight bounds are exceeded
     save_if_wb_exceeded = True
 
-    #Gene bounds
-    g_lb = [-10., -10.]
-    g_ub = [10., 120.]
-
     render = False
     use_decoder = False
-
-    dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                             neurons_per_hidden_layer, decoder=use_decoder,
-                             bias=bias)
-    #num_weights = dummy_nn.get_num_weights()
-    num_genes = dummy_nn.get_genotype_size()
-
     randomise_hyperparams = False
 
+    network = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
+                            neurons_per_hidden_layer, decoder=use_decoder,
+                            bias=bias, w_lb=w_lb, w_ub=w_ub, enforce_wb=enforce_wb)
     env_kwargs = get_env_kwargs(env_name, randomise_hyperparams)
 
     toolbox = base.Toolbox()
-    toolbox.register("evaluate", evaluate,
-                     num_inputs=num_inputs, num_outputs=num_outputs,
-                     num_hidden_layers=num_hidden_layers,
-                     neurons_per_hidden_layer=neurons_per_hidden_layer, bias=bias,
-                     w_lb=w_lb, w_ub=w_ub, enforce_wb=enforce_wb, env_name=env_name,
-                     render=render, genotype_dir=None, env_kwargs=env_kwargs,
-                     use_decoder=use_decoder, avg_fitnesses=True)
+    toolbox.register("evaluate", evaluate, network=network,
+                     env_name=env_name, env_kwargs=env_kwargs, render=render,
+                     avg_fitnesses=True)
 
     domain_params = get_domain_params(env_kwargs, env_name)
     print("Domain params:", domain_params)
@@ -150,15 +131,20 @@ def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
     '''
     Define evolutionary algorithm
     '''
+    num_genes = network.get_genotype_size()
+
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                                   dir_path=dir_path, file_name=file_name)
-    #print("centroid:", centroid)
-
     #Initial standard deviation of the distribution
     init_sigma = 1.0
     #Number of children to produce at each generation
     #lambda_ = 20 * num_weights
-    lambda_ = 10
+    lambda_ = 100
+    num_gens = 100
+
+    #Gene bounds
+    g_lb = [-10., -10.]
+    g_ub = [10., 120.]
 
     strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
                             lb_=g_lb, ub_=g_ub)
@@ -167,6 +153,7 @@ def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
     toolbox.register("update", strategy.update)
 
     '''
+    Define execution and logs
     '''
 
     #np.random.seed(108)
@@ -186,24 +173,26 @@ def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 10
-    dump_every = 25
+    '''
+    Run evolutionary algorithm
+    '''
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
-                                   dump_every=dump_every, dummy_nn=dummy_nn,
                                    completion_fitness=completion_fitness)
 
     dir_path += str(uuid.uuid4()) + '/'
 
-    #Save best agent
+    '''
+    Write results to file
+    '''
     save_winners_only = False
 
     if ((save_winners_only is False) or
        (save_winners_only is True and complete)):
-        dummy_nn.set_genotype(hof[0], w_lb, w_ub, enforce_wb)
-        g_saved = dummy_nn.save_genotype(dir_path, file_name,
-                                         hof[0].fitness.getValues()[0],
-                                         domain_params, save_if_wb_exceeded)
+        network.set_genotype(hof[0])
+        g_saved = network.save_genotype(dir_path, file_name,
+                                        hof[0].fitness.getValues()[0],
+                                        domain_params, save_if_wb_exceeded)
 
         #Save population statistics
         if g_saved:
@@ -213,19 +202,22 @@ def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
     if parallelise:
         pool.close()
 
-    return dummy_nn
 
+def indv_run(genotype_dir, env_name, render=True):
 
-def indv_run(env_name, genotype_dir=None, env_kwargs=None, render=True):
+    #render = False
 
-    render = False
+    env_kwargs = get_env_kwargs(env_name, randomise=False)
 
-    reward = evaluate(env_name=env_name, render=render, genotype_dir=genotype_dir,
-                      env_kwargs=env_kwargs, verbosity=True)
+    network = NeuralNetwork(genotype_dir=genotype_dir)
+    rewards = evaluate(network=network,
+                       env_name=env_name, env_kwargs=env_kwargs, render=render,
+                       verbosity=True)
 
-    print("Reward: ", reward)
+    print("Rewards: ", rewards)
+    print("Mean reward:", sum(rewards) / len(rewards))
 
-    return reward
+    return rewards
 
 
 def main():
@@ -245,6 +237,10 @@ def main():
         train_gan(sys.argv[1])
         return
 
+    '''
+    Define environment
+    '''
+
     #env_name = 'BipedalWalker-v3'
     #env_name = 'HalfCheetah-v2'
     #env_name = 'LunarLanderContinuous-v2'
@@ -256,15 +252,15 @@ def main():
     if 'PyBulletEnv' in env_name:
         import pybulletgym
 
-    completion_fitness = None
-    #completion_fitness = 2.2
+    #completion_fitness = None
+    completion_fitness = 2.15
 
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
     file_name = "best_winner_so_far"
 
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
-        num_runs = 1
+        num_runs = 2
 
         #Create experiment path
         exp_dir_name = create_exp_dir_name(dir_path + 'python_data')
@@ -272,21 +268,17 @@ def main():
 
         for i in range(num_runs):
             print("Evo run: ", i)
-
-            domain_params=None
-            winner = evo_run(env_name, completion_fitness, dir_exp_path, file_name, i)
+            evo_run(env_name, completion_fitness, dir_exp_path, file_name)
 
     else:
 
         print("Individual run")
 
-        env_kwargs = get_env_kwargs(env_name, randomise=False)
-
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
         indv_full_path = dir_path + '/' + indv_dir + "/" + file_name
 
-        indv_run(env_name, genotype_dir=indv_full_path, env_kwargs=env_kwargs)
+        indv_run(indv_full_path, env_name)
 
 
 #Some bug in DEAP means that I have to create individual before if __name__ == "__main__"

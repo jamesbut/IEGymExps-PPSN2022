@@ -19,6 +19,10 @@ class NeuralNetwork():
         self.neurons_per_hidden_layer = neurons_per_hidden_layer
         self.bias = bias
 
+        self.w_lb = w_lb
+        self.w_ub = w_ub
+        self.enforce_wb = enforce_wb
+
         #Read genotype and metadata from files
         if genotype_dir is not None:
             genotype = self._read_genotype(genotype_dir)
@@ -41,9 +45,9 @@ class NeuralNetwork():
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
         if genotype is not None:
-            self.set_genotype(genotype, w_lb, w_ub, enforce_wb)
+            self.set_genotype(genotype)
         else:
-            self.set_genotype(self.get_weights(), w_lb, w_ub, enforce_wb)
+            self.set_genotype(self.get_weights())
 
 
     def _build_nn(self, bias=True):
@@ -107,7 +111,7 @@ class NeuralNetwork():
 
     #Sets a list of weights
     #This also checks the new weights against a weight lower and upper bound
-    def set_weights(self, new_weights, w_lb=None, w_ub=None, enforce_wb=True):
+    def set_weights(self, new_weights):
 
         #Check new weights is of correct size
         num_weights_required = self.get_num_weights()
@@ -116,8 +120,8 @@ class NeuralNetwork():
                                                                  num_weights_required)
 
         #Bound weights
-        if ((w_lb is not None) or (w_ub is not None)) and enforce_wb:
-            new_weights = self._bound_weights(new_weights, w_lb, w_ub)
+        if ((self.w_lb is not None) or (self.w_ub is not None)) and self.enforce_wb:
+            new_weights = self._bound_weights(new_weights, self.w_lb, self.w_ub)
 
         weight_index = 0
         for layer in self.nn:
@@ -133,19 +137,15 @@ class NeuralNetwork():
 
     #Set genotype - this uses a decoder if there is one as opposed to set_weights
     #which just sets the NN weights
-    def set_genotype(self, genotype, w_lb=None, w_ub=None, enforce_wb=True):
+    def set_genotype(self, genotype):
 
         self.genotype = genotype
 
-        self.w_lb = w_lb
-        self.w_ub = w_ub
-        self.enforce_wb = enforce_wb
-
         if self.decoder is not None:
             weights = self.decoder.decode(genotype)
-            self.set_weights(weights, w_lb, w_ub, enforce_wb)
+            self.set_weights(weights)
         else:
-            self.set_weights(genotype, w_lb, w_ub, enforce_wb)
+            self.set_weights(genotype)
 
     #Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):
