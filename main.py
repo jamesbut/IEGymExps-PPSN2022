@@ -88,7 +88,7 @@ def evaluate(genome=None, network=None,
         return rewards
 
 
-def evo_run(env_name, completion_fitness, dir_path, file_name):
+def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
 
     '''
     Define neural controller according to environment
@@ -180,24 +180,25 @@ def evo_run(env_name, completion_fitness, dir_path, file_name):
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
                                    completion_fitness=completion_fitness)
 
-    dir_path += str(uuid.uuid4()) + '/'
 
     '''
     Write results to file
     '''
+    run_path = exp_dir_path + str(uuid.uuid4()) + '/'
+
     save_winners_only = False
 
     if ((save_winners_only is False) or
        (save_winners_only is True and complete)):
         network.set_genotype(hof[0])
-        g_saved = network.save_genotype(dir_path, file_name,
+        g_saved = network.save_genotype(run_path, file_name,
                                         hof[0].fitness.getValues()[0],
                                         domain_params, save_if_wb_exceeded)
 
         #Save population statistics
         if g_saved:
-            dump_data(avg_fitnesses, dir_path, 'mean_fitnesses')
-            dump_data(best_fitnesses, dir_path, 'best_fitnesses')
+            dump_data(avg_fitnesses, run_path, 'mean_fitnesses')
+            dump_data(best_fitnesses, run_path, 'best_fitnesses')
 
     if parallelise:
         pool.close()
@@ -258,17 +259,18 @@ def main():
     dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
     file_name = "best_winner_so_far"
 
+    #Create experiment path
+    exp_dir_path = dir_path + 'python_data'
+    exp_dir_name = create_exp_dir_name(exp_dir_path)
+    exp_dir_path += '/' + exp_dir_name + '/'
+
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
         num_runs = 2
 
-        #Create experiment path
-        exp_dir_name = create_exp_dir_name(dir_path + 'python_data')
-        dir_exp_path = dir_path + 'python_data/' + exp_dir_name + '/'
-
         for i in range(num_runs):
             print("Evo run: ", i)
-            evo_run(env_name, completion_fitness, dir_exp_path, file_name)
+            evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name)
 
     else:
 
