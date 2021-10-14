@@ -17,8 +17,9 @@ from evo_utils import get_cmaes_centroid
 np.set_printoptions(suppress=True)
 
 def run(genome=None, num_inputs=None, num_outputs=None,
-        num_hidden_layers=None, neurons_per_hidden_layer=None,
-        render=False, genotype_dir=None, env_kwargs=None):
+        num_hidden_layers=None, neurons_per_hidden_layer=None, bias=True,
+        w_lb=None, w_ub=None, enforce_wb=False, env_name=None, render=False,
+        genotype_dir=None, env_kwargs=None, use_decoder=False):
 
     if env_kwargs is not None:
         env = gym.make(env_name, **env_kwargs)
@@ -71,36 +72,102 @@ def run(genome=None, num_inputs=None, num_outputs=None,
 
 def evaluate(genome=None, num_inputs=None, num_outputs=None,
              num_hidden_layers=None, neurons_per_hidden_layer=None,
-             render=False, genotype_dir=None, env_kwargs=None,
-             verbosity=False):
+             bias=True, w_lb=None, w_ub=None, enforce_wb=False,
+             env_name=None, render=False, genotype_dir=None, env_kwargs=None,
+             verbosity=False, use_decoder=False, avg_fitnesses=False):
 
     rewards = []
-    #reward = 0
 
     #For a certain number of trials/env arguments
     for kwargs in env_kwargs:
         r = run(genome, num_inputs, num_outputs, num_hidden_layers,
-                neurons_per_hidden_layer, render, genotype_dir, kwargs)
+                neurons_per_hidden_layer, bias, w_lb, w_ub, enforce_wb,
+                env_name, render, genotype_dir, kwargs, use_decoder)
         rewards.append(r)
-        #reward += r
 
         if verbosity:
             print(kwargs)
             print("Reward: ", r)
 
-    #Average reward over number of trials
-    #reward /= len(env_kwargs)
-
-    avg_reward = sum(rewards) / len(rewards)
-
-    return [avg_reward]
-    #return [avg_reward], rewards
+    if avg_fitnesses:
+        return [sum(rewards) / len(rewards)]
+    else:
+        return rewards
 
 
-def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer,
-            dir_path, file_name, run_num, domain_params):
+def evo_run(env_name, completion_fitness, dir_path, file_name, run_num):
 
+    '''
+    Define neural controller according to environment
+    '''
+    dummy_env = gym.make(env_name)
+    state = dummy_env.reset()
+
+    num_inputs = len(state)
+    num_outputs = len(dummy_env.action_space.high)
+    num_hidden_layers = 0
+    neurons_per_hidden_layer = 0
+    bias=False
+
+    #Weight bounds
+    w_lb = [-10., -10.]
+    w_ub = [10., 120.]
+    #Enforce the weight bounds
+    #If this is turned off the weight bounds are not applied
+    enforce_wb = True
+    #If this is turned off the genome is not saved if weight bounds are exceeded
+    save_if_wb_exceeded = True
+
+    #Gene bounds
+    g_lb = [-10., -10.]
+    g_ub = [10., 120.]
+
+    render = False
+    use_decoder = False
+
+    dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
+                             neurons_per_hidden_layer, decoder=use_decoder,
+                             bias=bias)
+    #num_weights = dummy_nn.get_num_weights()
+    num_genes = dummy_nn.get_genotype_size()
+
+    randomise_hyperparams = False
+
+    env_kwargs = get_env_kwargs(env_name, randomise_hyperparams)
+
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", evaluate,
+                     num_inputs=num_inputs, num_outputs=num_outputs,
+                     num_hidden_layers=num_hidden_layers,
+                     neurons_per_hidden_layer=neurons_per_hidden_layer, bias=bias,
+                     w_lb=w_lb, w_ub=w_ub, enforce_wb=enforce_wb, env_name=env_name,
+                     render=render, genotype_dir=None, env_kwargs=env_kwargs,
+                     use_decoder=use_decoder, avg_fitnesses=True)
+
+    domain_params = get_domain_params(env_kwargs, env_name)
     print("Domain params:", domain_params)
+
+    '''
+    Define evolutionary algorithm
+    '''
+    centroid = get_cmaes_centroid(num_genes, sys.argv[:],
+                                  dir_path=dir_path, file_name=file_name)
+    #print("centroid:", centroid)
+
+    #Initial standard deviation of the distribution
+    init_sigma = 1.0
+    #Number of children to produce at each generation
+    #lambda_ = 20 * num_weights
+    lambda_ = 10
+
+    strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
+                            lb_=g_lb, ub_=g_ub)
+
+    toolbox.register("generate", strategy.generate, creator.Individual)
+    toolbox.register("update", strategy.update)
+
+    '''
+    '''
 
     #np.random.seed(108)
 
@@ -119,7 +186,7 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    num_gens = 100
+    num_gens = 10
     dump_every = 25
     population, logbook, avg_fitnesses, best_fitnesses, complete = \
         evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
@@ -149,11 +216,11 @@ def evo_run(num_inputs, num_outputs, num_hidden_layers, neurons_per_hidden_layer
     return dummy_nn
 
 
-def indv_run(genotype_dir=None, env_kwargs=None, render=True):
+def indv_run(env_name, genotype_dir=None, env_kwargs=None, render=True):
 
     render = False
 
-    reward = evaluate(render=render, genotype_dir=genotype_dir,
+    reward = evaluate(env_name=env_name, render=render, genotype_dir=genotype_dir,
                       env_kwargs=env_kwargs, verbosity=True)
 
     print("Reward: ", reward)
@@ -178,8 +245,22 @@ def main():
         train_gan(sys.argv[1])
         return
 
+    #env_name = 'BipedalWalker-v3'
+    #env_name = 'HalfCheetah-v2'
+    #env_name = 'LunarLanderContinuous-v2'
+    #env_name = 'HumanoidPyBulletEnv-v0'
+    #env_name = 'HalfCheetahPyBulletEnv-v0'
+    #env_name = 'InvertedDoublePendulum-v2'
+    env_name = 'MountainCarContinuous-v0'
 
-    randomise_hyperparams = False
+    if 'PyBulletEnv' in env_name:
+        import pybulletgym
+
+    completion_fitness = None
+    #completion_fitness = 2.2
+
+    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
+    file_name = "best_winner_so_far"
 
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
@@ -192,28 +273,8 @@ def main():
         for i in range(num_runs):
             print("Evo run: ", i)
 
-            env_kwargs = get_env_kwargs(env_name, randomise_hyperparams)
-
-            toolbox.register("evaluate", evaluate,
-                             num_inputs=num_inputs, num_outputs=num_outputs,
-                             num_hidden_layers=num_hidden_layers,
-                             neurons_per_hidden_layer=neurons_per_hidden_layer,
-                             render=render, genotype_dir=None, env_kwargs=env_kwargs)
-
-            domain_params = get_domain_params(env_kwargs, env_name)
-
-            winner = evo_run(num_inputs, num_outputs, num_hidden_layers,
-                             neurons_per_hidden_layer, dir_exp_path, file_name, i,
-                             domain_params)
-
-            #Reset strategy
-            strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
-                                    lb_=w_lb, ub_=w_ub)
-            toolbox.register("generate", strategy.generate, creator.Individual)
-            toolbox.register("update", strategy.update)
-
-        #indv_run(winner.get_weights(), num_inputs, num_outputs, num_hidden_layers,
-        #         neurons_per_hidden_layer)
+            domain_params=None
+            winner = evo_run(env_name, completion_fitness, dir_exp_path, file_name, i)
 
     else:
 
@@ -225,86 +286,13 @@ def main():
         indv_dir = sys.argv[1]
         indv_full_path = dir_path + '/' + indv_dir + "/" + file_name
 
-        indv_run(genotype_dir=indv_full_path, env_kwargs=env_kwargs)
+        indv_run(env_name, genotype_dir=indv_full_path, env_kwargs=env_kwargs)
 
 
-dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
-file_name = "best_winner_so_far"
-
-#Some bug in DEAP means that I have to define toolbox before if __name__ == "__main__"
-#apparently
-
-#env_name = 'BipedalWalker-v3'
-#env_name = 'HalfCheetah-v2'
-#env_name = 'LunarLanderContinuous-v2'
-#env_name = 'HumanoidPyBulletEnv-v0'
-#env_name = 'HalfCheetahPyBulletEnv-v0'
-#env_name = 'InvertedDoublePendulum-v2'
-env_name = 'MountainCarContinuous-v0'
-
-if 'PyBulletEnv' in env_name:
-    import pybulletgym
-
-completion_fitness = None
-#completion_fitness = 2.2
-
-dummy_env = gym.make(env_name)
-state = dummy_env.reset()
-
-num_inputs = len(state)
-num_outputs = len(dummy_env.action_space.high)
-num_hidden_layers = 0
-neurons_per_hidden_layer = 0
-bias=False
-
-#Weight bounds
-w_lb = [-10., -10.]
-w_ub = [10., 120.]
-#Enforce the weight bounds
-#If this is turned off the weight bounds are not applied
-enforce_wb = True
-#If this is turned off the genome is not saved if weight bounds are exceeded
-save_if_wb_exceeded = True
-
-#Gene bounds
-g_lb = [-10., -10.]
-g_ub = [10., 120.]
-
-render = False
-use_decoder = False
-
-dummy_nn = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                         neurons_per_hidden_layer, decoder=use_decoder,
-                         bias=bias)
-#num_weights = dummy_nn.get_num_weights()
-num_genes = dummy_nn.get_genotype_size()
+#Some bug in DEAP means that I have to create individual before if __name__ == "__main__"
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
-
-toolbox = base.Toolbox()
-toolbox.register("evaluate", evaluate,
-                 num_inputs=num_inputs, num_outputs=num_outputs,
-                 num_hidden_layers=num_hidden_layers,
-                 neurons_per_hidden_layer=neurons_per_hidden_layer,
-                 render=render, genotype_dir=None)
-
-#Initial location of distribution centre
-centroid = get_cmaes_centroid(num_genes, sys.argv[:],
-                              dir_path=dir_path, file_name=file_name)
-#print("centroid:", centroid)
-
-#Initial standard deviation of the distribution
-init_sigma = 1.0
-#Number of children to produce at each generation
-#lambda_ = 20 * num_weights
-lambda_ = 100
-
-strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
-                        lb_=g_lb, ub_=g_ub)
-
-toolbox.register("generate", strategy.generate, creator.Individual)
-toolbox.register("update", strategy.update)
 
 if __name__ == "__main__":
     main()
