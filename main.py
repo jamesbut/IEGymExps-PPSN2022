@@ -103,7 +103,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
                             NEURONS_PER_HIDDEN_LAYER, decoder=USE_DECODER,
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
 
-    env_kwargs = get_env_kwargs(env_name, RANDOMISE_HYPERPARAMETERS)
+    env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, network=network,
@@ -177,7 +177,7 @@ def indv_run(genotype_dir, env_name, render=True):
 
     #render = False
 
-    env_kwargs = get_env_kwargs(env_name, randomise=False)
+    env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS)
 
     network = NeuralNetwork(genotype_dir=genotype_dir)
     rewards = evaluate(network=network,

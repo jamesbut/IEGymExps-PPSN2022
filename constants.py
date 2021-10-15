@@ -27,19 +27,29 @@ RANDOMISE_HYPERPARAMETERS = False
 '''
 Environment constants
 '''
-#ENV_NAME = 'BipedalWalker-v3'
-#ENV_NAME = 'HalfCheetah-v2'
-#ENV_NAME = 'LunarLanderContinuous-v2'
-#ENV_NAME = 'HumanoidPyBulletEnv-v0'
-#ENV_NAME = 'HalfCheetahPyBulletEnv-v0'
-#ENV_NAME = 'InvertedDoublePendulum-v2'
+
+'''
+ENV_NAME = 'BipedalWalker-v3'
+DOMAIN_PARAMETERS = [4.75]
+
+ENV_NAME = 'HalfCheetah-v2'
+ENV_NAME = 'LunarLanderContinuous-v2'
+ENV_NAME = 'HumanoidPyBulletEnv-v0'
+ENV_NAME = 'HalfCheetahPyBulletEnv-v0'
+ENV_NAME = 'InvertedDoublePendulum-v2'
+'''
+
 ENV_NAME = 'MountainCarContinuous-v0'
+COMPLETION_FITNESS = 2.15
+#Engine powers
+#DOMAIN_PARAMETERS = [0.0010]
+DOMAIN_PARAMETERS = [0.0010, 0.001001]
+#DOMAIN_PARAMETERS = [0.0008, 0.0012, 0.0016]
+
+#COMPLETION_FITNESS = None
 
 if 'PyBulletEnv' in ENV_NAME:
     import pybulletgym
-
-#COMPLETION_FITNESS = None
-COMPLETION_FITNESS = 2.15
 
 
 '''

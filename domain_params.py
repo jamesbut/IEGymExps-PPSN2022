@@ -1,17 +1,9 @@
 import numpy as np
 import random
+from constants import DOMAIN_PARAMETERS
 
-def get_kwarg_values(env_name):
-    if env_name == 'BipedalWalkerv3':
-        return 4.75
-    elif env_name == 'MountainCarContinuous-v0':
-        #return [0.0008, 0.0012, 0.0016]
-        #return [0.0008, 0.0010, 0.0012, 0.0014, 0.0016]
-        #return [0.0010, 0.001001]
-        return [0.0010]
-
-#Get env kwargs for particular environment
-def get_env_kwargs(env_name, randomise=False, domain_params=None):
+#Get list of env kwargs, one for each organism trial
+def get_env_kwargs(env_name, domain_params, randomise=False):
 
     if randomise:
 
@@ -41,28 +33,17 @@ def get_env_kwargs(env_name, randomise=False, domain_params=None):
     else:
 
         if env_name == 'BipedalWalker-v3':
-            env_kwargs = {
-                #'speed_knee' : 6.
-                'speed_knee' : 4.75
-            }
-
+            param_string = 'speed_knee'
         elif env_name == 'MountainCarContinuous-v0':
-            #Create list of env kwargs for different trials for the same organism
-            if domain_params is not None:
-                env_kwarg_vals = domain_params
-            else:
-                env_kwarg_vals = get_kwarg_values(env_name)
+            param_string = 'power'
 
-            env_kwargs = []
-            for val in env_kwarg_vals:
-                env_kwargs.append(
-                    {
-                        'power' : val
-                    }
-                )
-
-        else:
-            env_kwargs = None
+        env_kwargs = []
+        for p in domain_params:
+            env_kwargs.append(
+                {
+                    param_string : p
+                }
+            )
 
     return env_kwargs
 
