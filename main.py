@@ -12,6 +12,7 @@ from formatting import *
 from domain_params import *
 from model_training import *
 from evo_utils import get_cmaes_centroid
+from constants import *
 
 #Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -98,31 +99,15 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
 
     num_inputs = len(state)
     num_outputs = len(dummy_env.action_space.high)
-    num_hidden_layers = 0
-    neurons_per_hidden_layer = 0
-    bias=False
+    network = NeuralNetwork(num_inputs, num_outputs, NUM_HIDDEN_LAYERS,
+                            NEURONS_PER_HIDDEN_LAYER, decoder=USE_DECODER,
+                            bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
 
-    #Weight bounds
-    w_lb = [-10., -10.]
-    w_ub = [10., 120.]
-    #Enforce the weight bounds
-    #If this is turned off the weight bounds are not applied
-    enforce_wb = True
-    #If this is turned off the genome is not saved if weight bounds are exceeded
-    save_if_wb_exceeded = True
-
-    render = False
-    use_decoder = False
-    randomise_hyperparams = False
-
-    network = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                            neurons_per_hidden_layer, decoder=use_decoder,
-                            bias=bias, w_lb=w_lb, w_ub=w_ub, enforce_wb=enforce_wb)
-    env_kwargs = get_env_kwargs(env_name, randomise_hyperparams)
+    env_kwargs = get_env_kwargs(env_name, RANDOMISE_HYPERPARAMETERS)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, network=network,
-                     env_name=env_name, env_kwargs=env_kwargs, render=render,
+                     env_name=env_name, env_kwargs=env_kwargs, render=RENDER,
                      avg_fitnesses=True)
 
     domain_params = get_domain_params(env_kwargs, env_name)
@@ -135,19 +120,9 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
 
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                                   dir_path=dir_path, file_name=file_name)
-    #Initial standard deviation of the distribution
-    init_sigma = 1.0
-    #Number of children to produce at each generation
-    #lambda_ = 20 * num_weights
-    lambda_ = 100
-    num_gens = 100
 
-    #Gene bounds
-    g_lb = [-10., -10.]
-    g_ub = [10., 120.]
-
-    strategy = cma.Strategy(centroid=centroid, sigma=init_sigma, lambda_=lambda_,
-                            lb_=g_lb, ub_=g_ub)
+    strategy = cma.Strategy(centroid=centroid, sigma=INIT_SIGMA, lambda_=LAMBDA,
+                            lb_=G_LB, ub_=G_UB)
 
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
@@ -155,18 +130,15 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
     '''
     Define execution and logs
     '''
-
     #np.random.seed(108)
 
-    parallelise = True
-    if parallelise:
+    if PARALLELISE:
         import multiprocessing
 
         pool = multiprocessing.Pool()
         toolbox.register("map", pool.map)
 
-    num_genomes_in_hof = 1
-    hof = evo_utils.HallOfFamePriorityYoungest(num_genomes_in_hof)
+    hof = tools.HallOfFame(maxsize=1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("std", np.std)
@@ -176,31 +148,28 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
     '''
     Run evolutionary algorithm
     '''
-    population, logbook, avg_fitnesses, best_fitnesses, complete = \
-        evo_utils.eaGenerateUpdate(toolbox, ngen=num_gens, stats=stats, halloffame=hof,
-                                   completion_fitness=completion_fitness)
-
+    population, logbook, complete = evo_utils.eaGenerateUpdate(
+            toolbox, ngen=NUM_GENS, stats=stats,
+            halloffame=hof, completion_fitness=completion_fitness)
 
     '''
     Write results to file
     '''
     run_path = exp_dir_path + str(uuid.uuid4()) + '/'
 
-    save_winners_only = False
-
-    if ((save_winners_only is False) or
-       (save_winners_only is True and complete)):
+    if ((SAVE_WINNERS_ONLY is False) or
+       (SAVE_WINNERS_ONLY is True and complete)):
         network.set_genotype(hof[0])
         g_saved = network.save_genotype(run_path, file_name,
-                                        hof[0].fitness.getValues()[0],
-                                        domain_params, save_if_wb_exceeded)
+                                        hof[0].fitness.values[0],
+                                        domain_params, SAVE_IF_WB_EXCEEDED)
 
         #Save population statistics
         if g_saved:
-            dump_data(avg_fitnesses, run_path, 'mean_fitnesses')
-            dump_data(best_fitnesses, run_path, 'best_fitnesses')
+            dump_data(logbook.select('avg'), run_path, 'mean_fitnesses')
+            dump_data(logbook.select('max'), run_path, 'best_fitnesses')
 
-    if parallelise:
+    if PARALLELISE:
         pool.close()
 
 
@@ -238,39 +207,17 @@ def main():
         train_gan(sys.argv[1])
         return
 
-    '''
-    Define environment
-    '''
-
-    #env_name = 'BipedalWalker-v3'
-    #env_name = 'HalfCheetah-v2'
-    #env_name = 'LunarLanderContinuous-v2'
-    #env_name = 'HumanoidPyBulletEnv-v0'
-    #env_name = 'HalfCheetahPyBulletEnv-v0'
-    #env_name = 'InvertedDoublePendulum-v2'
-    env_name = 'MountainCarContinuous-v0'
-
-    if 'PyBulletEnv' in env_name:
-        import pybulletgym
-
-    #completion_fitness = None
-    completion_fitness = 2.15
-
-    dir_path = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
-    file_name = "best_winner_so_far"
-
     #Create experiment path
-    exp_dir_path = dir_path + 'python_data'
+    exp_dir_path = DATA_DIR_PATH + 'python_data'
     exp_dir_name = create_exp_dir_name(exp_dir_path)
     exp_dir_path += '/' + exp_dir_name + '/'
 
     if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
 
-        num_runs = 2
-
-        for i in range(num_runs):
+        for i in range(NUM_EVO_RUNS):
             print("Evo run: ", i)
-            evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name)
+            evo_run(ENV_NAME, COMPLETION_FITNESS,
+                    DATA_DIR_PATH, exp_dir_path, WINNER_FILE_NAME)
 
     else:
 
@@ -278,9 +225,9 @@ def main():
 
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
-        indv_full_path = dir_path + '/' + indv_dir + "/" + file_name
+        indv_full_path = DATA_DIR_PATH + '/' + indv_dir + "/" + WINNER_FILE_NAME
 
-        indv_run(indv_full_path, env_name)
+        indv_run(indv_full_path, ENV_NAME)
 
 
 #Some bug in DEAP means that I have to create individual before if __name__ == "__main__"

@@ -1,50 +1,13 @@
 from deap import tools
 
-#This class extends the DEAP HallOfFame in order to give priority to the YOUNGEST
-#winning genotypes. In The Hunting of The Plark, the sparse reward means that all the
-#winners have a reward of 1, I therefore think the most recent genotypes will be more
-#generalisable and of more interest.
-class HallOfFamePriorityYoungest(tools.HallOfFame):
-
-    def update(self, population):
-        """Update the hall of fame with the *population* by replacing the
-        worst individuals in it by the best individuals present in
-        *population* (if they are better). The size of the hall of fame is
-        kept constant.
-        :param population: A list of individual with a fitness attribute to
-                           update the hall of fame with.
-        """
-        for ind in population:
-            if len(self) == 0 and self.maxsize !=0:
-                # Working on an empty hall of fame is problematic for the
-                # "for else"
-                self.insert(population[0])
-                continue
-            if ind.fitness >= self[-1].fitness or len(self) < self.maxsize:
-                for hofer in self:
-                    # Loop through the hall of fame to check for any
-                    # similar individual
-                    if self.similar(ind, hofer):
-                        break
-                else:
-                    # The individual is unique and strictly better than
-                    # the worst
-                    if len(self) >= self.maxsize:
-                        self.remove(-1)
-                    self.insert(ind)
-
 """
-This function is just a copy of the function in DEAP but it dumps the best genotype
-in the hall of fame every n generations
+This function is just a copy of the function in DEAP but it returns if some
+completion fitness has been met - this prevents unnecessary computation
 """
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                      verbose=__debug__, completion_fitness=None):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-    avg_fitnesses = []
-    best_fitness_so_far = None
-    best_fitnesses = []
 
     for gen in range(ngen):
         # Generate a new population
@@ -65,27 +28,15 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         if verbose:
             print(logbook.stream)
 
-        #Log statistics
-        avg_fitnesses.append(record['avg'])
-
-        #Calculate best fitness so far
-        if best_fitness_so_far is None:
-            best_fitness_so_far = record['max']
-        else:
-            if record['max'] > best_fitness_so_far:
-                best_fitness_so_far = record['max']
-        best_fitnesses.append(best_fitness_so_far)
-
         #End if completion fitness has been achieved
         if completion_fitness is not None:
-            if best_fitness_so_far >= completion_fitness:
-                print("WINNER FOUND!   fitness:", best_fitness_so_far)
-                return population, logbook, avg_fitnesses, best_fitnesses, True
+            if halloffame[0].fitness.values[0] >= completion_fitness:
+                print("WINNER FOUND!")
+                return population, logbook, True
 
     print("No winner found :(")
 
-    return population, logbook, avg_fitnesses, best_fitnesses, False
-
+    return population, logbook, False
 
 
 #This function parses args for '-cmaes_centroid' and then takes the next argument
@@ -116,4 +67,3 @@ def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
 
     else:
         return [0.] * num_genes
-
