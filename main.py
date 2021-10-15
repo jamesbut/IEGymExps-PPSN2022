@@ -89,7 +89,7 @@ def evaluate(genome=None, network=None,
         return rewards
 
 
-def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
+def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
 
     '''
     Define neural controller according to environment
@@ -160,7 +160,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path, file_name):
     if ((SAVE_WINNERS_ONLY is False) or
        (SAVE_WINNERS_ONLY is True and complete)):
         network.set_genotype(hof[0])
-        g_saved = network.save_genotype(run_path, file_name,
+        g_saved = network.save_genotype(run_path, 'best_winner_so_far',
                                         hof[0].fitness.values[0],
                                         domain_params, SAVE_IF_WB_EXCEEDED)
 
@@ -179,7 +179,7 @@ def indv_run(genotype_dir, env_name, render=True):
 
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS)
 
-    network = NeuralNetwork(genotype_dir=genotype_dir)
+    network = NeuralNetwork(genotype_dir=genotype_dir + '/best_winner_so_far')
     rewards = evaluate(network=network,
                        env_name=env_name, env_kwargs=env_kwargs, render=render,
                        verbosity=True)
@@ -225,9 +225,9 @@ def main():
 
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
-        indv_full_path = DATA_DIR_PATH + '/' + indv_dir + "/" + WINNER_FILE_NAME
+        indv_path = DATA_DIR_PATH + '/' + indv_dir
 
-        indv_run(indv_full_path, ENV_NAME)
+        indv_run(indv_path, ENV_NAME)
 
 
 #Some bug in DEAP means that I have to create individual before if __name__ == "__main__"

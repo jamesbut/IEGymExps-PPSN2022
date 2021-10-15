@@ -1,21 +1,8 @@
-#The decoder trained via the C++ code
-#It is imported here and used as an indirect encoding
-
 import torch
 
 class Decoder:
 
-    #def __init__(self, num_inputs, num_outputs, num_hidden_layers,
-    #             neurons_per_hidden_layer, file_name):
     def __init__(self, file_name):
-
-        '''
-        self.num_inputs = num_inputs
-        self.num_outputs = num_outputs
-        self.num_hidden_layers = num_hidden_layers
-        self.neurons_per_hidden_layer = neurons_per_hidden_layer
-        '''
-
 
         #Read decoder
         self.decoder = torch.load(file_name)

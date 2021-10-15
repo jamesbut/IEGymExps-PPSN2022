@@ -23,7 +23,9 @@ class NeuralNetwork():
         self.w_ub = w_ub
         self.enforce_wb = enforce_wb
 
-        #Read genotype and metadata from files
+        self.decoder = None
+
+        #Read genotype, metadata and decoder from files
         if genotype_dir is not None:
             genotype = self._read_genotype(genotype_dir)
             metadata = self._read_metadata(genotype_dir)
@@ -34,11 +36,13 @@ class NeuralNetwork():
             self.neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
             self.bias = metadata['bias']
 
+            #Read decoder
+            #self.decoder = torch.load('')
+
         #Build neural net
         self._build_nn(self.bias)
 
         #Decoder is used in set_genotype
-        self.decoder = None
         if decoder:
             self.decoder = Decoder("generator.pt")
 
@@ -263,4 +267,3 @@ class NeuralNetwork():
             metadata = json.load(f)
 
         return metadata
-
