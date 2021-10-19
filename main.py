@@ -109,6 +109,9 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
                             NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
 
+    print(network.__dict__)
+    quit()
+
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
 
     toolbox = base.Toolbox()

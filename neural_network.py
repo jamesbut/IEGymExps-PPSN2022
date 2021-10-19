@@ -13,39 +13,39 @@ class NeuralNetwork():
                  genotype=None, genotype_path=None, decoder=None,
                  bias=True, w_lb=None, w_ub=None, enforce_wb=True):
 
-        self.num_inputs = num_inputs
-        self.num_outputs = num_outputs
-        self.num_hidden_layers = num_hidden_layers
-        self.neurons_per_hidden_layer = neurons_per_hidden_layer
-        self.bias = bias
+        self._num_inputs = num_inputs
+        self._num_outputs = num_outputs
+        self._num_hidden_layers = num_hidden_layers
+        self._neurons_per_hidden_layer = neurons_per_hidden_layer
+        self._bias = bias
 
-        self.w_lb = w_lb
-        self.w_ub = w_ub
-        self.enforce_wb = enforce_wb
+        self._w_lb = w_lb
+        self._w_ub = w_ub
+        self._enforce_wb = enforce_wb
 
-        self.decoder = decoder
+        self._decoder = decoder
 
         #Read genotype, metadata and decoder from files
         if genotype_path is not None:
             genotype = self._read_genotype(genotype_path)
             metadata = self._read_metadata(genotype_path)
 
-            self.num_inputs = metadata['num_inputs']
-            self.num_outputs = metadata['num_outputs']
-            self.num_hidden_layers = metadata['num_hidden_layers']
-            self.neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
-            self.bias = metadata['bias']
+            self._num_inputs = metadata['num_inputs']
+            self._num_outputs = metadata['num_outputs']
+            self._num_hidden_layers = metadata['num_hidden_layers']
+            self._neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
+            self._bias = metadata['bias']
 
             #Read decoder if there is one
             decoder_path = genotype_path + '_decoder.pt'
             try:
-                self.decoder = torch.load(decoder_path)
+                self._decoder = torch.load(decoder_path)
             except IOError:
                 #No problem if there is not a decoder
                 pass
 
         #Build neural net
-        self._build_nn(self.bias)
+        self._build_nn()
 
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
@@ -55,58 +55,58 @@ class NeuralNetwork():
             self.set_genotype(self.get_weights())
 
 
-    def _build_nn(self, bias=True):
+    def _build_nn(self):
 
         layers = []
-        if self.num_hidden_layers == 0:
-            layers.append(torch.nn.Linear(self.num_inputs, self.num_outputs,
-                                          bias=bias))
+        if self._num_hidden_layers == 0:
+            layers.append(torch.nn.Linear(self._num_inputs, self._num_outputs,
+                                          bias=self._bias))
 
         else:
-            layers.append(torch.nn.Linear(self.num_inputs,
-                                          self.neurons_per_hidden_layer,
-                                          bias=bias))
+            layers.append(torch.nn.Linear(self._num_inputs,
+                                          self._neurons_per_hidden_layer,
+                                          bias=self._bias))
             #Hidden layers have ReLU activation
             layers.append(torch.nn.ReLU())
 
-            for i in range(self.num_hidden_layers-1):
-                layers.append(torch.nn.Linear(self.neurons_per_hidden_layer,
-                                              self.neurons_per_hidden_layer,
-                                              bias=bias))
+            for i in range(self._num_hidden_layers-1):
+                layers.append(torch.nn.Linear(self._neurons_per_hidden_layer,
+                                              self._neurons_per_hidden_layer,
+                                              bias=self._bias))
                 layers.append(torch.nn.ReLU())
 
-            layers.append(torch.nn.Linear(self.neurons_per_hidden_layer,
-                                          self.num_outputs,
-                                          bias=bias))
+            layers.append(torch.nn.Linear(self._neurons_per_hidden_layer,
+                                          self._num_outputs,
+                                          bias=self._bias))
 
         #Final layer goes through Sigmoid
         layers.append(torch.nn.Sigmoid())
 
-        self.nn = torch.nn.Sequential(*layers).double()
+        self._nn = torch.nn.Sequential(*layers).double()
 
     #Takes a list, passes through the network and returns a list
     def forward(self, x):
         x = torch.tensor(x, dtype=torch.float64)
-        net_out = self.nn.forward(x)
+        net_out = self._nn.forward(x)
         return net_out.tolist()
 
     #Returns the number of weights
     def get_num_weights(self):
         num_weights = 0
-        for layer in self.nn:
+        for layer in self._nn:
             for params in layer.parameters():
                 num_weights += params.numel()
         return num_weights
 
     #Returns size of genotype needed for this NN
     def get_genotype_size(self):
-        if self.decoder is None:
+        if self._decoder is None:
             return self.get_num_weights()
         else:
-            return self.decoder.get_num_inputs()
+            return self._decoder.get_num_inputs()
 
     def print_weights(self):
-        for layer in self.nn:
+        for layer in self._nn:
             for params in layer.parameters():
                 print(params)
 
@@ -125,11 +125,11 @@ class NeuralNetwork():
                                                                  num_weights_required)
 
         #Bound weights
-        if ((self.w_lb is not None) or (self.w_ub is not None)) and self.enforce_wb:
-            new_weights = self._bound_weights(new_weights, self.w_lb, self.w_ub)
+        if ((self._w_lb is not None) or (self._w_ub is not None)) and self._enforce_wb:
+            new_weights = self._bound_weights(new_weights, self._w_lb, self._w_ub)
 
         weight_index = 0
-        for layer in self.nn:
+        for layer in self._nn:
             for params in layer.parameters():
 
                 #Slice out new weights
@@ -144,10 +144,10 @@ class NeuralNetwork():
     #which just sets the NN weights
     def set_genotype(self, genotype):
 
-        self.genotype = genotype
+        self._genotype = genotype
 
         if self.decoder is not None:
-            weights = self.decoder.decode(genotype)
+            weights = self._decoder.decode(genotype)
             self.set_weights(weights)
         else:
             self.set_weights(genotype)
@@ -194,7 +194,7 @@ class NeuralNetwork():
     #Return weights as a 1d list
     def get_weights(self):
         weights = []
-        for layer in self.nn:
+        for layer in self._nn:
             for params in layer.parameters():
                 weights += params.flatten().tolist()
         return weights
@@ -205,7 +205,8 @@ class NeuralNetwork():
 
         #If bounds were exceeded do not save
         if not save_if_bounds_exceeded:
-            b_exceeded = self._bounds_exceeded(self.get_weights(), self.w_lb, self.w_ub)
+            b_exceeded = self._bounds_exceeded(self.get_weights(),
+                                               self._w_lb, self._w_ub)
             if b_exceeded:
                 return False
 
@@ -221,7 +222,7 @@ class NeuralNetwork():
             csv_writer = csv.writer(outfile)
             #Added fitness at the beginning because this is how it is
             #read in on the NeuroEvo side
-            fitness_and_genotype = [fitness] + self.genotype
+            fitness_and_genotype = [fitness] + self._genotype
             csv_writer.writerow(fitness_and_genotype)
 
             #Add domain hyperparameters on next line for cGAN
@@ -242,11 +243,11 @@ class NeuralNetwork():
 
         metadata = {}
 
-        metadata['num_inputs'] = self.num_inputs
-        metadata['num_outputs'] = self.num_outputs
-        metadata['num_hidden_layers'] = self.num_hidden_layers
-        metadata['neurons_per_hidden_layer'] = self.neurons_per_hidden_layer
-        metadata['bias'] = self.bias
+        metadata['num_inputs'] = self._num_inputs
+        metadata['num_outputs'] = self._num_outputs
+        metadata['num_hidden_layers'] = self._num_hidden_layers
+        metadata['neurons_per_hidden_layer'] = self._neurons_per_hidden_layer
+        metadata['bias'] = self._bias
 
         with open(metadata_filepath, 'w') as f:
             json.dump(metadata, f)
