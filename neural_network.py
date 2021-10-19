@@ -4,7 +4,6 @@ import csv
 import os
 import shutil
 import json
-from decoder import Decoder
 
 class NeuralNetwork():
 
@@ -37,12 +36,7 @@ class NeuralNetwork():
             self._bias = metadata['bias']
 
             #Read decoder if there is one
-            decoder_path = genotype_path + '_decoder.pt'
-            try:
-                self._decoder = torch.load(decoder_path)
-            except IOError:
-                #No problem if there is not a decoder
-                pass
+            decoder = self._read_decoder(genotype_path)
 
         #Build neural net
         self._build_nn()
@@ -84,11 +78,13 @@ class NeuralNetwork():
 
         self._nn = torch.nn.Sequential(*layers).double()
 
+
     #Takes a list, passes through the network and returns a list
     def forward(self, x):
         x = torch.tensor(x, dtype=torch.float64)
         net_out = self._nn.forward(x)
         return net_out.tolist()
+
 
     #Returns the number of weights
     @property
@@ -99,22 +95,26 @@ class NeuralNetwork():
                 total_weights += params.numel()
         return total_weights
 
+
     #Returns size of genotype needed for this NN
     @property
     def genotype_size(self):
         if self._decoder is None:
             return self.num_weights
         else:
-            return self._decoder.get_num_inputs()
+            return self._decoder.l1.in_features
+
 
     def print_weights(self):
         for layer in self._nn:
             for params in layer.parameters():
                 print(params)
 
+
     def _set_weights_err_msg(self, weights_len, num_weights_required):
         return "Trying to set {} weights to an NN that requires {} weights" \
             .format(weights_len, num_weights_required)
+
 
     #Return weights as a 1d list
     @property
@@ -124,6 +124,7 @@ class NeuralNetwork():
             for params in layer.parameters():
                 w += params.flatten().tolist()
         return w
+
 
     #Sets a list of weights
     #This also checks the new weights against a weight lower and upper bound
@@ -152,6 +153,7 @@ class NeuralNetwork():
                 params.data = torch.tensor(np.reshape(p_weights, params.size()), \
                                            dtype=torch.float64)
 
+
     @property
     def genotype(self):
         return self._genotype
@@ -164,10 +166,17 @@ class NeuralNetwork():
         self._genotype = genotype
 
         if self._decoder is not None:
-            weights = self._decoder.decode(genotype)
+            weights = self._decode(genotype)
             self.weights = weights
         else:
             self.weights = genotype
+
+
+    #Decode genotype and apply appropriate type conversions
+    def _decode(self, genotype):
+        output = self._decoder.forward(torch.Tensor(genotype))
+        return output.detach().numpy()
+
 
     #Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):
@@ -179,6 +188,7 @@ class NeuralNetwork():
         weights = np.minimum(weights, w_ub)
 
         return weights
+
 
     #Returns True if ANY weight exceeds its bound
     def _bounds_exceeded(self, weights, w_lb, w_ub):
@@ -196,6 +206,7 @@ class NeuralNetwork():
                 return True
         return False
 
+
     def _check_bounds_size(self, weights, w_lb, w_ub):
 
         #Check bounds are the same size as weights
@@ -208,9 +219,10 @@ class NeuralNetwork():
                   "same as weights upper bound length")
             sys.exit(1)
 
+
     #Return bool for success or fail
-    def save_genotype(self, dir_path, file_name, fitness, domain_params=None,
-                      save_if_bounds_exceeded=False):
+    def save(self, dir_path, file_name, fitness, domain_params=None,
+             save_if_bounds_exceeded=False):
 
         #If bounds were exceeded do not save
         if not save_if_bounds_exceeded:
@@ -241,10 +253,14 @@ class NeuralNetwork():
             #Also save phenotype if there is a decoder
             csv_writer.writerow(self.weights)
 
-        #Also save metadata
+        #Save metadata
         self._save_metadata(file_path)
 
+        #Save decoder
+        self._save_decoder(file_path)
+
         return True
+
 
     def _save_metadata(self, genotype_filepath):
         metadata_filepath = genotype_filepath + '_metadata.json'
@@ -260,6 +276,12 @@ class NeuralNetwork():
         with open(metadata_filepath, 'w') as f:
             json.dump(metadata, f)
 
+
+    def _save_decoder(self, genotype_filepath):
+        decoder_filepath = genotype_filepath + '_decoder.pt'
+        torch.save(self._decoder, decoder_filepath)
+
+
     def _read_genotype(self, genotype_filepath):
         with open(genotype_filepath, 'r') as genotype_file:
             reader = csv.reader(genotype_file)
@@ -270,6 +292,7 @@ class NeuralNetwork():
 
         return genotype
 
+
     def _read_metadata(self, genotype_filepath):
         metadata_filepath = genotype_filepath + '_metadata.json'
 
@@ -277,3 +300,12 @@ class NeuralNetwork():
             metadata = json.load(f)
 
         return metadata
+
+
+    def _read_decoder(self, genotype_filepath):
+        decoder_path = genotype_filepath + '_decoder.pt'
+        try:
+            self._decoder = torch.load(decoder_path)
+        except IOError:
+            #No problem if there is not a decoder
+            pass

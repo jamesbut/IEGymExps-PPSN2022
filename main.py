@@ -1,5 +1,4 @@
 from neural_network import NeuralNetwork
-from decoder import Decoder
 import gym
 from deap import creator, base, cma, tools
 import evo_utils
@@ -101,10 +100,11 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     num_outputs = len(dummy_env.action_space.high)
     decoder = None
     if USE_DECODER:
+        decoder_path = 'generator.pt'
         try:
-            decoder = torch.load(dir_path + 'generator.py')
+            decoder = torch.load(decoder_path)
         except IOError:
-            print("Could not find requested decoder!!")
+            print("Could not find requested decoder!!:", decoder_path)
     network = NeuralNetwork(num_inputs, num_outputs, NUM_HIDDEN_LAYERS,
                             NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
@@ -166,9 +166,9 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     if ((SAVE_WINNERS_ONLY is False) or
        (SAVE_WINNERS_ONLY is True and complete)):
         network.genotype = hof[0]
-        g_saved = network.save_genotype(run_path, WINNER_FILE_NAME,
-                                        hof[0].fitness.values[0],
-                                        domain_params, SAVE_IF_WB_EXCEEDED)
+        g_saved = network.save(run_path, WINNER_FILE_NAME,
+                               hof[0].fitness.values[0],
+                               domain_params, SAVE_IF_WB_EXCEEDED)
 
         #Save population statistics
         if g_saved:

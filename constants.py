@@ -42,8 +42,8 @@ ENV_NAME = 'InvertedDoublePendulum-v2'
 ENV_NAME = 'MountainCarContinuous-v0'
 COMPLETION_FITNESS = 2.15
 #Engine powers
-#DOMAIN_PARAMETERS = [0.0010]
-DOMAIN_PARAMETERS = [0.0010, 0.001001]
+DOMAIN_PARAMETERS = [0.0010]
+#DOMAIN_PARAMETERS = [0.0010, 0.001001]
 #DOMAIN_PARAMETERS = [0.0008, 0.0012, 0.0016]
 
 #COMPLETION_FITNESS = None
@@ -61,7 +61,7 @@ NEURONS_PER_HIDDEN_LAYER = 0
 BIAS = False
 
 #Evolve solution using indirect encoding
-USE_DECODER = False
+USE_DECODER = True
 
 #Weight bounds
 W_LB = [-10., -10.]
