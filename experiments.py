@@ -5,7 +5,8 @@ import csv
 import numpy as np
 from data import read_data, get_sub_folders
 from domain_params import get_env_kwargs
-from main import env_name, indv_run
+from main import indv_run
+from constants import ENV_NAME
 
 np.set_printoptions(suppress=True)
 
@@ -29,14 +30,13 @@ def find_trained_solutions(train_dirs):
     return train_paths, train_params
 
 
-def test_solutions(train_paths, train_params, test_params):
+def test_solutions(train_paths, train_params, test_params, render):
 
     #Do individual runs on test parameters
-    for t in zip(train_paths, train_params):
-        print('Testing solution trained on:', t[1])
+    for train_info in zip(train_paths, train_params):
+        print('Testing solution trained on:', train_info[1])
 
-        env_kwargs = get_env_kwargs(env_name, domain_params=test_params)
-        reward = indv_run(t[0], env_kwargs)
+        rewards = indv_run(train_info[0], ENV_NAME, test_params, render=False)
 
 
 
@@ -56,7 +56,7 @@ def train_test_table(argv, test_params):
     elif len(argv) == 1:
         pass
 
-    test_solutions(train_paths, train_params, test_params)
+    test_solutions(train_paths, train_params, test_params, render=False)
 
 if __name__ == "__main__":
 

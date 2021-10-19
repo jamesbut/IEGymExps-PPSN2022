@@ -179,13 +179,13 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
         pool.close()
 
 
-def indv_run(genotype_dir, env_name, render=True):
+def indv_run(genotype_path, env_name, domain_parameters, render=True):
 
     #render = False
 
-    env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS)
+    env_kwargs = get_env_kwargs(env_name, domain_parameters)
 
-    network = NeuralNetwork(genotype_path=genotype_dir + '/' + WINNER_FILE_NAME)
+    network = NeuralNetwork(genotype_path=genotype_path)
     rewards = evaluate(network=network,
                        env_name=env_name, env_kwargs=env_kwargs, render=render,
                        verbosity=True)
@@ -230,9 +230,9 @@ def main():
 
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
-        indv_path = DATA_DIR_PATH + indv_dir
+        indv_path = DATA_DIR_PATH + indv_dir + '/' + WINNER_FILE_NAME
 
-        indv_run(indv_path, ENV_NAME)
+        indv_run(indv_path, ENV_NAME, DOMAIN_PARAMETERS)
 
 
 #Some bug in DEAP means that I have to create individual before if __name__ == "__main__"
