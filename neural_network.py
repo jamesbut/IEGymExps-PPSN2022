@@ -10,7 +10,7 @@ class NeuralNetwork():
 
     def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
-                 genotype=None, genotype_dir=None, decoder=False,
+                 genotype=None, genotype_path=None, decoder=None,
                  bias=True, w_lb=None, w_ub=None, enforce_wb=True):
 
         self.num_inputs = num_inputs
@@ -23,12 +23,12 @@ class NeuralNetwork():
         self.w_ub = w_ub
         self.enforce_wb = enforce_wb
 
-        self.decoder = None
+        self.decoder = decoder
 
         #Read genotype, metadata and decoder from files
-        if genotype_dir is not None:
-            genotype = self._read_genotype(genotype_dir)
-            metadata = self._read_metadata(genotype_dir)
+        if genotype_path is not None:
+            genotype = self._read_genotype(genotype_path)
+            metadata = self._read_metadata(genotype_path)
 
             self.num_inputs = metadata['num_inputs']
             self.num_outputs = metadata['num_outputs']
@@ -36,15 +36,16 @@ class NeuralNetwork():
             self.neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
             self.bias = metadata['bias']
 
-            #Read decoder
-            #self.decoder = torch.load('')
+            #Read decoder if there is one
+            decoder_path = genotype_path + '_decoder.pt'
+            try:
+                self.decoder = torch.load(decoder_path)
+            except IOError:
+                #No problem if there is not a decoder
+                pass
 
         #Build neural net
         self._build_nn(self.bias)
-
-        #Decoder is used in set_genotype
-        if decoder:
-            self.decoder = Decoder("generator.pt")
 
         #Set genotype as weights
         #If no genotype is given, torch generates random weights

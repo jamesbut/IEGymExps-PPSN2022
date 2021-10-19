@@ -77,7 +77,8 @@ ENFORCE_WB = False
 Logging constants
 '''
 
-DATA_DIR_PATH = "../IndirectEncodingsExperiments/lib/NeuroEvo/data/"
+DATA_DIR_PATH = '../IndirectEncodingsExperiments/lib/NeuroEvo/data/'
+WINNER_FILE_NAME = 'best_winner_so_far'
 
 #If this is turned off the genome is not saved if weight bounds are exceeded
 SAVE_IF_WB_EXCEEDED = True

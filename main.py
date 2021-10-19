@@ -99,8 +99,14 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
 
     num_inputs = len(state)
     num_outputs = len(dummy_env.action_space.high)
+    decoder = None
+    if USE_DECODER:
+        try:
+            decoder = torch.load(dir_path + 'generator.py')
+        except IOError:
+            print("Could not find requested decoder!!")
     network = NeuralNetwork(num_inputs, num_outputs, NUM_HIDDEN_LAYERS,
-                            NEURONS_PER_HIDDEN_LAYER, decoder=USE_DECODER,
+                            NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
 
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
@@ -119,7 +125,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     num_genes = network.get_genotype_size()
 
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
-                                  dir_path=dir_path, file_name=file_name)
+                                  dir_path=dir_path, file_name=WINNER_FILE_NAME)
 
     strategy = cma.Strategy(centroid=centroid, sigma=INIT_SIGMA, lambda_=LAMBDA,
                             lb_=G_LB, ub_=G_UB)
@@ -160,7 +166,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     if ((SAVE_WINNERS_ONLY is False) or
        (SAVE_WINNERS_ONLY is True and complete)):
         network.set_genotype(hof[0])
-        g_saved = network.save_genotype(run_path, 'best_winner_so_far',
+        g_saved = network.save_genotype(run_path, WINNER_FILE_NAME,
                                         hof[0].fitness.values[0],
                                         domain_params, SAVE_IF_WB_EXCEEDED)
 
@@ -179,7 +185,7 @@ def indv_run(genotype_dir, env_name, render=True):
 
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS)
 
-    network = NeuralNetwork(genotype_dir=genotype_dir + '/best_winner_so_far')
+    network = NeuralNetwork(genotype_path=genotype_dir + '/' + WINNER_FILE_NAME)
     rewards = evaluate(network=network,
                        env_name=env_name, env_kwargs=env_kwargs, render=render,
                        verbosity=True)
@@ -216,8 +222,7 @@ def main():
 
         for i in range(NUM_EVO_RUNS):
             print("Evo run: ", i)
-            evo_run(ENV_NAME, COMPLETION_FITNESS,
-                    DATA_DIR_PATH, exp_dir_path, WINNER_FILE_NAME)
+            evo_run(ENV_NAME, COMPLETION_FITNESS, DATA_DIR_PATH, exp_dir_path)
 
     else:
 
