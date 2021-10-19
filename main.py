@@ -70,7 +70,7 @@ def evaluate(genome=None, network=None,
              verbosity=False, avg_fitnesses=False):
 
     if genome is not None:
-        network.set_genotype(genome)
+        network.genotype = genome
 
     rewards = []
 
@@ -109,9 +109,6 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
                             NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
 
-    print(network.__dict__)
-    quit()
-
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
 
     toolbox = base.Toolbox()
@@ -125,7 +122,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     '''
     Define evolutionary algorithm
     '''
-    num_genes = network.get_genotype_size()
+    num_genes = network.genotype_size
 
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                                   dir_path=dir_path, file_name=WINNER_FILE_NAME)
@@ -168,7 +165,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
 
     if ((SAVE_WINNERS_ONLY is False) or
        (SAVE_WINNERS_ONLY is True and complete)):
-        network.set_genotype(hof[0])
+        network.genotype = hof[0]
         g_saved = network.save_genotype(run_path, WINNER_FILE_NAME,
                                         hof[0].fitness.values[0],
                                         domain_params, SAVE_IF_WB_EXCEEDED)
@@ -233,7 +230,7 @@ def main():
 
         #Genome directory comes from the command line
         indv_dir = sys.argv[1]
-        indv_path = DATA_DIR_PATH + '/' + indv_dir
+        indv_path = DATA_DIR_PATH + indv_dir
 
         indv_run(indv_path, ENV_NAME)
 

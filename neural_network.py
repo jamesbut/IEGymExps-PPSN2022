@@ -50,9 +50,9 @@ class NeuralNetwork():
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
         if genotype is not None:
-            self.set_genotype(genotype)
+            self.genotype = genotype
         else:
-            self.set_genotype(self.get_weights())
+            self.genotype = self.weights
 
 
     def _build_nn(self):
@@ -91,17 +91,19 @@ class NeuralNetwork():
         return net_out.tolist()
 
     #Returns the number of weights
-    def get_num_weights(self):
-        num_weights = 0
+    @property
+    def num_weights(self):
+        total_weights = 0
         for layer in self._nn:
             for params in layer.parameters():
-                num_weights += params.numel()
-        return num_weights
+                total_weights += params.numel()
+        return total_weights
 
     #Returns size of genotype needed for this NN
-    def get_genotype_size(self):
+    @property
+    def genotype_size(self):
         if self._decoder is None:
-            return self.get_num_weights()
+            return self.num_weights
         else:
             return self._decoder.get_num_inputs()
 
@@ -114,12 +116,22 @@ class NeuralNetwork():
         return "Trying to set {} weights to an NN that requires {} weights" \
             .format(weights_len, num_weights_required)
 
+    #Return weights as a 1d list
+    @property
+    def weights(self):
+        w = []
+        for layer in self._nn:
+            for params in layer.parameters():
+                w += params.flatten().tolist()
+        return w
+
     #Sets a list of weights
     #This also checks the new weights against a weight lower and upper bound
-    def set_weights(self, new_weights):
+    @weights.setter
+    def weights(self, new_weights):
 
         #Check new weights is of correct size
-        num_weights_required = self.get_num_weights()
+        num_weights_required = self.num_weights
         assert num_weights_required == len(new_weights), \
                                        self._set_weights_err_msg(len(new_weights), \
                                                                  num_weights_required)
@@ -140,17 +152,22 @@ class NeuralNetwork():
                 params.data = torch.tensor(np.reshape(p_weights, params.size()), \
                                            dtype=torch.float64)
 
+    @property
+    def genotype(self):
+        return self._genotype
+
     #Set genotype - this uses a decoder if there is one as opposed to set_weights
     #which just sets the NN weights
-    def set_genotype(self, genotype):
+    @genotype.setter
+    def genotype(self, genotype):
 
         self._genotype = genotype
 
-        if self.decoder is not None:
+        if self._decoder is not None:
             weights = self._decoder.decode(genotype)
-            self.set_weights(weights)
+            self.weights = weights
         else:
-            self.set_weights(genotype)
+            self.weights = genotype
 
     #Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):
@@ -191,14 +208,6 @@ class NeuralNetwork():
                   "same as weights upper bound length")
             sys.exit(1)
 
-    #Return weights as a 1d list
-    def get_weights(self):
-        weights = []
-        for layer in self._nn:
-            for params in layer.parameters():
-                weights += params.flatten().tolist()
-        return weights
-
     #Return bool for success or fail
     def save_genotype(self, dir_path, file_name, fitness, domain_params=None,
                       save_if_bounds_exceeded=False):
@@ -230,8 +239,7 @@ class NeuralNetwork():
                 csv_writer.writerow(domain_params)
 
             #Also save phenotype if there is a decoder
-            #if self.decoder is not None:
-            csv_writer.writerow(self.get_weights())
+            csv_writer.writerow(self.weights)
 
         #Also save metadata
         self._save_metadata(file_path)
