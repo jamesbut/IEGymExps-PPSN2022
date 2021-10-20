@@ -7,6 +7,7 @@ from data import read_data, get_sub_folders
 from domain_params import get_env_kwargs
 from main import indv_run
 from constants import ENV_NAME
+from formatting import *
 
 np.set_printoptions(suppress=True)
 
@@ -25,19 +26,23 @@ def find_trained_solutions(train_dirs):
         #fitness
         arg_fit_max = np.argmax(fitnesses)
         train_paths.append(paths[arg_fit_max])
-        train_params.append(params[arg_fit_max])
+        train_params.append(params[arg_fit_max].tolist())
 
     return train_paths, train_params
 
 
 def test_solutions(train_paths, train_params, test_params, render):
 
+    rewards = []
+
     #Do individual runs on test parameters
     for train_info in zip(train_paths, train_params):
         print('Testing solution trained on:', train_info[1])
 
-        rewards = indv_run(train_info[0], ENV_NAME, test_params, render=False)
+        train_rewards = indv_run(train_info[0], ENV_NAME, test_params, render=False)
+        rewards.append(train_rewards)
 
+    return rewards
 
 
 '''
@@ -56,7 +61,14 @@ def train_test_table(argv, test_params):
     elif len(argv) == 1:
         pass
 
-    test_solutions(train_paths, train_params, test_params, render=False)
+    #Test solutions
+    rewards = test_solutions(train_paths, train_params, test_params, render=False)
+
+    #Format results in table
+    test_params_str = list(map(str, test_params))
+    train_params_str = list(map(list_to_string, train_params))
+    format_data_table(rewards, train_params_str, test_params_str)
+
 
 if __name__ == "__main__":
 
