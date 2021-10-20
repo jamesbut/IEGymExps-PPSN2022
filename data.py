@@ -138,3 +138,25 @@ def create_synthetic_data(code_size, num_data_points=500):
                 means[i][j] = -10.
 
     return means + np.randn(500, 2)
+
+
+###############################
+# Pandas data frame functions #
+###############################
+import pandas as pd
+
+#Computes data frame means and adds them to the data frame
+def compute_df_means(df):
+
+    #Add row means
+    df['mean'] = df.mean(axis=1)
+
+    #Add columns means
+    col_means = dict(list(zip(df.columns, df[:].mean())))
+    new_row = pd.Series(data=col_means, name='mean')
+    df = df.append(new_row, ignore_index=False)
+
+    return df
+
+
+

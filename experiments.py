@@ -67,7 +67,8 @@ def train_test_table(argv, test_params):
     #Format results in table
     test_params_str = list(map(str, test_params))
     train_params_str = list(map(list_to_string, train_params))
-    format_data_table(rewards, train_params_str, test_params_str)
+    format_data_table(rewards, train_params_str, test_params_str,
+                      row_axis='train', column_axis='test')
 
 
 if __name__ == "__main__":
