@@ -8,8 +8,12 @@ from domain_params import get_env_kwargs
 from main import indv_run
 from constants import ENV_NAME
 from formatting import *
+from itertools import product, filterfalse
+from helper import more_than_one_true, lists_from_bools
+import copy
 
 np.set_printoptions(suppress=True)
+
 
 def find_trained_solutions(train_dirs):
 
@@ -42,7 +46,7 @@ def test_solutions(train_paths, train_params, test_params, render):
         train_rewards = indv_run(train_info[0], ENV_NAME, test_params, render=False)
         rewards.append(train_rewards)
 
-    return rewards
+    return np.array(rewards)
 
 
 '''
@@ -63,6 +67,31 @@ def train_test_table(argv, test_params):
 
     #Test solutions
     rewards = test_solutions(train_paths, train_params, test_params, render=False)
+
+    #Get power set of test params so that we can calculate all appropriate means
+    print('\n---------------------------\n')
+    print('test params:', test_params)
+
+    pow_set_bools = product([True, False], repeat=len(test_params))
+    #Remove from power set all tuples with less than two Trues
+    filtered_bools = filterfalse(lambda x: not more_than_one_true(x), pow_set_bools)
+    #Get test parameters according to boolean tuples
+    filtered_test_params = lists_from_bools(test_params, copy.deepcopy(filtered_bools))
+
+    print('rewards:', rewards)
+    train_means = np.mean(rewards, axis=1)
+    test_means = np.mean(rewards, axis=0)
+
+    pow_set_means = []
+    for b in filtered_bools:
+        pow_set_means.append(np.mean(rewards, axis=1, where=b))
+    pow_set_means.append(np.array([4.0, 5.0]))
+    pow_set_means = np.transpose(np.array(pow_set_means))
+    print('pow set means:', pow_set_means)
+    results_w_means = np.concatenate((rewards, pow_set_means), axis=1)
+    print('results w means:\n', results_w_means)
+
+    quit()
 
     #Format results in table
     test_params_str = list(map(str, test_params))

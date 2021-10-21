@@ -14,10 +14,14 @@ def delete_last_lines(n=1):
 
 #Formats 2d array into table
 def format_data_table(data, row_labels, column_labels, row_axis=None, column_axis=None):
+
     df = DataFrame(data, index=row_labels, columns=column_labels)
+
     df = compute_df_means(df)
+
     df = df.rename_axis(row_axis)
     df = df.rename_axis(column_axis, axis='columns')
+
     print(df)
 
 
