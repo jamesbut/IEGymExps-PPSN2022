@@ -17,11 +17,14 @@ def format_data_table(data, row_labels, column_labels, row_axis=None, column_axi
 
     df = DataFrame(data, index=row_labels, columns=column_labels)
 
-    df = compute_df_means(df)
-
     df = df.rename_axis(row_axis)
     df = df.rename_axis(column_axis, axis='columns')
 
+    print('\n\n')
+    print('######################################')
+    print('#          Train test table          #')
+    print('######################################')
+    print('\n\n')
     print(df)
 
 

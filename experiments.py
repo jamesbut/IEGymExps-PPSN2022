@@ -69,39 +69,37 @@ def train_test_table(argv, test_params):
     rewards = test_solutions(train_paths, train_params, test_params, render=False)
 
     #Get power set of test params so that we can calculate all appropriate means
-    print('\n---------------------------\n')
-    print('test params:', test_params)
-
     pow_set_bools = product([True, False], repeat=len(test_params))
     #Remove from power set all tuples with less than two Trues
     filtered_bools = filterfalse(lambda x: not more_than_one_true(x), pow_set_bools)
     #Get test parameters according to boolean tuples
     filtered_test_params = lists_from_bools(test_params, copy.deepcopy(filtered_bools))
 
-    print('rewards:', rewards)
-    train_means = np.mean(rewards, axis=1)
-    test_means = np.mean(rewards, axis=0)
-
+    #Calculate relevant means
     pow_set_means = []
     for b in filtered_bools:
         pow_set_means.append(np.mean(rewards, axis=1, where=b))
-    pow_set_means.append(np.array([4.0, 5.0]))
-    pow_set_means = np.transpose(np.array(pow_set_means))
-    print('pow set means:', pow_set_means)
-    results_w_means = np.concatenate((rewards, pow_set_means), axis=1)
-    print('results w means:\n', results_w_means)
+    pow_set_means = np.array(pow_set_means).T
+    rewards_w_means = np.concatenate((rewards, pow_set_means), axis=1)
 
-    quit()
+    #Calculate the mean scores of each test environment
+    test_means = np.mean(rewards_w_means, axis=0)
+    rewards_w_means = np.row_stack((rewards_w_means, test_means))
+
+    #Build axis strings
+    test_params_str = list(map(str, test_params))
+    test_params_str += list(map(list_to_string, filtered_test_params))
+    train_params_str = list(map(list_to_string, train_params))
+    train_params_str.append('test means')
 
     #Format results in table
-    test_params_str = list(map(str, test_params))
-    train_params_str = list(map(list_to_string, train_params))
-    format_data_table(rewards, train_params_str, test_params_str,
+    format_data_table(rewards_w_means, train_params_str, test_params_str,
                       row_axis='train', column_axis='test')
 
 
 if __name__ == "__main__":
 
-    test_parameters = [0.001000, 0.001001]
+    #test_parameters = [0.001000, 0.001001]
+    test_parameters = [0.001000, 0.001001, 0.002]
 
     train_test_table(sys.argv, test_parameters)
