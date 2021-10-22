@@ -49,6 +49,15 @@ def test_solutions(train_paths, train_params, test_params, render):
     return np.array(rewards)
 
 
+def add_train_to_test(test_params, train_params):
+
+    for train_param in train_params:
+        if (len(train_param) == 1) and (train_param[0] not in test_params):
+            test_params.append(train_param[0])
+
+    return test_params
+
+
 '''
 Argument should be a comma separated list of either a single solution
 directory or an experiment directory of which the solution with the
@@ -63,7 +72,11 @@ def train_test_table(argv, test_params):
 
     #Or train them
     elif len(argv) == 1:
+        #TODO
         pass
+
+    #Add train params to test params if they are not already there
+    test_params = add_train_to_test(test_params, train_params)
 
     #Test solutions
     rewards = test_solutions(train_paths, train_params, test_params, render=False)
@@ -74,12 +87,13 @@ def train_test_table(argv, test_params):
     filtered_bools = filterfalse(lambda x: not more_than_one_true(x), pow_set_bools)
     #Get test parameters according to boolean tuples
     filtered_test_params = lists_from_bools(test_params, copy.deepcopy(filtered_bools))
+    filtered_test_params.reverse()
 
     #Calculate relevant means
     pow_set_means = []
     for b in filtered_bools:
         pow_set_means.append(np.mean(rewards, axis=1, where=b))
-    pow_set_means = np.array(pow_set_means).T
+    pow_set_means = np.fliplr(np.array(pow_set_means).T)
     rewards_w_means = np.concatenate((rewards, pow_set_means), axis=1)
 
     #Calculate the mean scores of each test environment
