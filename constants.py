@@ -11,8 +11,10 @@ NUM_GENS = 100
 NUM_EVO_RUNS = 1
 
 #Gene bounds
-G_LB = [-10., -10.]
-G_UB = [10., 120.]
+#G_LB = [-10., -10.]
+#G_UB = [10., 120.]
+G_LB = None
+G_UB = None
 
 
 '''
@@ -60,8 +62,11 @@ NUM_HIDDEN_LAYERS = 0
 NEURONS_PER_HIDDEN_LAYER = 0
 BIAS = False
 
+#Evolve solution with domain parameters as input
+DOMAIN_PARAMS_INPUT = False
+
 #Evolve solution using indirect encoding
-USE_DECODER = True
+USE_DECODER = False
 
 #Weight bounds
 W_LB = [-10., -10.]

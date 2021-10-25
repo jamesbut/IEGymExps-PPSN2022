@@ -33,6 +33,9 @@ def run(network, env_name, env_kwargs=None, render=False):
         env.render()
 
     state = env.reset()
+    #Add domain parameters to input
+    if network.domain_params_input:
+        state = np.append(state, DOMAIN_PARAMETERS)
 
     while not done:
 
@@ -46,6 +49,8 @@ def run(network, env_name, env_kwargs=None, render=False):
                       env.action_space.low
 
         state, r, done, info = env.step(action_vals)
+        if network.domain_params_input:
+            state = np.append(state, DOMAIN_PARAMETERS)
 
         reward += r
 
@@ -98,6 +103,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
 
     num_inputs = len(state)
     num_outputs = len(dummy_env.action_space.high)
+
     decoder = None
     if USE_DECODER:
         decoder_path = 'generator.pt'
@@ -105,9 +111,11 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
             decoder = torch.load(decoder_path)
         except IOError:
             print("Could not find requested decoder!!:", decoder_path)
+
     network = NeuralNetwork(num_inputs, num_outputs, NUM_HIDDEN_LAYERS,
                             NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
-                            bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB)
+                            bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB,
+                            domain_params_input=DOMAIN_PARAMS_INPUT)
 
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
 
@@ -115,9 +123,6 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     toolbox.register("evaluate", evaluate, network=network,
                      env_name=env_name, env_kwargs=env_kwargs, render=RENDER,
                      avg_fitnesses=True)
-
-    domain_params = get_domain_params(env_kwargs, env_name)
-    print("Domain params:", domain_params)
 
     '''
     Define evolutionary algorithm
@@ -168,7 +173,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
         network.genotype = hof[0]
         g_saved = network.save(run_path, WINNER_FILE_NAME,
                                hof[0].fitness.values[0],
-                               domain_params, SAVE_IF_WB_EXCEEDED)
+                               DOMAIN_PARAMETERS, SAVE_IF_WB_EXCEEDED)
 
         #Save population statistics
         if g_saved:

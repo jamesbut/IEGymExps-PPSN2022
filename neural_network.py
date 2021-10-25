@@ -10,9 +10,14 @@ class NeuralNetwork():
     def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
                  genotype=None, genotype_path=None, decoder=None,
-                 bias=True, w_lb=None, w_ub=None, enforce_wb=True):
+                 bias=True, w_lb=None, w_ub=None, enforce_wb=True,
+                 domain_params_input=False):
 
         self._num_inputs = num_inputs
+        #Only one domain parameter per environment being used for now
+        self._domain_params_input = domain_params_input
+        if self._domain_params_input:
+            self._num_inputs += 1
         self._num_outputs = num_outputs
         self._num_hidden_layers = num_hidden_layers
         self._neurons_per_hidden_layer = neurons_per_hidden_layer
@@ -30,6 +35,7 @@ class NeuralNetwork():
             metadata = self._read_metadata(genotype_path)
 
             self._num_inputs = metadata['num_inputs']
+            self._domain_params_input = metadata.get('domain_params_input', False)
             self._num_outputs = metadata['num_outputs']
             self._num_hidden_layers = metadata['num_hidden_layers']
             self._neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
@@ -172,6 +178,10 @@ class NeuralNetwork():
             self.weights = genotype
 
 
+    @property
+    def domain_params_input(self):
+        return self._domain_params_input
+
     #Decode genotype and apply appropriate type conversions
     def _decode(self, genotype):
         output = self._decoder.forward(torch.Tensor(genotype))
@@ -272,6 +282,7 @@ class NeuralNetwork():
         metadata['num_hidden_layers'] = self._num_hidden_layers
         metadata['neurons_per_hidden_layer'] = self._neurons_per_hidden_layer
         metadata['bias'] = self._bias
+        metadata['domain_params_input'] = self._domain_params_input
 
         with open(metadata_filepath, 'w') as f:
             json.dump(metadata, f)
