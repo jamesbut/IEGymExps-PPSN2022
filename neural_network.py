@@ -4,6 +4,7 @@ import csv
 import os
 import shutil
 import json
+import sys
 
 class NeuralNetwork():
 
@@ -22,10 +23,6 @@ class NeuralNetwork():
         self._num_hidden_layers = num_hidden_layers
         self._neurons_per_hidden_layer = neurons_per_hidden_layer
         self._bias = bias
-
-        self._w_lb = w_lb
-        self._w_ub = w_ub
-        self._enforce_wb = enforce_wb
 
         self._decoder = decoder
 
@@ -46,6 +43,16 @@ class NeuralNetwork():
 
         #Build neural net
         self._build_nn()
+
+        #Set weight bounds
+        self._w_lb = w_lb
+        self._w_ub = w_ub
+        #If the length of the weight bounds is one, expand list to number of weights
+        if len(w_lb) == 1:
+            self._w_lb *= self.num_weights
+        if len(w_ub) == 1:
+            self._w_ub *= self.num_weights
+        self._enforce_wb = enforce_wb
 
         #Set genotype as weights
         #If no genotype is given, torch generates random weights
@@ -223,10 +230,16 @@ class NeuralNetwork():
         if len(weights) is not len(w_lb):
             print("neural_network.py _check_bounds_size(): weights length is not the "
                   "same as weights lower bound length")
+            print("Weights: {}, Lower bounds: {}, Weights length: {}, "
+                  "Lower bounds length: {}".format(weights, w_lb,
+                                                   len(weights), len(w_lb)))
             sys.exit(1)
         if len(weights) is not len(w_ub):
             print("neural_network.py _check_bounds_size(): weights length is not the "
                   "same as weights upper bound length")
+            print("Weights: {}, Upper bounds: {}, Weights length: {}, "
+                  "Upper bounds length: {}".format(weights, w_ub,
+                                                   len(weights), len(w_ub)))
             sys.exit(1)
 
 

@@ -74,8 +74,10 @@ DOMAIN_PARAMS_INPUT = True
 USE_DECODER = False
 
 #Weight bounds
-W_LB = [-10., -10.]
-W_UB = [10., 120.]
+#W_LB = [-10., -10.]
+#W_UB = [10., 120.]
+W_LB = [-10.]
+W_UB = [120.]
 
 #Enforce the weight bounds
 #If this is turned off the weight bounds are not applied
