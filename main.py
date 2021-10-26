@@ -132,8 +132,16 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                                   dir_path=dir_path, file_name=WINNER_FILE_NAME)
 
+    #Expand gene bounds if gene bound list is only of length 1
+    g_lb = G_LB
+    g_ub = G_UB
+    if len(G_LB) == 1:
+        g_lb *= num_genes
+    if len(G_UB) == 1:
+        g_ub *= num_genes
+
     strategy = cma.Strategy(centroid=centroid, sigma=INIT_SIGMA, lambda_=LAMBDA,
-                            lb_=G_LB, ub_=G_UB)
+                            lb_=g_lb, ub_=g_ub)
 
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)

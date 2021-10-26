@@ -11,10 +11,15 @@ NUM_GENS = 100
 NUM_EVO_RUNS = 1
 
 #Gene bounds
+#A list size of 1 applies this bound to all genes
+#Alternatively, one can specify the entire list of gene bounds but this has to be
+#the same length as the number of genes needed
 #G_LB = [-10., -10.]
 #G_UB = [10., 120.]
-G_LB = None
-G_UB = None
+G_LB = [-10.]
+G_UB = [120.]
+#G_LB = None
+#G_UB = None
 
 
 '''
@@ -63,7 +68,7 @@ NEURONS_PER_HIDDEN_LAYER = 0
 BIAS = False
 
 #Evolve solution with domain parameters as input
-DOMAIN_PARAMS_INPUT = False
+DOMAIN_PARAMS_INPUT = True
 
 #Evolve solution using indirect encoding
 USE_DECODER = False
