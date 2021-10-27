@@ -17,7 +17,7 @@ from constants import *
 np.set_printoptions(suppress=True)
 
 
-def run(network, env_name, env_kwargs=None, render=False):
+def run(network, env_name, run_num, env_kwargs=None, render=False):
 
     if env_kwargs is not None:
         env = gym.make(env_name, **env_kwargs)
@@ -35,7 +35,7 @@ def run(network, env_name, env_kwargs=None, render=False):
     state = env.reset()
     #Add domain parameters to input
     if network.domain_params_input:
-        state = np.append(state, DOMAIN_PARAMETERS)
+        state = np.append(state, DOMAIN_PARAMETERS[run_num])
 
     while not done:
 
@@ -50,7 +50,7 @@ def run(network, env_name, env_kwargs=None, render=False):
 
         state, r, done, info = env.step(action_vals)
         if network.domain_params_input:
-            state = np.append(state, DOMAIN_PARAMETERS)
+            state = np.append(state, DOMAIN_PARAMETERS[run_num])
 
         reward += r
 
@@ -79,8 +79,8 @@ def evaluate(genome=None, network=None,
     rewards = []
 
     #For a certain number of trials/env arguments
-    for kwargs in env_kwargs:
-        r = run(network, env_name, kwargs, render)
+    for run_num, kwargs in enumerate(env_kwargs):
+        r = run(network, env_name, run_num, kwargs, render)
         rewards.append(r)
 
         if verbosity:
