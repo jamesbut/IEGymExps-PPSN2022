@@ -39,7 +39,9 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     network = NeuralNetwork(num_inputs, num_outputs, NUM_HIDDEN_LAYERS,
                             NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB,
-                            domain_params_input=DOMAIN_PARAMS_INPUT)
+                            domain_params_input=DOMAIN_PARAMS_INPUT,
+                            normalise_state=NORMALISE_STATE,
+                            normalise_state_domain_params=NORMALISE_STATE_DOMAIN_PARAMS)
 
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
 

@@ -14,12 +14,8 @@ NUM_EVO_RUNS = 1
 #A list size of 1 applies this bound to all genes
 #Alternatively, one can specify the entire list of gene bounds but this has to be
 #the same length as the number of genes needed
-#G_LB = [-10., -10.]
-#G_UB = [10., 120.]
 G_LB = [-120.]
 G_UB = [120.]
-#G_LB = None
-#G_UB = None
 
 
 '''
@@ -50,9 +46,11 @@ ENV_NAME = 'MountainCarContinuous-v0'
 #COMPLETION_FITNESS = 2.15
 COMPLETION_FITNESS = None
 #Engine powers
-#DOMAIN_PARAMETERS = [0.0016]
-#DOMAIN_PARAMETERS = [0.0010, 0.001001]
 DOMAIN_PARAMETERS = [0.0008, 0.0010, 0.0012]
+
+DOMAIN_PARAMS_LOW = [0.]
+DOMAIN_PARAMS_HIGH = [0.005]
+
 
 if 'PyBulletEnv' in ENV_NAME:
     import pybulletgym
@@ -68,6 +66,10 @@ BIAS = False
 
 #Evolve solution with domain parameters as input
 DOMAIN_PARAMS_INPUT = True
+
+NORMALISE_STATE = True
+NORMALISE_STATE_DOMAIN_PARAMS = True
+
 
 #Evolve solution using indirect encoding
 USE_DECODER = False

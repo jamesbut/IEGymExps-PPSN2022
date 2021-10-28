@@ -7,6 +7,27 @@ import numpy as np
 from domain_params import *
 
 
+#Apply operations to state before passing through network
+def build_state(state, network, env, env_name, env_kwargs):
+    print('state before:', state)
+
+    if network.normalise_state:
+        obs_space_low = env.observation_space.low
+        obs_space_high = env.observation_space.high
+
+    #Add domain parameters to input
+    if network.domain_params_input:
+        domain_param = get_domain_param_from_env_kwarg(env_kwargs, env_name)
+        state = np.append(state, domain_param)
+
+    if network.normalise_state_domain_params:
+        print('normalise state domain params')
+
+    print('state after:', state)
+    quit()
+    return state
+
+
 def run(network, env_name, run_num, env_kwargs=None, render=False):
 
     if env_kwargs is not None:
@@ -22,11 +43,7 @@ def run(network, env_name, run_num, env_kwargs=None, render=False):
     if render:
         env.render()
 
-    state = env.reset()
-    #Add domain parameters to input
-    if network.domain_params_input:
-        domain_param = get_domain_param_from_env_kwarg(env_kwargs, env_name)
-        state = np.append(state, domain_param)
+    state = build_state(env.reset(), network, env, env_name, env_kwargs)
 
     while not done:
 
@@ -40,9 +57,9 @@ def run(network, env_name, run_num, env_kwargs=None, render=False):
                       env.action_space.low
 
         state, r, done, info = env.step(action_vals)
-        if network.domain_params_input:
-            state = np.append(state, domain_param)
-        print('state:', state)
+        state = build_state(state, network, env, env_name, env_kwargs)
+
+        quit()
 
         reward += r
 

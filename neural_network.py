@@ -12,7 +12,8 @@ class NeuralNetwork():
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
                  genotype=None, genotype_path=None, decoder=None,
                  bias=True, w_lb=None, w_ub=None, enforce_wb=True,
-                 domain_params_input=False):
+                 domain_params_input=False, normalise_state=False,
+                 normalise_state_domain_params=False):
 
         self._num_inputs = num_inputs
         #Only one domain parameter per environment being used for now
@@ -23,6 +24,9 @@ class NeuralNetwork():
         self._num_hidden_layers = num_hidden_layers
         self._neurons_per_hidden_layer = neurons_per_hidden_layer
         self._bias = bias
+
+        self._normalise_state = normalise_state
+        self._normalise_state_domain_params = normalise_state_domain_params
 
         self._decoder = decoder
 
@@ -37,6 +41,10 @@ class NeuralNetwork():
             self._num_hidden_layers = metadata['num_hidden_layers']
             self._neurons_per_hidden_layer = metadata['neurons_per_hidden_layer']
             self._bias = metadata['bias']
+
+            self._normalise_state = metadata.get('normalise_state', False)
+            self._normalise_state_domain_params = \
+                metadata.get('normalise_state_domain_params', False)
 
             #Read decoder if there is one
             decoder = self._read_decoder(genotype_path)
@@ -171,6 +179,7 @@ class NeuralNetwork():
     def genotype(self):
         return self._genotype
 
+
     #Set genotype - this uses a decoder if there is one as opposed to set_weights
     #which just sets the NN weights
     @genotype.setter
@@ -188,6 +197,17 @@ class NeuralNetwork():
     @property
     def domain_params_input(self):
         return self._domain_params_input
+
+
+    @property
+    def normalise_state(self):
+        return self._normalise_state
+
+
+    @property
+    def normalise_state_domain_params(self):
+        return self._normalise_state_domain_params
+
 
     #Decode genotype and apply appropriate type conversions
     def _decode(self, genotype):
@@ -296,6 +316,9 @@ class NeuralNetwork():
         metadata['neurons_per_hidden_layer'] = self._neurons_per_hidden_layer
         metadata['bias'] = self._bias
         metadata['domain_params_input'] = self._domain_params_input
+
+        metadata['normalise_state'] = self._normalise_state
+        metadata['normalise_state_domain_params'] = self._normalise_state_domain_params
 
         with open(metadata_filepath, 'w') as f:
             json.dump(metadata, f)
