@@ -6,6 +6,7 @@ import shutil
 import json
 import sys
 
+
 class NeuralNetwork():
 
     def __init__(self, num_inputs=None, num_outputs=None,
@@ -13,10 +14,10 @@ class NeuralNetwork():
                  genotype=None, genotype_path=None, decoder=None,
                  bias=True, w_lb=None, w_ub=None, enforce_wb=True,
                  domain_params_input=False, normalise_state=False,
-                 normalise_state_domain_params=False):
+                 norm_domain_params_low=None, norm_domain_params_high=None):
 
         self._num_inputs = num_inputs
-        #Only one domain parameter per environment being used for now
+        # Only one domain parameter per environment being used for now
         self._domain_params_input = domain_params_input
         if self._domain_params_input:
             self._num_inputs += 1
@@ -26,11 +27,12 @@ class NeuralNetwork():
         self._bias = bias
 
         self._normalise_state = normalise_state
-        self._normalise_state_domain_params = normalise_state_domain_params
+        self._norm_domain_params_low = norm_domain_params_low
+        self._norm_domain_params_high = norm_domain_params_high
 
         self._decoder = decoder
 
-        #Read genotype, metadata and decoder from files
+        # Read genotype, metadata and decoder from files
         if genotype_path is not None:
             genotype = self._read_genotype(genotype_path)
             metadata = self._read_metadata(genotype_path)
@@ -43,32 +45,31 @@ class NeuralNetwork():
             self._bias = metadata['bias']
 
             self._normalise_state = metadata.get('normalise_state', False)
-            self._normalise_state_domain_params = \
-                metadata.get('normalise_state_domain_params', False)
+            self._norm_domain_params_low = metadata.get('norm_domain_params_low')
+            self._norm_domain_params_high = metadata.get('norm_domain_params_high')
 
-            #Read decoder if there is one
+            # Read decoder if there is one
             decoder = self._read_decoder(genotype_path)
 
-        #Build neural net
+        # Build neural net
         self._build_nn()
 
-        #Set weight bounds
+        # Set weight bounds
         self._w_lb = w_lb
         self._w_ub = w_ub
-        #If the length of the weight bounds is one, expand list to number of weights
+        # If the length of the weight bounds is one, expand list to number of weights
         if len(w_lb) == 1:
             self._w_lb *= self.num_weights
         if len(w_ub) == 1:
             self._w_ub *= self.num_weights
         self._enforce_wb = enforce_wb
 
-        #Set genotype as weights
-        #If no genotype is given, torch generates random weights
+        # Set genotype as weights
+        # If no genotype is given, torch generates random weights
         if genotype is not None:
             self.genotype = genotype
         else:
             self.genotype = self.weights
-
 
     def _build_nn(self):
 
@@ -81,10 +82,10 @@ class NeuralNetwork():
             layers.append(torch.nn.Linear(self._num_inputs,
                                           self._neurons_per_hidden_layer,
                                           bias=self._bias))
-            #Hidden layers have ReLU activation
+            # Hidden layers have ReLU activation
             layers.append(torch.nn.ReLU())
 
-            for i in range(self._num_hidden_layers-1):
+            for i in range(self._num_hidden_layers - 1):
                 layers.append(torch.nn.Linear(self._neurons_per_hidden_layer,
                                               self._neurons_per_hidden_layer,
                                               bias=self._bias))
@@ -94,20 +95,18 @@ class NeuralNetwork():
                                           self._num_outputs,
                                           bias=self._bias))
 
-        #Final layer goes through Sigmoid
+        # Final layer goes through Sigmoid
         layers.append(torch.nn.Sigmoid())
 
         self._nn = torch.nn.Sequential(*layers).double()
 
-
-    #Takes a list, passes through the network and returns a list
+    # Takes a list, passes through the network and returns a list
     def forward(self, x):
         x = torch.tensor(x, dtype=torch.float64)
         net_out = self._nn.forward(x)
         return net_out.tolist()
 
-
-    #Returns the number of weights
+    # Returns the number of weights
     @property
     def num_weights(self):
         total_weights = 0
@@ -116,8 +115,7 @@ class NeuralNetwork():
                 total_weights += params.numel()
         return total_weights
 
-
-    #Returns size of genotype needed for this NN
+    # Returns size of genotype needed for this NN
     @property
     def genotype_size(self):
         if self._decoder is None:
@@ -125,19 +123,16 @@ class NeuralNetwork():
         else:
             return self._decoder.l1.in_features
 
-
     def print_weights(self):
         for layer in self._nn:
             for params in layer.parameters():
                 print(params)
 
-
     def _set_weights_err_msg(self, weights_len, num_weights_required):
         return "Trying to set {} weights to an NN that requires {} weights" \
             .format(weights_len, num_weights_required)
 
-
-    #Return weights as a 1d list
+    # Return weights as a 1d list
     @property
     def weights(self):
         w = []
@@ -146,19 +141,18 @@ class NeuralNetwork():
                 w += params.flatten().tolist()
         return w
 
-
-    #Sets a list of weights
-    #This also checks the new weights against a weight lower and upper bound
+    # Sets a list of weights
+    # This also checks the new weights against a weight lower and upper bound
     @weights.setter
     def weights(self, new_weights):
 
-        #Check new weights is of correct size
+        # Check new weights is of correct size
         num_weights_required = self.num_weights
         assert num_weights_required == len(new_weights), \
-                                       self._set_weights_err_msg(len(new_weights), \
+                                       self._set_weights_err_msg(len(new_weights),
                                                                  num_weights_required)
 
-        #Bound weights
+        # Bound weights
         if ((self._w_lb is not None) or (self._w_ub is not None)) and self._enforce_wb:
             new_weights = self._bound_weights(new_weights, self._w_lb, self._w_ub)
 
@@ -166,22 +160,20 @@ class NeuralNetwork():
         for layer in self._nn:
             for params in layer.parameters():
 
-                #Slice out new weights
-                p_weights = new_weights[weight_index : weight_index + params.numel()]
+                # Slice out new weights
+                p_weights = new_weights[weight_index:weight_index + params.numel()]
                 weight_index += params.numel()
 
-                #Resize and set new weights
-                params.data = torch.tensor(np.reshape(p_weights, params.size()), \
+                # Resize and set new weights
+                params.data = torch.tensor(np.reshape(p_weights, params.size()),
                                            dtype=torch.float64)
-
 
     @property
     def genotype(self):
         return self._genotype
 
-
-    #Set genotype - this uses a decoder if there is one as opposed to set_weights
-    #which just sets the NN weights
+    # Set genotype - this uses a decoder if there is one as opposed to set_weights
+    # which just sets the NN weights
     @genotype.setter
     def genotype(self, genotype):
 
@@ -193,49 +185,47 @@ class NeuralNetwork():
         else:
             self.weights = genotype
 
-
     @property
     def domain_params_input(self):
         return self._domain_params_input
-
 
     @property
     def normalise_state(self):
         return self._normalise_state
 
+    @property
+    def norm_domain_params_low(self):
+        return self._norm_domain_params_low
 
     @property
-    def normalise_state_domain_params(self):
-        return self._normalise_state_domain_params
+    def norm_domain_params_high(self):
+        return self._norm_domain_params_high
 
-
-    #Decode genotype and apply appropriate type conversions
+    # Decode genotype and apply appropriate type conversions
     def _decode(self, genotype):
         output = self._decoder.forward(torch.Tensor(genotype))
         return output.detach().numpy()
 
-
-    #Bound weights between upper and lower bounds
+    # Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):
 
         self._check_bounds_size(weights, w_lb, w_ub)
 
-        #If weight exceeds bounds, set weight to bound
+        # If weight exceeds bounds, set weight to bound
         weights = np.maximum(weights, w_lb)
         weights = np.minimum(weights, w_ub)
 
         return weights
 
-
-    #Returns True if ANY weight exceeds its bound
+    # Returns True if ANY weight exceeds its bound
     def _bounds_exceeded(self, weights, w_lb, w_ub):
 
-        #Return False if bounds are None
+        # Return False if bounds are None
         if w_lb is None and w_ub is None:
             return False
 
-        #I know this is very C, but I couldn't think of another way and it just makes
-        #sense :/
+        # I know this is very C, but I couldn't think of another way and it just makes
+        # sense :/
         for i in range(len(weights)):
             if weights[i] <= w_lb[i]:
                 return True
@@ -243,10 +233,9 @@ class NeuralNetwork():
                 return True
         return False
 
-
     def _check_bounds_size(self, weights, w_lb, w_ub):
 
-        #Check bounds are the same size as weights
+        # Check bounds are the same size as weights
         if len(weights) is not len(w_lb):
             print("neural_network.py _check_bounds_size(): weights length is not the "
                   "same as weights lower bound length")
@@ -262,48 +251,46 @@ class NeuralNetwork():
                                                    len(weights), len(w_ub)))
             sys.exit(1)
 
-
-    #Return bool for success or fail
+    # Return bool for success or fail
     def save(self, dir_path, file_name, fitness, domain_params=None,
              save_if_bounds_exceeded=False):
 
-        #If bounds were exceeded do not save
+        # If bounds were exceeded do not save
         if not save_if_bounds_exceeded:
             b_exceeded = self._bounds_exceeded(self.get_weights(),
                                                self._w_lb, self._w_ub)
             if b_exceeded:
                 return False
 
-        #Save genotype as a csv - it is just a list
+        # Save genotype as a csv - it is just a list
         file_path = dir_path + file_name
 
-        #Create directory
+        # Create directory
         if os.path.exists(dir_path):
             shutil.rmtree(dir_path)
         os.makedirs(dir_path)
 
         with open(file_path, 'w') as outfile:
             csv_writer = csv.writer(outfile)
-            #Added fitness at the beginning because this is how it is
-            #read in on the NeuroEvo side
+            # Added fitness at the beginning because this is how it is
+            # read in on the NeuroEvo side
             fitness_and_genotype = [fitness] + self._genotype
             csv_writer.writerow(fitness_and_genotype)
 
-            #Add domain hyperparameters on next line for cGAN
+            # Add domain hyperparameters on next line for cGAN
             if domain_params is not None:
                 csv_writer.writerow(domain_params)
 
-            #Also save phenotype if there is a decoder
+            # Also save phenotype if there is a decoder
             csv_writer.writerow(self.weights)
 
-        #Save metadata
+        # Save metadata
         self._save_metadata(file_path)
 
-        #Save decoder
+        # Save decoder
         self._save_decoder(file_path)
 
         return True
-
 
     def _save_metadata(self, genotype_filepath):
         metadata_filepath = genotype_filepath + '_metadata.json'
@@ -318,27 +305,25 @@ class NeuralNetwork():
         metadata['domain_params_input'] = self._domain_params_input
 
         metadata['normalise_state'] = self._normalise_state
-        metadata['normalise_state_domain_params'] = self._normalise_state_domain_params
+        metadata['norm_domain_params_low'] = self._norm_domain_params_low
+        metadata['norm_domain_params_high'] = self._norm_domain_params_high
 
         with open(metadata_filepath, 'w') as f:
             json.dump(metadata, f)
 
-
     def _save_decoder(self, genotype_filepath):
         decoder_filepath = genotype_filepath + '_decoder.pt'
         torch.save(self._decoder, decoder_filepath)
-
 
     def _read_genotype(self, genotype_filepath):
         with open(genotype_filepath, 'r') as genotype_file:
             reader = csv.reader(genotype_file)
             genotype = list(map(float, list(reader)[0]))
 
-        #Remove fitness
+        # Remove fitness
         del genotype[0]
 
         return genotype
-
 
     def _read_metadata(self, genotype_filepath):
         metadata_filepath = genotype_filepath + '_metadata.json'
@@ -348,11 +333,10 @@ class NeuralNetwork():
 
         return metadata
 
-
     def _read_decoder(self, genotype_filepath):
         decoder_path = genotype_filepath + '_decoder.pt'
         try:
             self._decoder = torch.load(decoder_path)
         except IOError:
-            #No problem if there is not a decoder
+            # No problem if there is not a decoder
             pass

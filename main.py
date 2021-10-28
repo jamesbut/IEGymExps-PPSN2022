@@ -4,7 +4,6 @@ import evo_utils
 import numpy as np
 import uuid
 import sys
-import random
 from data import *
 from formatting import *
 from domain_params import *
@@ -13,12 +12,11 @@ from evo_utils import get_cmaes_centroid
 from constants import *
 from evaluate import *
 
-#Suppress scientific notation
+# Suppress scientific notation
 np.set_printoptions(suppress=True)
 
 
 def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
-
     '''
     Define neural controller according to environment
     '''
@@ -41,7 +39,8 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
                             bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB,
                             domain_params_input=DOMAIN_PARAMS_INPUT,
                             normalise_state=NORMALISE_STATE,
-                            normalise_state_domain_params=NORMALISE_STATE_DOMAIN_PARAMS)
+                            norm_domain_params_low=DOMAIN_PARAMS_LOW,
+                            norm_domain_params_high=DOMAIN_PARAMS_HIGH)
 
     env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
 
@@ -58,7 +57,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
                                   dir_path=dir_path, file_name=WINNER_FILE_NAME)
 
-    #Expand gene bounds if gene bound list is only of length 1
+    # Expand gene bounds if gene bound list is only of length 1
     g_lb = G_LB
     g_ub = G_UB
     if len(G_LB) == 1:
@@ -75,7 +74,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     '''
     Define execution and logs
     '''
-    #np.random.seed(108)
+    # np.random.seed(108)
 
     if PARALLELISE:
         import multiprocessing
@@ -94,8 +93,8 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     Run evolutionary algorithm
     '''
     population, logbook, complete = evo_utils.eaGenerateUpdate(
-            toolbox, ngen=NUM_GENS, stats=stats,
-            halloffame=hof, completion_fitness=completion_fitness)
+        toolbox, ngen=NUM_GENS, stats=stats,
+        halloffame=hof, completion_fitness=completion_fitness)
 
     '''
     Write results to file
@@ -109,7 +108,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
                                hof[0].fitness.values[0],
                                DOMAIN_PARAMETERS, SAVE_IF_WB_EXCEEDED)
 
-        #Save population statistics
+        # Save population statistics
         if g_saved:
             dump_data(logbook.select('avg'), run_path, 'mean_fitnesses')
             dump_data(logbook.select('max'), run_path, 'best_fitnesses')
@@ -152,12 +151,12 @@ def main():
         train_gan(sys.argv[1])
         return
 
-    #Create experiment path
+    # Create experiment path
     exp_dir_path = DATA_DIR_PATH + 'python_data'
     exp_dir_name = create_exp_dir_name(exp_dir_path)
     exp_dir_path += '/' + exp_dir_name + '/'
 
-    if (len(sys.argv)==1) or ('-cmaes_centroid' in sys.argv):
+    if (len(sys.argv) == 1) or ('-cmaes_centroid' in sys.argv):
 
         for i in range(NUM_EVO_RUNS):
             print("Evo run: ", i)
@@ -167,14 +166,14 @@ def main():
 
         print("Individual run")
 
-        #Genome directory comes from the command line
+        # Genome directory comes from the command line
         indv_dir = sys.argv[1]
         indv_path = DATA_DIR_PATH + indv_dir + '/' + WINNER_FILE_NAME
 
         indv_run(indv_path, ENV_NAME, DOMAIN_PARAMETERS)
 
 
-#Some bug in DEAP means that I have to create individual before if __name__ == "__main__"
+# Some bug in DEAP means that I have to create individual before if __name__ == "__main__"
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
