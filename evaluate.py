@@ -2,6 +2,10 @@
 # Code to evaluate network or genome performance on an environment #
 ####################################################################
 
+import gym
+import numpy as np
+from domain_params import *
+
 
 def run(network, env_name, run_num, env_kwargs=None, render=False):
 
@@ -21,7 +25,8 @@ def run(network, env_name, run_num, env_kwargs=None, render=False):
     state = env.reset()
     #Add domain parameters to input
     if network.domain_params_input:
-        state = np.append(state, DOMAIN_PARAMETERS[run_num])
+        domain_param = get_domain_param_from_env_kwarg(env_kwargs, env_name)
+        state = np.append(state, domain_param)
 
     while not done:
 
@@ -36,7 +41,8 @@ def run(network, env_name, run_num, env_kwargs=None, render=False):
 
         state, r, done, info = env.step(action_vals)
         if network.domain_params_input:
-            state = np.append(state, DOMAIN_PARAMETERS[run_num])
+            state = np.append(state, domain_param)
+        print('state:', state)
 
         reward += r
 

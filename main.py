@@ -1,5 +1,4 @@
 from neural_network import NeuralNetwork
-import gym
 from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np

@@ -32,30 +32,34 @@ def get_env_kwargs(env_name, domain_params, randomise=False):
 
     else:
 
-        if env_name == 'BipedalWalker-v3':
-            param_string = 'speed_knee'
-        elif env_name == 'MountainCarContinuous-v0':
-            param_string = 'power'
-
         env_kwargs = []
         for p in domain_params:
             env_kwargs.append(
                 {
-                    param_string : p
+                    _get_param_string(env_name) : p
                 }
             )
 
     return env_kwargs
 
-#Get env kwargs as a list
-def get_domain_params(env_kwargs, env_name):
+
+#Get domain parameter value from env_kwarg dictionary
+def get_domain_param_from_env_kwarg(env_kwarg, env_name):
+    return env_kwarg[_get_param_string(env_name)]
+
+
+#Get list of domain parameter values from env_kwarg dictionaries
+def get_domain_params_from_env_kwargs(env_kwargs, env_name):
+    params = []
+    for env_kwarg in env_kwargs:
+        params.append(get_domain_param_from_env_kwarg(env_kwarg))
+    return params
+
+
+#Get string for the domain parameter of interest
+def _get_param_string(env_name):
 
     if env_name == 'BipedalWalker-v3':
-        return env_kwargs['speed_knee']
+        return 'speed_knee'
     elif env_name == 'MountainCarContinuous-v0':
-        kwargs = []
-        for val in env_kwargs:
-            kwargs.append(val['power'])
-        return kwargs
-    else:
-        return None
+        return 'power'

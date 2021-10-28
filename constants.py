@@ -8,7 +8,7 @@ INIT_SIGMA = 1.
 #Number of children to produce at each generation
 LAMBDA = 100
 NUM_GENS = 100
-NUM_EVO_RUNS = 5
+NUM_EVO_RUNS = 1
 
 #Gene bounds
 #A list size of 1 applies this bound to all genes
@@ -26,7 +26,7 @@ G_UB = [120.]
 Evolution execution constants
 '''
 
-PARALLELISE = True
+PARALLELISE = False
 RENDER = False
 RANDOMISE_HYPERPARAMETERS = False
 
