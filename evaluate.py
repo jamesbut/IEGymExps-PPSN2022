@@ -5,6 +5,7 @@
 import gym
 import numpy as np
 from domain_params import *
+from maths import normalise
 
 
 #Apply operations to state before passing through network
@@ -14,6 +15,10 @@ def build_state(state, network, env, env_name, env_kwargs):
     if network.normalise_state:
         obs_space_low = env.observation_space.low
         obs_space_high = env.observation_space.high
+        print('low:', obs_space_low)
+        print('high:', obs_space_high)
+        state = normalise(state, obs_space_high, obs_space_low)
+        print('state:', state)
 
     #Add domain parameters to input
     if network.domain_params_input:
