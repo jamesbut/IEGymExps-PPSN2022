@@ -4,13 +4,14 @@ import evo_utils
 import numpy as np
 import uuid
 import sys
-from data import *
-from formatting import *
-from domain_params import *
-from model_training import *
+import gym
+import torch
+from data import dump_data, create_exp_dir_name
+from domain_params import get_env_kwargs
+from model_training import train_ae, train_vae, train_gan
 from evo_utils import get_cmaes_centroid
-from constants import *
-from evaluate import *
+from evaluate import evaluate
+import constants as consts
 
 # Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -27,26 +28,26 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     num_outputs = len(dummy_env.action_space.high)
 
     decoder = None
-    if USE_DECODER:
+    if consts.USE_DECODER:
         decoder_path = 'generator.pt'
         try:
             decoder = torch.load(decoder_path)
         except IOError:
             print("Could not find requested decoder!!:", decoder_path)
 
-    network = NeuralNetwork(num_inputs, num_outputs, NUM_HIDDEN_LAYERS,
-                            NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
-                            bias=BIAS, w_lb=W_LB, w_ub=W_UB, enforce_wb=ENFORCE_WB,
-                            domain_params_input=DOMAIN_PARAMS_INPUT,
-                            normalise_state=NORMALISE_STATE,
-                            norm_domain_params_low=DOMAIN_PARAMS_LOW,
-                            norm_domain_params_high=DOMAIN_PARAMS_HIGH)
+    network = NeuralNetwork(num_inputs, num_outputs, consts.NUM_HIDDEN_LAYERS,
+                            consts.NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
+                            bias=consts.BIAS, w_lb=consts.W_LB, w_ub=consts.W_UB,
+                            enforce_wb=consts.ENFORCE_WB,
+                            domain_params_input=consts.DOMAIN_PARAMS_INPUT,
+                            norm_domain_params_high=consts.DOMAIN_PARAMS_HIGH)
 
-    env_kwargs = get_env_kwargs(env_name, DOMAIN_PARAMETERS, RANDOMISE_HYPERPARAMETERS)
+    env_kwargs = get_env_kwargs(env_name, consts.DOMAIN_PARAMETERS,
+                                consts.RANDOMISE_HYPERPARAMETERS)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, network=network,
-                     env_name=env_name, env_kwargs=env_kwargs, render=RENDER,
+                     env_name=env_name, env_kwargs=env_kwargs, render=consts.RENDER,
                      avg_fitnesses=True)
 
     '''
@@ -55,18 +56,18 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     num_genes = network.genotype_size
 
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
-                                  dir_path=dir_path, file_name=WINNER_FILE_NAME)
+                                  dir_path=dir_path, file_name=consts.WINNER_FILE_NAME)
 
     # Expand gene bounds if gene bound list is only of length 1
-    g_lb = G_LB
-    g_ub = G_UB
-    if len(G_LB) == 1:
+    g_lb = consts.G_LB
+    g_ub = consts.G_UB
+    if len(consts.G_LB) == 1:
         g_lb *= num_genes
-    if len(G_UB) == 1:
+    if len(consts.G_UB) == 1:
         g_ub *= num_genes
 
-    strategy = cma.Strategy(centroid=centroid, sigma=INIT_SIGMA, lambda_=LAMBDA,
-                            lb_=g_lb, ub_=g_ub)
+    strategy = cma.Strategy(centroid=centroid, sigma=consts.INIT_SIGMA,
+                            lambda_=consts.LAMBDA, lb_=g_lb, ub_=g_ub)
 
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
@@ -76,7 +77,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     '''
     # np.random.seed(108)
 
-    if PARALLELISE:
+    if consts.PARALLELISE:
         import multiprocessing
 
         pool = multiprocessing.Pool()
@@ -93,7 +94,7 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     Run evolutionary algorithm
     '''
     population, logbook, complete = evo_utils.eaGenerateUpdate(
-        toolbox, ngen=NUM_GENS, stats=stats,
+        toolbox, ngen=consts.NUM_GENS, stats=stats,
         halloffame=hof, completion_fitness=completion_fitness)
 
     '''
@@ -101,25 +102,25 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
     '''
     run_path = exp_dir_path + str(uuid.uuid4()) + '/'
 
-    if ((SAVE_WINNERS_ONLY is False) or
-       (SAVE_WINNERS_ONLY is True and complete)):
+    if ((consts.SAVE_WINNERS_ONLY is False)
+         or (consts.SAVE_WINNERS_ONLY is True and complete)):
         network.genotype = hof[0]
-        g_saved = network.save(run_path, WINNER_FILE_NAME,
+        g_saved = network.save(run_path, consts.WINNER_FILE_NAME,
                                hof[0].fitness.values[0],
-                               DOMAIN_PARAMETERS, SAVE_IF_WB_EXCEEDED)
+                               consts.DOMAIN_PARAMETERS, consts.SAVE_IF_WB_EXCEEDED)
 
         # Save population statistics
         if g_saved:
             dump_data(logbook.select('avg'), run_path, 'mean_fitnesses')
             dump_data(logbook.select('max'), run_path, 'best_fitnesses')
 
-    if PARALLELISE:
+    if consts.PARALLELISE:
         pool.close()
 
 
 def indv_run(genotype_path, env_name, domain_parameters, render=True):
 
-    #render = False
+    # render = False
 
     env_kwargs = get_env_kwargs(env_name, domain_parameters)
 
@@ -152,25 +153,25 @@ def main():
         return
 
     # Create experiment path
-    exp_dir_path = DATA_DIR_PATH + 'python_data'
+    exp_dir_path = consts.DATA_DIR_PATH + 'python_data'
     exp_dir_name = create_exp_dir_name(exp_dir_path)
     exp_dir_path += '/' + exp_dir_name + '/'
 
     if (len(sys.argv) == 1) or ('-cmaes_centroid' in sys.argv):
 
-        for i in range(NUM_EVO_RUNS):
+        for i in range(consts.NUM_EVO_RUNS):
             print("Evo run: ", i)
-            evo_run(ENV_NAME, COMPLETION_FITNESS, DATA_DIR_PATH, exp_dir_path)
-
+            evo_run(consts.ENV_NAME, consts.COMPLETION_FITNESS,
+                    consts.DATA_DIR_PATH, exp_dir_path)
     else:
 
         print("Individual run")
 
         # Genome directory comes from the command line
         indv_dir = sys.argv[1]
-        indv_path = DATA_DIR_PATH + indv_dir + '/' + WINNER_FILE_NAME
+        indv_path = consts.DATA_DIR_PATH + indv_dir + '/' + consts.WINNER_FILE_NAME
 
-        indv_run(indv_path, ENV_NAME, DOMAIN_PARAMETERS)
+        indv_run(indv_path, consts.ENV_NAME, consts.DOMAIN_PARAMETERS)
 
 
 # Some bug in DEAP means that I have to create individual before if __name__ == "__main__"

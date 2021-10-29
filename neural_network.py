@@ -29,6 +29,8 @@ class NeuralNetwork():
         self._normalise_state = normalise_state
         self._norm_domain_params_low = norm_domain_params_low
         self._norm_domain_params_high = norm_domain_params_high
+        print('init norm low:', self._norm_domain_params_low)
+        print('init norm high:', self._norm_domain_params_high)
 
         self._decoder = decoder
 
