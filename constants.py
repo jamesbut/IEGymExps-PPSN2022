@@ -51,8 +51,8 @@ DOMAIN_PARAMETERS = [0.0008, 0.0010, 0.0012]
 DOMAIN_PARAMS_LOW = [0.]
 DOMAIN_PARAMS_HIGH = [0.005]
 # Set to None if domain params are NOT to be normalised
-DOMAIN_PARAMS_LOW = None
-DOMAIN_PARAMS_HIGH = None
+# DOMAIN_PARAMS_LOW = None
+# DOMAIN_PARAMS_HIGH = None
 
 
 if 'PyBulletEnv' in ENV_NAME:

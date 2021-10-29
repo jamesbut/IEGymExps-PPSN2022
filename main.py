@@ -40,6 +40,8 @@ def evo_run(env_name, completion_fitness, dir_path, exp_dir_path):
                             bias=consts.BIAS, w_lb=consts.W_LB, w_ub=consts.W_UB,
                             enforce_wb=consts.ENFORCE_WB,
                             domain_params_input=consts.DOMAIN_PARAMS_INPUT,
+                            normalise_state=consts.NORMALISE_STATE,
+                            norm_domain_params_low=consts.DOMAIN_PARAMS_LOW,
                             norm_domain_params_high=consts.DOMAIN_PARAMS_HIGH)
 
     env_kwargs = get_env_kwargs(env_name, consts.DOMAIN_PARAMETERS,

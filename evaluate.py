@@ -10,7 +10,6 @@ from maths import normalise
 
 # Apply operations to state before passing through network
 def build_state(state, network, env, env_name, env_kwargs):
-    print('state before:', state)
 
     if network.normalise_state:
         # Normalise state to [0, 1]
@@ -20,20 +19,13 @@ def build_state(state, network, env, env_name, env_kwargs):
     if network.domain_params_input:
         domain_param = get_domain_param_from_env_kwarg(env_kwargs, env_name)
         # Normalise domain parameters
-        print('low:', network.norm_domain_params_low)
-        print('high:', network.norm_domain_params_high)
         if network.norm_domain_params_low and network.norm_domain_params_high:
-            print('YES')
-            domain_param = normalise(domain_param,
-                                     network.norm_domain_params_low,
-                                     network.norm_domain_params_high)
-        else:
-            print('NO')
+            domain_param = normalise([domain_param],
+                                     network.norm_domain_params_high,
+                                     network.norm_domain_params_low)
         # Append domain parameters to state
         state = np.append(state, domain_param)
 
-    print('state after:', state)
-    quit()
     return state
 
 
