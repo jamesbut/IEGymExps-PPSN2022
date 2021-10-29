@@ -58,9 +58,9 @@ class NeuralNetwork():
         self._w_lb = w_lb
         self._w_ub = w_ub
         # If the length of the weight bounds is one, expand list to number of weights
-        if len(w_lb) == 1:
+        if w_lb and (len(w_lb) == 1):
             self._w_lb *= self.num_weights
-        if len(w_ub) == 1:
+        if w_ub and (len(w_ub) == 1):
             self._w_ub *= self.num_weights
         self._enforce_wb = enforce_wb
 

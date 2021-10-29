@@ -22,7 +22,7 @@ G_UB = [120.]
 Evolution execution constants
 '''
 
-PARALLELISE = False
+PARALLELISE = True
 RENDER = False
 RANDOMISE_HYPERPARAMETERS = False
 
@@ -70,7 +70,7 @@ BIAS = False
 # Evolve solution with domain parameters as input
 DOMAIN_PARAMS_INPUT = True
 
-NORMALISE_STATE = True
+NORMALISE_STATE = False
 
 
 # Evolve solution using indirect encoding

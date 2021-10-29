@@ -60,8 +60,6 @@ def run(network, env_name, run_num, env_kwargs=None, render=False):
         state, r, done, info = env.step(action_vals)
         state = build_state(state, network, env, env_name, env_kwargs)
 
-        quit()
-
         reward += r
 
         '''
