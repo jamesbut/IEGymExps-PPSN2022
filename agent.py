@@ -69,7 +69,7 @@ class Agent():
         self._fitness = fitness
 
     # Return bool for success or fail
-    def save(self, dir_path, file_name, trained_domain_params=None,
+    def save(self, dir_path, file_name, trained_env_wrapper=None,
              save_if_bounds_exceeded=False):
 
         # If weight bounds were exceeded do not save
@@ -82,21 +82,21 @@ class Agent():
             shutil.rmtree(dir_path)
         os.makedirs(dir_path)
 
-        data = vars(self)
-        del data['_network']
-        print(data)
-        #print(type(data['_network']))
+        # Get dictionary representation for serialisation
+        agent_data = self.to_dict()
+        if trained_env_wrapper is not None:
+            agent_data['env'] = trained_env_wrapper.to_dict()
 
-        agent_file_path = dir_path + file_name + '.json'
-
-        with open(agent_file_path, 'w') as f:
-            json.dump(data, f, indent=4)
+        agent_file_path = dir_path + file_name
+        with open(agent_file_path + '.json', 'w') as f:
+            json.dump(agent_data, f, indent=4)
 
         # Save decoder
-        #self._decoder.save(agent_file_path + '_decoder.pt')
+        if self._decoder:
+            self._decoder.save(agent_file_path + '_decoder.pt')
 
         # Save controller network
-        #self._network.save(agent_file_path + '_network.pt')
+        self._network.save(agent_file_path + '_network.pt')
 
         return True
 
@@ -125,3 +125,13 @@ class Agent():
         except IOError:
             # No problem if there is not a decoder
             pass
+
+    def to_dict(self):
+
+        agent_dict = {
+            'fitness': self._fitness,
+            'genotype': self._genotype,
+            'network': self._network.to_dict()
+        }
+
+        return agent_dict

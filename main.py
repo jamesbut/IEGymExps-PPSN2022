@@ -101,7 +101,7 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
         agent.genotype = hof[0]
         agent.fitness = hof[0].fitness.values[0]
         g_saved = agent.save(run_path, consts.WINNER_FILE_NAME,
-                             consts.DOMAIN_PARAMETERS, consts.SAVE_IF_WB_EXCEEDED)
+                             env_wrapper, consts.SAVE_IF_WB_EXCEEDED)
 
         # Save population statistics
         if g_saved:

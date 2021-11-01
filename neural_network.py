@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import sys
 import copy
-import json
 
 
 class NeuralNetwork():
@@ -169,18 +168,6 @@ class NeuralNetwork():
                                                    len(weights), len(w_ub)))
             sys.exit(1)
 
-    '''
-    def __repr__(self):
-        dict_repr = vars(self)
-        #dict_repr['weights'] = self.weights
-        #print('_nn:', self._nn)
-        #dict_repr['_nn'] = str(self._nn)
-        #print(dict_repr)
-
-        #return json.dumps(dict_repr)
-        return str(dict_repr)
-    '''
-
     def _set_weights_err_msg(self, weights_len, num_weights_required):
         return "Trying to set {} weights to an NN that requires {} weights" \
             .format(weights_len, num_weights_required)
@@ -190,3 +177,16 @@ class NeuralNetwork():
 
     def _read(self, file_path):
         return torch.load(file_path)
+
+    def to_dict(self):
+
+        network_dict = {
+            'num_inputs': self._num_inputs,
+            'num_outputs': self._num_outputs,
+            'num_hidden_layers': self._num_hidden_layers,
+            'neurons_per_hidden_layer': self._neurons_per_hidden_layer,
+            'bias': self._bias,
+            'weights': self.weights
+        }
+
+        return network_dict

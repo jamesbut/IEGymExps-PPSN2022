@@ -64,14 +64,19 @@ class EnvWrapper():
 
         return state
 
-    def reset(self):
-        return self._process_state(self._env.reset())
+    def to_dict(self):
 
-    def render(self):
-        self._env.render()
+        env_dict = {
+            'env_name': self._env_name,
+            'completion_fitness': self._completion_fitness,
+            'domain_params': self._domain_params,
+            'domain_params_input': self._domain_params_input,
+            'normalise_state': self._normalise_state,
+            'domain_params_low': self._domain_params_low,
+            'domain_params_high': self._domain_params_high
+        }
 
-    def close(self):
-        self._env.close()
+        return env_dict
 
     @property
     def domain_params(self):
@@ -88,3 +93,13 @@ class EnvWrapper():
     @property
     def action_space(self):
         return self._env.action_space
+
+    def reset(self):
+        return self._process_state(self._env.reset())
+
+    def render(self):
+        self._env.render()
+
+    def close(self):
+        self._env.close()
+
