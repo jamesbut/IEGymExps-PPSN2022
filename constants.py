@@ -6,8 +6,8 @@ Evolutionary algorithm constants
 INIT_SIGMA = 1.
 
 # Number of children to produce at each generation
-LAMBDA = 100
-NUM_GENS = 100
+LAMBDA = 10
+NUM_GENS = 1
 NUM_EVO_RUNS = 1
 
 # Gene bounds
@@ -22,7 +22,7 @@ G_UB = [120.]
 Evolution execution constants
 '''
 
-PARALLELISE = True
+PARALLELISE = False
 RENDER = False
 RANDOMISE_HYPERPARAMETERS = False
 
