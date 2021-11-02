@@ -66,6 +66,8 @@ Controller network constants
 NUM_HIDDEN_LAYERS = 0
 NEURONS_PER_HIDDEN_LAYER = 0
 BIAS = False
+HIDDEN_LAYER_ACTIV_FUNC = 'relu'
+FINAL_LAYER_ACTIV_FUNC = 'sigmoid'
 
 # Evolve solution with domain parameters as input
 DOMAIN_PARAMS_INPUT = True
@@ -73,7 +75,7 @@ DOMAIN_PARAMS_INPUT = True
 NORMALISE_STATE = False
 
 # Evolve solution using indirect encoding
-USE_DECODER = True
+USE_DECODER = False
 DECODER_PATH = 'generator.pt'
 
 # Weight bounds

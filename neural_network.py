@@ -4,12 +4,15 @@ import sys
 import copy
 
 
-class NeuralNetwork():
+class NeuralNetwork(torch.nn.Module):
 
     def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
+                 hidden_activ_func='relu', final_activ_func='sigmoid',
                  bias=True, w_lb=None, w_ub=None, enforce_wb=True,
                  file_path=None):
+
+        super(NeuralNetwork, self).__init__()
 
         if not file_path:
 
@@ -18,6 +21,8 @@ class NeuralNetwork():
             self._num_hidden_layers = num_hidden_layers
             self._neurons_per_hidden_layer = neurons_per_hidden_layer
             self._bias = bias
+            self._hidden_activ_func = hidden_activ_func
+            self._final_activ_func = final_activ_func
 
             # Build neural net
             self._nn = self._build_nn()
@@ -50,20 +55,20 @@ class NeuralNetwork():
                                           self._neurons_per_hidden_layer,
                                           bias=self._bias))
             # Hidden layers have ReLU activation
-            layers.append(torch.nn.ReLU())
+            layers.append(self._activ_func_from_string(self._hidden_activ_func))
 
             for i in range(self._num_hidden_layers - 1):
                 layers.append(torch.nn.Linear(self._neurons_per_hidden_layer,
                                               self._neurons_per_hidden_layer,
                                               bias=self._bias))
-                layers.append(torch.nn.ReLU())
+                layers.append(self._activ_func_from_string(self._hidden_activ_func))
 
             layers.append(torch.nn.Linear(self._neurons_per_hidden_layer,
                                           self._num_outputs,
                                           bias=self._bias))
 
         # Final layer goes through Sigmoid
-        layers.append(torch.nn.Sigmoid())
+        layers.append(self._activ_func_from_string(self._final_activ_func))
 
         return torch.nn.Sequential(*layers).double()
 
@@ -185,8 +190,20 @@ class NeuralNetwork():
             'num_outputs': self._num_outputs,
             'num_hidden_layers': self._num_hidden_layers,
             'neurons_per_hidden_layer': self._neurons_per_hidden_layer,
+            'hidden_layer_activation_function': self._hidden_activ_func,
+            'final_layer_activation_function': self._final_activ_func,
             'bias': self._bias,
             'weights': self.weights
         }
 
         return network_dict
+
+    # Get activation function from specifying string
+    def _activ_func_from_string(self, func_string):
+
+        if func_string == 'relu':
+            return torch.nn.ReLU()
+        elif func_string == 'sigmoid':
+            return torch.nn.Sigmoid()
+        else:
+            raise KeyError('Activation function: {} not known'.format(func_string))

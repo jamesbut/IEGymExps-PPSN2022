@@ -1,4 +1,3 @@
-import csv
 import os
 import shutil
 import json
@@ -9,8 +8,9 @@ class Agent():
 
     def __init__(self, num_inputs=None, num_outputs=None,
                  num_hidden_layers=0, neurons_per_hidden_layer=0,
-                 genotype=None, agent_path=None, decoder=None,
-                 bias=True, w_lb=None, w_ub=None, enforce_wb=True):
+                 hidden_activ_func='relu', final_activ_func='sigmoid',
+                 bias=True, w_lb=None, w_ub=None, enforce_wb=True,
+                 genotype=None, agent_path=None, decoder=None):
 
         # If an agent path is given, read from file
         if agent_path:
@@ -21,9 +21,10 @@ class Agent():
 
             self._decoder = decoder
 
-            self._network = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
-                                          neurons_per_hidden_layer, bias, w_lb, w_ub,
-                                          enforce_wb)
+            self._network = NeuralNetwork(num_inputs, num_outputs,
+                                          num_hidden_layers, neurons_per_hidden_layer,
+                                          hidden_activ_func, final_activ_func, bias,
+                                          w_lb, w_ub, enforce_wb)
             self._genotype = self._network.weights
 
         self._fitness = None

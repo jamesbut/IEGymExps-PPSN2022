@@ -37,10 +37,11 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
             print("Could not find requested decoder for evolution:",
                   consts.DECODER_PATH)
 
-    agent = Agent(num_inputs, num_outputs, consts.NUM_HIDDEN_LAYERS,
-                  consts.NEURONS_PER_HIDDEN_LAYER, decoder=decoder,
+    agent = Agent(num_inputs, num_outputs,
+                  consts.NUM_HIDDEN_LAYERS, consts.NEURONS_PER_HIDDEN_LAYER,
+                  consts.HIDDEN_LAYER_ACTIV_FUNC, consts.FINAL_LAYER_ACTIV_FUNC,
                   bias=consts.BIAS, w_lb=consts.W_LB, w_ub=consts.W_UB,
-                  enforce_wb=consts.ENFORCE_WB)
+                  enforce_wb=consts.ENFORCE_WB, decoder=decoder)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, agent=agent, env_wrapper=env_wrapper,
@@ -132,6 +133,7 @@ def indv_run(agent_path, domain_params, render=True):
 
 def main():
 
+    # TODO: Take command line argument for training
     ae_train = False
     if ae_train:
         train_ae(sys.argv[1])
