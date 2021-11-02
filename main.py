@@ -1,16 +1,15 @@
-from agent import Agent
 from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np
 import uuid
 import sys
-import torch
+from agent import Agent
 from data import dump_data, create_exp_dir_name
-from domain_params import get_env_kwargs
 from model_training import train_ae, train_vae, train_gan
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
+from neural_network import NeuralNetwork
 import constants as consts
 
 # Suppress scientific notation
@@ -27,14 +26,13 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
     num_inputs = len(state)
     num_outputs = len(env_wrapper.action_space.high)
 
-    # TODO: Change to NeuralNetwork
+    # Read decoder for evolution if specified
     decoder = None
     if consts.USE_DECODER:
-        decoder_path = 'generator.pt'
         try:
-            decoder = torch.load(decoder_path)
+            decoder = NeuralNetwork(file_path=consts.DECODER_PATH)
         except IOError:
-            print("Could not find requested decoder!!:", decoder_path)
+            print("Could not find requested decoder for evolution:", consts.DECODER_PATH)
 
     agent = Agent(num_inputs, num_outputs, consts.NUM_HIDDEN_LAYERS,
                   consts.NEURONS_PER_HIDDEN_LAYER, decoder=decoder,

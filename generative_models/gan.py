@@ -5,6 +5,7 @@ from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
 from plotter import read_and_plot
 
+
 class Generator(nn.Module):
 
     def __init__(self, code_size, num_outputs, num_hidden_neurons=None):
@@ -18,7 +19,6 @@ class Generator(nn.Module):
         else:
             self.l1 = nn.Linear(code_size, self.num_hidden_neurons)
             self.l2 = nn.Linear(self.num_hidden_neurons, num_outputs)
-
 
     def forward(self, x):
 
@@ -43,7 +43,6 @@ class Discriminator(nn.Module):
             self.l1 = nn.Linear(num_inputs, self.num_hidden_neurons)
             self.l2 = nn.Linear(self.num_hidden_neurons, 1)
 
-
     def forward(self, x):
 
         if self.num_hidden_neurons is None:
@@ -51,7 +50,6 @@ class Discriminator(nn.Module):
 
         else:
             return F.sigmoid(self.l2(F.relu(self.l1(x))))
-
 
 
 class GAN():
@@ -76,7 +74,7 @@ class GAN():
 
         loss = nn.BCELoss()
 
-        #Generate batches
+        # Generate batches
         batches = generate_batches(self.training_data, batch_size, shuffle=True)
 
         for i in range(training_steps):
@@ -86,18 +84,18 @@ class GAN():
 
                 self.discriminator.zero_grad()
 
-                #Train discriminator on real data
+                # Train discriminator on real data
                 d_real_output = self.discriminator(batch)
 
                 true_labels = torch.Tensor([[1.] * batch.size(0)]).T
                 d_real_loss = loss(d_real_output, true_labels)
                 d_real_loss.backward()
 
-                #Generate fake data using generator
+                # Generate fake data using generator
                 noise = torch.randn(batch.size(0), self.code_size)
                 fake_data = self.generator(noise)
 
-                #Train discriminator on false data
+                # Train discriminator on false data
                 d_fake_output = self.discriminator(fake_data.detach())
 
                 false_labels = torch.Tensor([[0.] * batch.size(0)]).T
@@ -106,7 +104,7 @@ class GAN():
 
                 self.d_optimiser.step()
 
-                #Train generator
+                # Train generator
                 self.generator.zero_grad()
                 d_output = self.discriminator(fake_data)
                 g_loss = loss(d_output, true_labels)
@@ -117,8 +115,7 @@ class GAN():
                 d_total_loss += d_real_loss + d_fake_loss
                 g_total_loss += g_loss
 
-
-            #Print loss
+            # Print loss
             d_avg_loss = d_total_loss / (2 * len(batches))
             g_avg_loss = g_total_loss / len(batches)
             print("Step: {}    D loss: {}       G loss: {}".format(i,
@@ -128,7 +125,7 @@ class GAN():
     def test(self, rand_code=False, plot=False, train_data_dir=None):
 
         if rand_code:
-            #Generate fake data using generator
+            # Generate fake data using generator
             noise = torch.randn(self.training_data.size(0), self.code_size)
             fake_data = self.generator(noise)
 

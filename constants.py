@@ -72,9 +72,9 @@ DOMAIN_PARAMS_INPUT = True
 
 NORMALISE_STATE = False
 
-
 # Evolve solution using indirect encoding
-USE_DECODER = False
+USE_DECODER = True
+DECODER_PATH = 'generator.pt'
 
 # Weight bounds
 # W_LB = [-10., -10.]
