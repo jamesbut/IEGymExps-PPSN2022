@@ -160,6 +160,7 @@ def main():
     exp_dir_name = create_exp_dir_name(exp_dir_path)
     exp_dir_path += '/' + exp_dir_name + '/'
 
+    # Evolutionary run
     if (len(sys.argv) == 1) or ('-cmaes_centroid' in sys.argv):
 
         env_wrapper = EnvWrapper(consts.ENV_NAME, consts.COMPLETION_FITNESS,
@@ -170,6 +171,8 @@ def main():
         for i in range(consts.NUM_EVO_RUNS):
             print("Evo run: ", i)
             evo_run(env_wrapper, consts.DATA_DIR_PATH, exp_dir_path)
+
+    # Individual run
     else:
 
         print("Individual run")
