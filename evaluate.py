@@ -56,12 +56,15 @@ def evaluate(genome=None, agent=None, env_wrapper=None,
 
     # The number of trials is taken as the number of domain paramaters in EnvWrapper
     for trial_num in range(len(env_wrapper.domain_params)):
+
+        if verbosity:
+            print("Domain parameters:", env_wrapper.domain_params[trial_num])
+
         env_wrapper.make_env(trial_num)
         r = run(agent, env_wrapper, render)
         rewards.append(r)
 
         if verbosity:
-            print("Domain parameters:", env_wrapper.domain_params[trial_num])
             print("Reward: ", r)
 
     if avg_fitnesses:

@@ -21,12 +21,12 @@ class Agent():
 
             self._decoder = decoder
 
-            self._fitness = None
-
             self._network = NeuralNetwork(num_inputs, num_outputs, num_hidden_layers,
                                           neurons_per_hidden_layer, bias, w_lb, w_ub,
                                           enforce_wb)
             self._genotype = self._network.weights
+
+        self._fitness = None
 
         # Setting the genotype pushes the genotype through the decoder (if there is one)
         # and sets the networks weights
@@ -100,31 +100,24 @@ class Agent():
 
         return True
 
-    def _read_genotype(self, genotype_filepath):
-        with open(genotype_filepath, 'r') as genotype_file:
-            reader = csv.reader(genotype_file)
-            genotype = list(map(float, list(reader)[0]))
+    def _read(self, agent_filepath):
 
-        # Remove fitness
-        del genotype[0]
+        # Read genotype
+        with open(agent_filepath + '.json', 'r') as f:
+            data = json.load(f)
+            genotype = data['genotype']
 
-        return genotype
-
-    def _read_metadata(self, genotype_filepath):
-        metadata_filepath = genotype_filepath + '_metadata.json'
-
-        with open(metadata_filepath, 'r') as f:
-            metadata = json.load(f)
-
-        return metadata
-
-    def _read_decoder(self, genotype_filepath):
-        decoder_path = genotype_filepath + '_decoder.pt'
+        # Attempt to read decoder
         try:
-            self._decoder = torch.load(decoder_path)
+            decoder = NeuralNetwork(file_path=agent_filepath + '_decoder.pt')
         except IOError:
             # No problem if there is not a decoder
-            pass
+            decoder = None
+
+        # Read network (phenotype)
+        network = NeuralNetwork(file_path=agent_filepath + '_network.pt')
+
+        return genotype, decoder, network
 
     def to_dict(self):
 

@@ -5,15 +5,17 @@
 
 import gym
 import numpy as np
+import json
 from maths import normalise
 from domain_params import get_env_kwargs
 
 
 class EnvWrapper():
 
-    def __init__(self, env_name, completion_fitness=None, domain_params=None,
+    def __init__(self, env_name=None, completion_fitness=None, domain_params=None,
                  domain_params_input=False, normalise_state=False,
-                 domain_params_low=None, domain_params_high=None):
+                 domain_params_low=None, domain_params_high=None,
+                 env_path=None):
 
         self._env_name = env_name
         self._completion_fitness = completion_fitness
@@ -23,6 +25,9 @@ class EnvWrapper():
         self._normalise_state = normalise_state
         self._domain_params_low = domain_params_low
         self._domain_params_high = domain_params_high
+
+        if env_path:
+            self._read(env_path)
 
         self._domain_param = None
 
@@ -64,6 +69,19 @@ class EnvWrapper():
 
         return state
 
+    def _read(self, file_path):
+
+        with open(file_path + '.json', 'r') as f:
+            data = json.load(f)
+
+        env_data = data['env']
+
+        self._env_name = env_data['env_name']
+        self._domain_params_input = env_data['domain_params_input']
+        self._normalise_state = env_data['normalise_state']
+        self._domain_params_low = env_data['domain_params_low']
+        self._domain_params_high = env_data['domain_params_high']
+
     def to_dict(self):
 
         env_dict = {
@@ -102,4 +120,3 @@ class EnvWrapper():
 
     def close(self):
         self._env.close()
-

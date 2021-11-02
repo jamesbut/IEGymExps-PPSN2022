@@ -27,6 +27,7 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
     num_inputs = len(state)
     num_outputs = len(env_wrapper.action_space.high)
 
+    # TODO: Change to NeuralNetwork
     decoder = None
     if consts.USE_DECODER:
         decoder_path = 'generator.pt'
@@ -112,15 +113,14 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
         pool.close()
 
 
-def indv_run(genotype_path, env_name, domain_parameters, render=True):
+def indv_run(agent_path, domain_params, render=True):
 
     # render = False
 
-    env_kwargs = get_env_kwargs(env_name, domain_parameters)
+    agent = Agent(agent_path=agent_path)
+    env_wrapper = EnvWrapper(env_path=agent_path, domain_params=domain_params)
 
-    network = NeuralNetwork(genotype_path=genotype_path)
-    rewards = evaluate(network=network,
-                       env_name=env_name, env_kwargs=env_kwargs, render=render,
+    rewards = evaluate(agent=agent, env_wrapper=env_wrapper, render=render,
                        verbosity=True)
 
     print("Rewards: ", rewards)
@@ -169,7 +169,7 @@ def main():
         indv_dir = sys.argv[1]
         indv_path = consts.DATA_DIR_PATH + indv_dir + '/' + consts.WINNER_FILE_NAME
 
-        indv_run(indv_path, consts.ENV_NAME, consts.DOMAIN_PARAMETERS)
+        indv_run(indv_path, consts.DOMAIN_PARAMETERS)
 
 
 # Some bug in DEAP means that I have to create individual before if __name__ == "__main__"
