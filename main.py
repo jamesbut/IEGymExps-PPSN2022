@@ -30,9 +30,12 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
     decoder = None
     if consts.USE_DECODER:
         try:
-            decoder = NeuralNetwork(file_path=consts.DECODER_PATH)
+            #decoder = NeuralNetwork(file_path=consts.DECODER_PATH)
+            import torch
+            decoder = torch.load(consts.DECODER_PATH)
         except IOError:
-            print("Could not find requested decoder for evolution:", consts.DECODER_PATH)
+            print("Could not find requested decoder for evolution:",
+                  consts.DECODER_PATH)
 
     agent = Agent(num_inputs, num_outputs, consts.NUM_HIDDEN_LAYERS,
                   consts.NEURONS_PER_HIDDEN_LAYER, decoder=decoder,

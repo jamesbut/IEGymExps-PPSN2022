@@ -11,20 +11,19 @@ class Generator(nn.Module):
     def __init__(self, code_size, num_outputs, num_hidden_neurons=None):
         super(Generator, self).__init__()
 
-        self.num_hidden_neurons = num_hidden_neurons
+        self._num_hidden_neurons = num_hidden_neurons
 
-        if self.num_hidden_neurons is None:
+        if self._num_hidden_neurons is None:
             self.l1 = nn.Linear(code_size, num_outputs)
 
         else:
-            self.l1 = nn.Linear(code_size, self.num_hidden_neurons)
-            self.l2 = nn.Linear(self.num_hidden_neurons, num_outputs)
+            self.l1 = nn.Linear(code_size, self._num_hidden_neurons)
+            self.l2 = nn.Linear(self._num_hidden_neurons, num_outputs)
 
     def forward(self, x):
 
-        if self.num_hidden_neurons is None:
+        if self._num_hidden_neurons is None:
             return self.l1(x)
-
         else:
             return self.l2(F.relu(self.l1(x)))
 
