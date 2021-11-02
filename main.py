@@ -133,20 +133,26 @@ def indv_run(agent_path, domain_params, render=True):
 
 def main():
 
-    # TODO: Take command line argument for training
-    ae_train = False
-    if ae_train:
-        train_ae(sys.argv[1])
-        return
+    # Train decoder
+    if '-train_decoder' in sys.argv:
 
-    vae_train = False
-    if vae_train:
-        train_vae(sys.argv[1])
-        return
+        # Parse command line for information on how to train the decoder
+        td_index = sys.argv.index('-train_decoder')
+        # Read in the type of model: 'gan', 'ae' or 'vae'
+        gen_model_type = sys.argv[td_index + 1]
+        # Give training data directory to train model with
+        gen_model_train_data_dir = sys.argv[td_index + 2]
 
-    gan_train = False
-    if gan_train:
-        train_gan(sys.argv[1])
+        if gen_model_type == 'ae':
+            train_ae(gen_model_train_data_dir)
+        elif gen_model_type == 'vae':
+            train_vae(gen_model_train_data_dir)
+        elif gen_model_type == 'gan':
+            train_gan(gen_model_train_data_dir)
+        else:
+            raise ValueError('{} is not a valid generative model type'
+                             .format(gen_model_type))
+
         return
 
     # Create experiment path
@@ -175,7 +181,8 @@ def main():
         indv_run(indv_path, consts.DOMAIN_PARAMETERS)
 
 
-# Some bug in DEAP means that I have to create individual before if __name__ == "__main__"
+# Some bug in DEAP means that I have to create individual before
+# if __name__ == "__main__"
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
