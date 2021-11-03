@@ -8,7 +8,7 @@ from neural_network import NeuralNetwork
 class GAN():
 
     def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, read_generator=False):
+                 neurons_per_hidden_layer, read_decoder=False):
 
         self._generator = NeuralNetwork(
             num_inputs=code_size,
@@ -24,8 +24,8 @@ class GAN():
             neurons_per_hidden_layer=neurons_per_hidden_layer,
             final_activ_func='sigmoid')
 
-        if read_generator:
-            self._generator = torch.load('generator.pt')
+        if read_decoder:
+            self._generator = NeuralNetwork(file_path='decoder.pt')
 
         self._g_optimiser = torch.optim.RMSprop(self._generator.parameters(),
                                                 lr=2e-4)
