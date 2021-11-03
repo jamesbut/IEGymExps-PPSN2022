@@ -86,22 +86,22 @@ class GAN():
                                                                    d_avg_loss,
                                                                    g_avg_loss))
 
-    def test(self, rand_code=False, plot=False, train_data_dir=None):
+    def test(self, rand_code=False, plot=False, train_data_dir=None,
+             data_dir_path=None, winner_file_name=None):
 
+        # Generate fake data using generator
         if rand_code:
-            # Generate fake data using generator
             noise = torch.randn(self._training_data.size(0), self._code_size)
-            fake_data = self._generator(noise)
-
         else:
+            noise = code_in_range(self._code_size, -4., 4., step_size=0.01)
+        fake_data = self._generator(noise)
 
-            code_range = code_in_range(self._code_size, -4., 4., step_size=0.01)
-            fake_data = self._generator(code_range)
-
+        print('Testing, fake data:')
         print(fake_data)
 
         if plot:
-            read_and_plot(train_data_dir, test_data=fake_data.detach().numpy())
+            read_and_plot(train_data_dir, data_dir_path, winner_file_name,
+                          fake_data.detach().numpy())
 
     def dump_decoder(self, file_path):
         torch.save(self._generator, file_path)

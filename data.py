@@ -6,11 +6,11 @@ import numpy as np
 import json
 
 
-def read_data(data_dir, dir_path, winner_file_name):
+def read_data(data_dir, data_dir_path, winner_file_name):
 
     # Get directories in data_dir
     try:
-        folder_paths, dir_path = get_sub_folders(data_dir, dir_path)
+        folder_paths, dir_path = get_sub_folders(data_dir, data_dir_path)
 
         # If there are no directories in data_dir, then look for data in data_dir
         if not folder_paths:

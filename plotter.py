@@ -41,11 +41,13 @@ def _fitness_analysis(fitnesses, folder_paths):
     print("Mean fitness:", mean_fitness)
 
 
-def read_and_plot(data_dir=None, dir_path=None, winner_file_name=None, test_data=None):
+def read_and_plot(data_dir=None, data_dir_path=None, winner_file_name=None,
+                  test_data=None):
 
     # Read data
     if data_dir is not None:
-        fitnesses, genos, phenos, params, folder_paths = read_data(data_dir, dir_path,
+        fitnesses, genos, phenos, params, folder_paths = read_data(data_dir,
+                                                                   data_dir_path,
                                                                    winner_file_name)
 
     print("Fitnesses:\n", fitnesses)
