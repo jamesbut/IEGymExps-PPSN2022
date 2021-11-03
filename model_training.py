@@ -1,81 +1,42 @@
-from data import *
-from generative_models.gan import *
-from generative_models.autoencoder import *
-from generative_models.vae import *
+from generative_models.autoencoder import Autoencoder
+from generative_models.vae import VAE
+from generative_models.gan import GAN
+from data import read_data
+from torch import Tensor
 
-def train_gan(train_data_path):
 
-    code_size = 2
-    #Set to none if no hidden layer required
-    num_hidden_neurons = 64
-    training_steps = 2000
-    batch_size = 256
+def train_generative_model(gen_model_type, code_size, num_hidden_layers,
+                           neurons_per_hidden_layer, num_epochs, batch_size,
+                           train_data_path, dump_file_path):
 
+    # Read training data
     _, _, phenotypes, _, _ = read_data(train_data_path)
-    training_data = torch.Tensor(phenotypes)
-    #training_data = create_synthetic_data(code_size)
+    train_data = Tensor(phenotypes)
 
-    test = False
+    # Build model
+    gen_model = _build_generative_model(gen_model_type, code_size, train_data.size(1),
+                                        num_hidden_layers, neurons_per_hidden_layer)
 
-    if not test:
+    # Train model
+    gen_model.train(train_data, num_epochs, batch_size)
+    gen_model.dump_decoder(dump_file_path)
 
-        gan = GAN(code_size, training_data, read_generator=False,
-                  num_hidden_neurons=num_hidden_neurons)
-        gan.train(training_steps, batch_size)
-        gan.dump_generator()
-        gan.test(plot=True, train_data_dir=train_data_path)
-        #gan.test(plot=True)
+    # Test model
+    gen_model.test(plot=True, train_data_dir=train_data_path)
 
+
+def _build_generative_model(gen_model_type, code_size, data_size,
+                            num_hidden_layers, neurons_per_hidden_layer):
+
+    if gen_model_type == 'ae':
+        return Autoencoder(code_size, data_size,
+                           num_hidden_layers, neurons_per_hidden_layer)
+    elif gen_model_type == 'vae':
+        return VAE(code_size, data_size,
+                   num_hidden_layers, neurons_per_hidden_layer)
+    elif gen_model_type == 'gan':
+        return GAN(code_size, data_size,
+                   num_hidden_layers, neurons_per_hidden_layer)
     else:
-
-        gan = GAN(code_size, training_data, read_generator=True,
-                  num_hidden_neurons=num_hidden_neurons)
-        gan.test(plot=True, train_data_dir=train_data_path, rand_code=True)
-
-
-def train_ae(train_data_path):
-
-    code_size = 2
-    num_hidden_neurons = 32
-    training_steps = 2000
-    batch_size=256
-
-    _, _, phenotypes, _, _ = read_data(train_data_path)
-    training_data = torch.Tensor(phenotypes)
-    #training_data = create_synthetic_data(code_size)
-
-    test=False
-
-    if not test:
-
-        ae = Autoencoder(code_size, training_data, read_decoder=False,
-                         num_hidden_neurons=num_hidden_neurons)
-        ae.train(training_steps, batch_size)
-        ae.dump_decoder()
-        ae.test_decoder(plot=True, train_data_dir=train_data_path)
-
-    else:
-
-        ae = Autoencoder(code_size, training_data, read_decoder=True,
-                         num_hidden_neurons=num_hidden_neurons)
-        ae.test_decoder(plot=True, train_data_dir=train_data_path)
-
-
-def train_vae(train_data_path):
-
-    code_size = 1
-    training_steps = 200
-    batch_size = 256
-
-    _, _, phenotypes, _, _ = read_data(train_data_path)
-    training_data = torch.Tensor(phenotypes)
-    #training_data = create_synthetic_data(code_size)
-
-    vae = VAE(code_size, training_data)
-
-    vae.train(training_steps, batch_size)
-
-    #vae.test()
-
-    vae.dump_decoder()
-
+        raise ValueError('{} is not a valid generative model type'
+                         .format(gen_model_type))

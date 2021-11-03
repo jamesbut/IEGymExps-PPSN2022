@@ -119,5 +119,5 @@ class VAE(nn.Module):
     def test(self):
         self(self.training_data, verbosity=True)
 
-    def dump_decoder(self):
-        torch.save(self.decoder, "generator.pt")
+    def dump_decoder(self, file_path):
+        torch.save(self.decoder, file_path)

@@ -5,7 +5,7 @@ import uuid
 import sys
 from agent import Agent
 from data import dump_data, create_exp_dir_name
-from model_training import train_ae, train_vae, train_gan
+from model_training import train_generative_model
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
@@ -143,15 +143,12 @@ def main():
         # Give training data directory to train model with
         gen_model_train_data_dir = sys.argv[td_index + 2]
 
-        if gen_model_type == 'ae':
-            train_ae(gen_model_train_data_dir)
-        elif gen_model_type == 'vae':
-            train_vae(gen_model_train_data_dir)
-        elif gen_model_type == 'gan':
-            train_gan(gen_model_train_data_dir)
-        else:
-            raise ValueError('{} is not a valid generative model type'
-                             .format(gen_model_type))
+        # Train generative model
+        train_generative_model(gen_model_type, consts.CODE_SIZE,
+                               consts.D_NUM_HIDDEN_LAYERS,
+                               consts.D_NEURONS_PER_HIDDEN_LAYER,
+                               consts.NUM_EPOCHS, consts.BATCH_SIZE,
+                               gen_model_train_data_dir, consts.DECODER_PATH)
 
         return
 

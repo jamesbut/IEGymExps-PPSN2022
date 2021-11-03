@@ -1,6 +1,6 @@
-'''
-Evolutionary algorithm constants
-'''
+####################################
+# Evolutionary algorithm constants #
+####################################
 
 # Initial standard deviation of the CMAES distribution
 INIT_SIGMA = 1.
@@ -17,19 +17,34 @@ NUM_EVO_RUNS = 1
 G_LB = [-120.]
 G_UB = [120.]
 
-
-'''
-Evolution execution constants
-'''
+# Evolution execution constants
 
 PARALLELISE = False
 RENDER = False
 RANDOMISE_HYPERPARAMETERS = False
 
+###############################
+# Indirect encoding constants #
+###############################
 
-'''
-Environment constants
-'''
+# Evolve solution using indirect encoding
+USE_DECODER = False
+
+# Generative model architecture
+CODE_SIZE = 2
+D_NUM_HIDDEN_LAYERS = 1
+D_NEURONS_PER_HIDDEN_LAYER = 64
+
+# IE training params
+NUM_EPOCHS = 2000
+BATCH_SIZE = 256
+
+DECODER_PATH = 'decoder.pt'
+
+
+#########################
+# Environment constants #
+#########################
 
 '''
 ENV_NAME = 'BipedalWalker-v3'
@@ -59,9 +74,9 @@ if 'PyBulletEnv' in ENV_NAME:
     import pybulletgym
 
 
-'''
-Controller network constants
-'''
+################################
+# Controller network constants #
+################################
 
 NUM_HIDDEN_LAYERS = 0
 NEURONS_PER_HIDDEN_LAYER = 0
@@ -71,12 +86,7 @@ FINAL_LAYER_ACTIV_FUNC = 'sigmoid'
 
 # Evolve solution with domain parameters as input
 DOMAIN_PARAMS_INPUT = True
-
 NORMALISE_STATE = False
-
-# Evolve solution using indirect encoding
-USE_DECODER = False
-DECODER_PATH = 'generator.pt'
 
 # Weight bounds
 # W_LB = [-10., -10.]
@@ -89,9 +99,9 @@ W_UB = [120.]
 ENFORCE_WB = False
 
 
-'''
-Logging constants
-'''
+#####################
+# Logging constants #
+#####################
 
 DATA_DIR_PATH = '../IndirectEncodingsExperiments/lib/NeuroEvo/data/'
 WINNER_FILE_NAME = 'best_winner_so_far'
