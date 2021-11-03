@@ -1,77 +1,42 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
 from plotter import read_and_plot
-
-
-class Generator(nn.Module):
-
-    def __init__(self, code_size, num_outputs, num_hidden_neurons=None):
-        super(Generator, self).__init__()
-
-        self._num_hidden_neurons = num_hidden_neurons
-
-        if self._num_hidden_neurons is None:
-            self.l1 = nn.Linear(code_size, num_outputs)
-
-        else:
-            self.l1 = nn.Linear(code_size, self._num_hidden_neurons)
-            self.l2 = nn.Linear(self._num_hidden_neurons, num_outputs)
-
-    def forward(self, x):
-
-        if self._num_hidden_neurons is None:
-            return self.l1(x)
-        else:
-            return self.l2(F.relu(self.l1(x)))
-
-
-class Discriminator(nn.Module):
-
-    def __init__(self, num_inputs, num_hidden_neurons=None):
-        super(Discriminator, self).__init__()
-
-        self.num_hidden_neurons = num_hidden_neurons
-
-        if self.num_hidden_neurons is None:
-            self.l1 = nn.Linear(num_inputs, 1)
-
-        else:
-            self.l1 = nn.Linear(num_inputs, self.num_hidden_neurons)
-            self.l2 = nn.Linear(self.num_hidden_neurons, 1)
-
-    def forward(self, x):
-
-        if self.num_hidden_neurons is None:
-            return F.sigmoid(self.l1(x))
-
-        else:
-            return F.sigmoid(self.l2(F.relu(self.l1(x))))
+from neural_network import NeuralNetwork
 
 
 class GAN():
 
-    def __init__(self, code_size, training_data_vec_size, num_hidden_layers,
+    def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
                  neurons_per_hidden_layer, read_generator=False):
 
-        self._generator = Generator(code_size, training_data_vec_size,
-                                    neurons_per_hidden_layer)
-        self._discriminator = Discriminator(training_data_vec_size,
-                                            neurons_per_hidden_layer)
+        self._generator = NeuralNetwork(
+            num_inputs=code_size,
+            num_outputs=train_data_vec_size,
+            num_hidden_layers=num_hidden_layers,
+            neurons_per_hidden_layer=neurons_per_hidden_layer,
+            final_activ_func=None)
+
+        self._discriminator = NeuralNetwork(
+            num_inputs=train_data_vec_size,
+            num_outputs=1,
+            num_hidden_layers=num_hidden_layers,
+            neurons_per_hidden_layer=neurons_per_hidden_layer,
+            final_activ_func='sigmoid')
 
         if read_generator:
             self._generator = torch.load('generator.pt')
 
-        self._g_optimiser = torch.optim.RMSprop(self._generator.parameters(), lr=2e-4)
-        self._d_optimiser = torch.optim.RMSprop(self._discriminator.parameters(), lr=5e-4)
+        self._g_optimiser = torch.optim.RMSprop(self._generator.parameters(),
+                                                lr=2e-4)
+        self._d_optimiser = torch.optim.RMSprop(self._discriminator.parameters(),
+                                                lr=5e-4)
 
         self._code_size = code_size
 
     def train(self, train_data, num_epochs, batch_size):
 
-        loss = nn.BCELoss()
+        loss = torch.nn.BCELoss()
 
         # Generate batches
         batches = generate_batches(train_data, batch_size, shuffle=True)

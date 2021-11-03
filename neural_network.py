@@ -68,15 +68,19 @@ class NeuralNetwork(torch.nn.Module):
                                           bias=self._bias))
 
         # Final layer goes through Sigmoid
-        layers.append(self._activ_func_from_string(self._final_activ_func))
+        if self._final_activ_func:
+            layers.append(self._activ_func_from_string(self._final_activ_func))
 
-        return torch.nn.Sequential(*layers).double()
+        return torch.nn.Sequential(*layers)
 
-    # Takes a list, passes through the network and returns a list
+    # Takes a list, numpy array or torch Tensor, passes it through the network and
+    # returns a torch Tensor
     def forward(self, x):
-        x = torch.tensor(x, dtype=torch.float64)
+        # Convert list or numpy array to torch tensor
+        if not isinstance(x, torch.Tensor):
+            x = torch.tensor(x)
         net_out = self._nn.forward(x)
-        return net_out.detach().numpy()
+        return net_out
 
     @property
     def num_inputs(self):
@@ -124,8 +128,7 @@ class NeuralNetwork(torch.nn.Module):
                 weight_index += params.numel()
 
                 # Resize and set new weights
-                params.data = torch.tensor(np.reshape(p_weights, params.size()),
-                                           dtype=torch.float64)
+                params.data = torch.tensor(np.reshape(p_weights, params.size()))
 
     # Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):

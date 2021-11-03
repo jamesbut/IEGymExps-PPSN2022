@@ -36,7 +36,7 @@ class Agent():
 
     # Takes a list, passes through the network and returns a list
     def forward(self, state):
-        return self._network.forward(state)
+        return self._network.forward(state).detach().numpy()
 
     # Returns size of genotype needed for this NN
     @property
