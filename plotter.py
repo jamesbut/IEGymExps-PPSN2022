@@ -1,28 +1,28 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-import csv
 from data import read_data
 
 np.set_printoptions(suppress=True)
 
-def __plot_data(train_phenotypes=None, params=None, test_phenotypes=None):
+
+def _plot_data(train_phenotypes=None, params=None, test_phenotypes=None):
 
     if train_phenotypes is not None:
         if params is not None:
-            plt.scatter(train_phenotypes[:,0], train_phenotypes[:,1],
-                        c=params[:,0], cmap='plasma')
-            cbar = plt.colorbar()
+            plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1],
+                        c=params[:, 0], cmap='plasma')
+            plt.colorbar()
         else:
-            plt.scatter(train_phenotypes[:,0], train_phenotypes[:,1])
+            plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1])
 
     if test_phenotypes is not None:
-        plt.scatter(test_phenotypes[:,0], test_phenotypes[:,1])
+        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1])
 
     plt.show()
 
 
-def __fitness_analysis(fitnesses, folder_paths):
+def _fitness_analysis(fitnesses, folder_paths):
 
     max_arg = np.argmax(fitnesses)
     max_fitness = fitnesses[max_arg]
@@ -42,7 +42,7 @@ def __fitness_analysis(fitnesses, folder_paths):
 
 def read_and_plot(data_dir=None, test_data=None):
 
-    #Read data
+    # Read data
     if data_dir is not None:
         fitnesses, genos, phenos, params, folder_paths = read_data(data_dir)
 
@@ -51,11 +51,12 @@ def read_and_plot(data_dir=None, test_data=None):
     print("Phenotypes:\n", phenos)
     print("Params:\n", params[0])
 
-    #Provide fitness analysis
-    __fitness_analysis(fitnesses, folder_paths)
+    # Provide fitness analysis
+    _fitness_analysis(fitnesses, folder_paths)
 
-    #Plot training and/or test data
-    __plot_data(phenos, params, test_data)
+    # Plot training and/or test data
+    _plot_data(phenos, params, test_data)
+
 
 if __name__ == '__main__':
 
