@@ -3,24 +3,10 @@ import sys
 import csv
 from glob import glob
 import numpy as np
+import json
 
 
-def get_sub_folders(folders_dir,
-                    dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
-
-    dir_path += folders_dir
-
-    if os.path.isdir(dir_path):
-        # Get all folder names
-        folder_names = [x[0] for x in os.walk(dir_path)][1:]
-
-    else:
-        raise NotADirectoryError("{} is not a directory".format(dir_path))
-
-    return folder_names, dir_path
-
-
-def read_data(data_dir, dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/data/'):
+def read_data(data_dir, dir_path, winner_file_name):
 
     # Get directories in data_dir
     try:
@@ -34,16 +20,69 @@ def read_data(data_dir, dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/d
         print(e)
         sys.exit(1)
 
+    # Append winner file name to folder paths
+    for i in range(len(folder_paths)):
+        folder_paths[i] += '/' + winner_file_name
+
+    # Check for old data format
+    if check_for_old_format(folder_paths[0]):
+        fitnesses, genos, phenos, domain_params = read_data_old_format(folder_paths)
+    else:
+        fitnesses, genos, phenos, domain_params = read_data_new_format(folder_paths)
+
+    return fitnesses, genos, phenos, domain_params, folder_paths
+
+
+# Check for old data format
+def check_for_old_format(data_path):
+    try:
+        open(data_path)
+        return True
+    except FileNotFoundError:
+        return False
+
+
+# Read new data format that uses json files
+def read_data_new_format(folder_paths):
+
     fitnesses = []
     genotypes = []
-    params = []
     phenotypes = []
+    domain_params = []
 
+    # Append .json to folder paths
     for i in range(len(folder_paths)):
-        folder_paths[i] += '/best_winner_so_far'
+        folder_paths[i] += '.json'
 
+    for fp in folder_paths:
         try:
-            with open(folder_paths[i]) as data_file:
+            with open(fp) as agent_file:
+                agent = json.load(agent_file)
+                print(agent)
+
+                fitnesses.append(agent['fitness'])
+                genotypes.append(agent['genotype'])
+                phenotypes.append(agent['network']['weights'])
+                domain_params.append(agent['env']['domain_params'])
+
+        except FileNotFoundError:
+            sys.exit("Could not find file named: " + fp)
+
+    return np.array(fitnesses), np.array(genotypes), np.array(phenotypes), \
+           np.array(domain_params)
+
+
+# Read old data format that was used by NeuroEvo C++ code
+def read_data_old_format(folder_paths):
+
+    fitnesses = []
+    genotypes = []
+    phenotypes = []
+    domain_params = []
+
+    for fp in folder_paths:
+        try:
+            with open(fp) as data_file:
 
                 csv_reader = csv.reader(data_file, delimiter=',')
 
@@ -59,14 +98,14 @@ def read_data(data_dir, dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/d
 
                     # Second row is parameters, if they are there
                     elif i == 1:
-                        params.append(row)
+                        domain_params.append(row)
 
                     # If an IE was used the phenotype is on the third row
                     elif i == 2:
                         phenotypes.append(row)
 
         except FileNotFoundError:
-            sys.exit("Could not find file named: " + folder_paths[i])
+            sys.exit("Could not find file named: " + fp)
 
     # If phenotypes are not in file, make phenotypes equal to the genotypes
     if not phenotypes:
@@ -76,8 +115,21 @@ def read_data(data_dir, dir_path='../IndirectEncodingsExperiments/lib/NeuroEvo/d
     return np.array(fitnesses), \
            np.array(genotypes), \
            np.array(phenotypes) if phenotypes else None, \
-           np.array(params) if params else None, \
-           folder_paths
+           np.array(domain_params) if domain_params else None
+
+
+def get_sub_folders(folders_dir, dir_path):
+
+    dir_path += folders_dir
+
+    if os.path.isdir(dir_path):
+        # Get all folder names
+        folder_names = [x[0] for x in os.walk(dir_path)][1:]
+
+    else:
+        raise NotADirectoryError("{} is not a directory".format(dir_path))
+
+    return folder_names, dir_path
 
 
 def dump_data(data, dir_path, file_name):

@@ -2,6 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from data import read_data
+import constants as consts
 
 np.set_printoptions(suppress=True)
 
@@ -40,11 +41,12 @@ def _fitness_analysis(fitnesses, folder_paths):
     print("Mean fitness:", mean_fitness)
 
 
-def read_and_plot(data_dir=None, test_data=None):
+def read_and_plot(data_dir=None, dir_path=None, winner_file_name=None, test_data=None):
 
     # Read data
     if data_dir is not None:
-        fitnesses, genos, phenos, params, folder_paths = read_data(data_dir)
+        fitnesses, genos, phenos, params, folder_paths = read_data(data_dir, dir_path,
+                                                                   winner_file_name)
 
     print("Fitnesses:\n", fitnesses)
     print("Genotypes:\n", genos)
@@ -60,4 +62,5 @@ def read_and_plot(data_dir=None, test_data=None):
 
 if __name__ == '__main__':
 
-    read_and_plot(sys.argv[1])
+    read_and_plot(data_dir=sys.argv[1], dir_path=consts.DATA_DIR_PATH,
+                  winner_file_name=consts.WINNER_FILE_NAME)
