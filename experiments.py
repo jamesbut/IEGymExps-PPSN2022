@@ -1,10 +1,7 @@
-#Some experiments that I might need to run frequently
+# Some experiments that I might need to run frequently
 
 import sys
-import csv
 import numpy as np
-from data import read_data, get_sub_folders
-from domain_params import get_env_kwargs
 from main import indv_run
 from constants import ENV_NAME
 from formatting import *
