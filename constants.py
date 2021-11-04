@@ -6,9 +6,9 @@
 INIT_SIGMA = 1.
 
 # Number of children to produce at each generation
-LAMBDA = 10
-NUM_GENS = 1
-NUM_EVO_RUNS = 2
+LAMBDA = 100
+NUM_GENS = 100
+NUM_EVO_RUNS = 1
 
 # Gene bounds
 # A list size of 1 applies this bound to all genes
@@ -28,7 +28,7 @@ RANDOMISE_HYPERPARAMETERS = False
 ###############################
 
 # Evolve solution using indirect encoding
-USE_DECODER = False
+USE_DECODER = True
 
 # Generative model architecture
 CODE_SIZE = 2
@@ -36,7 +36,7 @@ D_NUM_HIDDEN_LAYERS = 1
 D_NEURONS_PER_HIDDEN_LAYER = 64
 
 # IE training params
-NUM_EPOCHS = 1
+NUM_EPOCHS = 2000
 BATCH_SIZE = 256
 
 DECODER_PATH = 'decoder.pt'
@@ -58,8 +58,8 @@ ENV_NAME = 'InvertedDoublePendulum-v2'
 '''
 
 ENV_NAME = 'MountainCarContinuous-v0'
-# COMPLETION_FITNESS = 2.15
-COMPLETION_FITNESS = None
+COMPLETION_FITNESS = 2.15
+# COMPLETION_FITNESS = None
 # Engine powers
 DOMAIN_PARAMETERS = [0.0008, 0.0010, 0.0012]
 
@@ -85,7 +85,7 @@ HIDDEN_LAYER_ACTIV_FUNC = 'relu'
 FINAL_LAYER_ACTIV_FUNC = 'sigmoid'
 
 # Evolve solution with domain parameters as input
-DOMAIN_PARAMS_INPUT = True
+DOMAIN_PARAMS_INPUT = False
 NORMALISE_STATE = False
 
 # Weight bounds

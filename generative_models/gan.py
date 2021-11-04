@@ -104,4 +104,4 @@ class GAN():
                           fake_data.detach().numpy())
 
     def dump_decoder(self, file_path):
-        torch.save(self._generator, file_path)
+        self._generator.save(file_path)

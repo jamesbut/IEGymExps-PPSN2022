@@ -80,4 +80,4 @@ class Autoencoder(torch.nn.Module):
         self(self.training_data, verbosity=True)
 
     def dump_decoder(self, file_path):
-        torch.save(self._decoder, file_path)
+        self._decoder.save(file_path)

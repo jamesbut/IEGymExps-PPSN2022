@@ -54,10 +54,15 @@ class Agent():
     @genotype.setter
     def genotype(self, genotype):
 
+        # Convert genotype to float32
+        # DEAP produces float64 values but all the other values of the system are
+        # float32
+        genotype = [float(g) for g in genotype]
+
         self._genotype = genotype
 
         if self._decoder is not None:
-            self._network.weights = self._decoder.forward(genotype)
+            self._network.weights = self._decoder.forward(genotype).detach()
         else:
             self._network.weights = genotype
 

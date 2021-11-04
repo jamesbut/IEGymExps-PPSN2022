@@ -77,14 +77,14 @@ class NeuralNetwork(torch.nn.Module):
     # returns a torch Tensor
     def forward(self, x):
         # Convert list or numpy array to torch tensor
-        if not isinstance(x, torch.Tensor):
-            x = torch.tensor(x)
+        if not isinstance(x, torch.FloatTensor):
+            x = torch.as_tensor(x, dtype=torch.float32)
         net_out = self._nn.forward(x)
         return net_out
 
     @property
     def num_inputs(self):
-        return self._nn.l1.in_features
+        return self._nn[0].in_features
 
     # Returns the number of weights
     @property
@@ -108,6 +108,10 @@ class NeuralNetwork(torch.nn.Module):
     # This also checks the new weights against a weight lower and upper bound
     @weights.setter
     def weights(self, new_weights):
+
+        # Convert to numpy array if torch Tensor is given
+        if isinstance(new_weights, torch.Tensor):
+            new_weights = new_weights.numpy()
 
         # Check new weights is of correct size
         num_weights_required = self.num_weights
