@@ -19,7 +19,7 @@ G_UB = [120.]
 
 # Evolution execution constants
 
-PARALLELISE = False
+PARALLELISE = True
 RENDER = False
 RANDOMISE_HYPERPARAMETERS = False
 
@@ -28,7 +28,7 @@ RANDOMISE_HYPERPARAMETERS = False
 ###############################
 
 # Evolve solution using indirect encoding
-USE_DECODER = True
+USE_DECODER = False
 
 # Generative model architecture
 CODE_SIZE = 2
@@ -61,7 +61,7 @@ ENV_NAME = 'MountainCarContinuous-v0'
 COMPLETION_FITNESS = 2.15
 # COMPLETION_FITNESS = None
 # Engine powers
-DOMAIN_PARAMETERS = [0.0008, 0.0010, 0.0012]
+DOMAIN_PARAMETERS = [0.0008]
 
 DOMAIN_PARAMS_LOW = [0.]
 DOMAIN_PARAMS_HIGH = [0.005]

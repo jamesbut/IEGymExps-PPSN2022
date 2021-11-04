@@ -132,7 +132,8 @@ class NeuralNetwork(torch.nn.Module):
                 weight_index += params.numel()
 
                 # Resize and set new weights
-                params.data = torch.tensor(np.reshape(p_weights, params.size()))
+                params.data = torch.tensor(np.reshape(p_weights, params.size()),
+                                           dtype=torch.float32)
 
     # Bound weights between upper and lower bounds
     def _bound_weights(self, weights, w_lb, w_ub):
