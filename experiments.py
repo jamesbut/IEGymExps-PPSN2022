@@ -7,7 +7,7 @@ from constants import ENV_NAME
 from formatting import format_data_table, list_to_string
 from itertools import product, filterfalse
 from helper import more_than_one_true, lists_from_bools
-from data import read_data
+from data import read_agent_data
 import copy
 
 np.set_printoptions(suppress=True)
@@ -22,7 +22,7 @@ def find_trained_solutions(train_dirs):
     train_params = []
 
     for td in train_dirs:
-        fitnesses, _, _, params, paths = read_data(td)
+        fitnesses, _, _, params, paths = read_agent_data(td)
 
         # If more than one solution has been read in, select solution with highest
         # fitness

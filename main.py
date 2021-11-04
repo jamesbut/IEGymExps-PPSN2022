@@ -139,15 +139,15 @@ def main():
         # Read in the type of model: 'gan', 'ae' or 'vae'
         gen_model_type = sys.argv[td_index + 1]
         # Give training data directory to train model with
-        gen_model_train_data_dir = sys.argv[td_index + 2]
+        gen_model_train_data_exp_dir = sys.argv[td_index + 2]
 
         # Train generative model
         train_generative_model(gen_model_type, consts.CODE_SIZE,
                                consts.D_NUM_HIDDEN_LAYERS,
                                consts.D_NEURONS_PER_HIDDEN_LAYER,
                                consts.NUM_EPOCHS, consts.BATCH_SIZE,
-                               gen_model_train_data_dir, consts.DECODER_PATH,
-                               consts.DATA_DIR_PATH, consts.WINNER_FILE_NAME)
+                               consts.DATA_DIR_PATH + gen_model_train_data_exp_dir,
+                               consts.DECODER_PATH, consts.WINNER_FILE_NAME)
 
         return
 

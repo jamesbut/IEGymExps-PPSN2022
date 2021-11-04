@@ -1,17 +1,16 @@
 from generative_models.autoencoder import Autoencoder
 from generative_models.vae import VAE
 from generative_models.gan import GAN
-from data import read_data
+from data import read_agent_data
 from torch import Tensor
 
 
 def train_generative_model(gen_model_type, code_size, num_hidden_layers,
                            neurons_per_hidden_layer, num_epochs, batch_size,
-                           train_data_path, dump_file_path, data_dir_path,
-                           winner_file_name):
+                           train_data_exp_path, dump_file_path, winner_file_name):
 
     # Read training data
-    _, _, phenotypes, _, _ = read_data(train_data_path, data_dir_path, winner_file_name)
+    _, _, phenotypes, _, _ = read_agent_data(train_data_exp_path, winner_file_name)
     train_data = Tensor(phenotypes)
 
     # Build model
@@ -23,8 +22,8 @@ def train_generative_model(gen_model_type, code_size, num_hidden_layers,
     gen_model.dump_decoder(dump_file_path)
 
     # Test model
-    gen_model.test(plot=True, train_data_dir=train_data_path,
-                   data_dir_path=data_dir_path, winner_file_name=winner_file_name)
+    gen_model.test(plot=True, train_data_path=train_data_exp_path,
+                   winner_file_name=winner_file_name)
 
 
 def _build_generative_model(gen_model_type, code_size, data_size,

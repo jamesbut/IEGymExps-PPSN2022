@@ -1,13 +1,13 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-from data import read_data
+from data import read_agent_data
 import constants as consts
 
 np.set_printoptions(suppress=True)
 
 
-def _plot_data(train_phenotypes=None, params=None, test_phenotypes=None):
+def _plot_phenos_scatter(train_phenotypes=None, params=None, test_phenotypes=None):
 
     if train_phenotypes is not None:
         if params is not None:
@@ -41,14 +41,12 @@ def _fitness_analysis(fitnesses, folder_paths):
     print("Mean fitness:", mean_fitness)
 
 
-def read_and_plot(data_dir=None, data_dir_path=None, winner_file_name=None,
-                  test_data=None):
+def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None):
 
-    # Read data
-    if data_dir is not None:
-        fitnesses, genos, phenos, params, folder_paths = read_data(data_dir,
-                                                                   data_dir_path,
-                                                                   winner_file_name)
+    # Read agent data
+    if exp_data_path is not None:
+        fitnesses, genos, phenos, params, folder_paths = \
+            read_agent_data(exp_data_path, winner_file_name)
 
     print("Fitnesses:\n", fitnesses)
     print("Genotypes:\n", genos)
@@ -59,10 +57,16 @@ def read_and_plot(data_dir=None, data_dir_path=None, winner_file_name=None,
     _fitness_analysis(fitnesses, folder_paths)
 
     # Plot training and/or test data
-    _plot_data(phenos, params, test_data)
+    _plot_phenos_scatter(phenos, params, test_data)
+
+
+def read_and_plot_evo_data(data_dirs, data_dir_path):
+    #read_evo_data(data_dir[0], data_dir_path)
+
+    pass
 
 
 if __name__ == '__main__':
 
-    read_and_plot(data_dir=sys.argv[1], dir_path=consts.DATA_DIR_PATH,
-                  winner_file_name=consts.WINNER_FILE_NAME)
+    read_and_plot_phenos(exp_data_path=consts.DATA_DIR_PATH + sys.argv[1],
+                         winner_file_name=consts.WINNER_FILE_NAME)

@@ -1,7 +1,7 @@
 import torch
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
-from plotter import read_and_plot
+from plotter import read_and_plot_phenos
 from neural_network import NeuralNetwork
 
 
@@ -86,8 +86,8 @@ class GAN():
                                                                    d_avg_loss,
                                                                    g_avg_loss))
 
-    def test(self, rand_code=False, plot=False, train_data_dir=None,
-             data_dir_path=None, winner_file_name=None):
+    def test(self, rand_code=False, plot=False,
+             train_data_exp_path=None, winner_file_name=None):
 
         # Generate fake data using generator
         if rand_code:
@@ -100,8 +100,8 @@ class GAN():
         print(fake_data)
 
         if plot:
-            read_and_plot(train_data_dir, data_dir_path, winner_file_name,
-                          fake_data.detach().numpy())
+            read_and_plot_phenos(train_data_exp_path, winner_file_name,
+                                 fake_data.detach().numpy())
 
     def dump_decoder(self, file_path):
         self._generator.save(file_path)

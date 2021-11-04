@@ -6,31 +6,37 @@ import numpy as np
 import json
 
 
-def read_data(data_dir, data_dir_path, winner_file_name):
+# Read useful information about winning agents from experiment
+def read_agent_data(exp_data_path, winner_file_name):
 
-    # Get directories in data_dir
-    try:
-        folder_paths, dir_path = get_sub_folders(data_dir, data_dir_path)
+    # Get directories in data_dir_path
+    run_folder_paths = get_sub_folders(exp_data_path)
 
-        # If there are no directories in data_dir, then look for data in data_dir
-        if not folder_paths:
-            folder_paths = [dir_path]
-
-    except NotADirectoryError as e:
-        print(e)
-        sys.exit(1)
+    # If there are no directories in exp_data_path, then look for data in exp_data_path
+    if not run_folder_paths:
+        run_folder_paths = [exp_data_path]
 
     # Append winner file name to folder paths
-    for i in range(len(folder_paths)):
-        folder_paths[i] += '/' + winner_file_name
+    for i in range(len(run_folder_paths)):
+        run_folder_paths[i] += '/' + winner_file_name
 
     # Check for old data format
-    if check_for_old_format(folder_paths[0]):
-        fitnesses, genos, phenos, domain_params = read_data_old_format(folder_paths)
+    if check_for_old_format(run_folder_paths[0]):
+        fitnesses, genos, phenos, domain_params = read_data_old_format(run_folder_paths)
     else:
-        fitnesses, genos, phenos, domain_params = read_data_new_format(folder_paths)
+        fitnesses, genos, phenos, domain_params = read_data_new_format(run_folder_paths)
 
-    return fitnesses, genos, phenos, domain_params, folder_paths
+    return fitnesses, genos, phenos, domain_params, run_folder_paths
+
+
+# Read information regarding evolutionary runs
+def read_evo_data(data_dir, data_dir_path):
+
+    # Get sub folders in data_dir (different run folders)
+    folder_paths, _ = get_sub_folders(data_dir, data_dir_path)
+
+
+    pass
 
 
 # Check for old data format
@@ -58,7 +64,6 @@ def read_data_new_format(folder_paths):
         try:
             with open(fp) as agent_file:
                 agent = json.load(agent_file)
-                print(agent)
 
                 fitnesses.append(agent['fitness'])
                 genotypes.append(agent['genotype'])
@@ -118,9 +123,7 @@ def read_data_old_format(folder_paths):
            np.array(domain_params) if domain_params else None
 
 
-def get_sub_folders(folders_dir, dir_path):
-
-    dir_path += folders_dir
+def get_sub_folders(dir_path):
 
     if os.path.isdir(dir_path):
         # Get all folder names
@@ -129,7 +132,7 @@ def get_sub_folders(folders_dir, dir_path):
     else:
         raise NotADirectoryError("{} is not a directory".format(dir_path))
 
-    return folder_names, dir_path
+    return folder_names
 
 
 def dump_data(data, dir_path, file_name):

@@ -1,7 +1,8 @@
-#A few functions for generating inputs for testing the generative models
+# A few functions for generating inputs for testing the generative models
 
 import numpy as np
 import torch
+
 
 def code_in_range(code_size, lb, ub, step_size=0.001):
 
