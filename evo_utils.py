@@ -10,7 +10,8 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
 
     for gen in range(ngen):
         # Generate a new population
-        population = toolbox.generate()
+        population = list(toolbox.generate())
+
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
