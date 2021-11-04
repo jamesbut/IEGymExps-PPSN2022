@@ -6,9 +6,9 @@
 INIT_SIGMA = 1.
 
 # Number of children to produce at each generation
-LAMBDA = 100
-NUM_GENS = 100
-NUM_EVO_RUNS = 5
+LAMBDA = 10
+NUM_GENS = 2
+NUM_EVO_RUNS = 1
 
 # Gene bounds
 # A list size of 1 applies this bound to all genes
@@ -104,7 +104,7 @@ ENFORCE_WB = False
 # Logging constants #
 #####################
 
-DATA_DIR_PATH = '../IndirectEncodingsExperiments/lib/NeuroEvo/data/'
+DATA_DIR_PATH = 'data/'
 WINNER_FILE_NAME = 'best_winner_so_far'
 
 # If this is turned off the genome is not saved if weight bounds are exceeded

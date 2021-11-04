@@ -152,9 +152,8 @@ def main():
         return
 
     # Create experiment path
-    exp_dir_path = consts.DATA_DIR_PATH + 'python_data'
-    exp_dir_name = create_exp_dir_name(exp_dir_path)
-    exp_dir_path += '/' + exp_dir_name + '/'
+    exp_dir_name = create_exp_dir_name(consts.DATA_DIR_PATH)
+    exp_dir_path = consts.DATA_DIR_PATH + exp_dir_name + '/'
 
     # Evolutionary run
     if (len(sys.argv) == 1) or ('-cmaes_centroid' in sys.argv):
