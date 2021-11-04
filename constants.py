@@ -8,7 +8,7 @@ INIT_SIGMA = 1.
 # Number of children to produce at each generation
 LAMBDA = 100
 NUM_GENS = 100
-NUM_EVO_RUNS = 1
+NUM_EVO_RUNS = 5
 
 # Gene bounds
 # A list size of 1 applies this bound to all genes
@@ -58,9 +58,10 @@ ENV_NAME = 'InvertedDoublePendulum-v2'
 '''
 
 ENV_NAME = 'MountainCarContinuous-v0'
-COMPLETION_FITNESS = 2.15
-# COMPLETION_FITNESS = None
+# COMPLETION_FITNESS = 2.15
+COMPLETION_FITNESS = None
 # Engine powers
+# DOMAIN_PARAMETERS = [0.0008, 0.0010, 0.0012]
 DOMAIN_PARAMETERS = [0.0008]
 
 DOMAIN_PARAMS_LOW = [0.]
@@ -85,7 +86,7 @@ HIDDEN_LAYER_ACTIV_FUNC = 'relu'
 FINAL_LAYER_ACTIV_FUNC = 'sigmoid'
 
 # Evolve solution with domain parameters as input
-DOMAIN_PARAMS_INPUT = False
+DOMAIN_PARAMS_INPUT = True
 NORMALISE_STATE = False
 
 # Weight bounds
