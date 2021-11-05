@@ -9,12 +9,11 @@ import constants as consts
 
 if __name__ == '__main__':
 
-    consts.LAMBDA = 10
-    consts.NUM_GENS = 10
-    consts.NUM_EVO_RUNS = 1
+    settings = [
+        'consts.NUM_GENS = 10',
+        'consts.NUM_GENS = 20'
+    ]
 
-    main(sys.argv)
-
-    consts.NUM_GENS = 20
-
-    main(sys.argv)
+    for s in settings:
+        exec(s)
+        main(sys.argv)
