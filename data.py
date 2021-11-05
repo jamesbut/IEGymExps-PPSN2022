@@ -172,6 +172,12 @@ def read_list(file_path):
     return lst
 
 
+# Dump dictionary as json
+def dump_json(file_path, json_dict):
+    with open(file_path, 'w') as file:
+        json.dump(json_dict, file, indent=4)
+
+
 # Calculates the name of the directory to store exp data in, it is looking for
 # exp_*next integer*
 def create_exp_dir_name(base_path):

@@ -10,8 +10,8 @@ import constants as consts
 if __name__ == '__main__':
 
     settings = [
-        'consts.NUM_GENS = 10',
-        'consts.NUM_GENS = 20'
+        'consts.INIT_SIGMA = 0.5',
+        'consts.INIT_SIGMA = 0.1'
     ]
 
     for s in settings:

@@ -4,7 +4,7 @@ import numpy as np
 import uuid
 import sys
 from agent import Agent
-from data import dump_list, create_exp_dir_name
+from data import dump_list, create_exp_dir_name, dump_json
 from model_training import train_generative_model
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
@@ -151,21 +151,32 @@ def main(argv):
 
         return
 
-    # Create experiment path
-    exp_dir_name = create_exp_dir_name(consts.DATA_DIR_PATH)
-    exp_dir_path = consts.DATA_DIR_PATH + exp_dir_name + '/'
-
     # Evolutionary run
     if (len(argv) == 1) or ('-cmaes_centroid' in argv):
 
+        # Create experiment path
+        exp_dir_name = create_exp_dir_name(consts.DATA_DIR_PATH)
+        exp_dir_path = consts.DATA_DIR_PATH + exp_dir_name + '/'
+
+        # Create environment
         env_wrapper = EnvWrapper(consts.ENV_NAME, consts.COMPLETION_FITNESS,
                                  consts.DOMAIN_PARAMETERS, consts.DOMAIN_PARAMS_INPUT,
                                  consts.NORMALISE_STATE, consts.DOMAIN_PARAMS_LOW,
                                  consts.DOMAIN_PARAMS_HIGH)
 
+        # Run experiment
         for i in range(consts.NUM_EVO_RUNS):
             print("Evo run: ", i)
             evo_run(env_wrapper, consts.DATA_DIR_PATH, exp_dir_path)
+
+        # Dump evolutionary algorithm information
+        evo_alg_params = {
+            'init_sigma': consts.INIT_SIGMA,
+            'lambda': consts.LAMBDA,
+            'g_lb': consts.G_LB,
+            'g_ub': consts.G_UB
+        }
+        dump_json(exp_dir_path + 'evo_alg_params.json', evo_alg_params)
 
     # Individual run
     else:
