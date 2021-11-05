@@ -129,17 +129,17 @@ def indv_run(agent_path, domain_params, render=True):
     return rewards
 
 
-def main():
+def main(argv):
 
     # Train decoder
-    if '-train_decoder' in sys.argv:
+    if '-train_decoder' in argv:
 
         # Parse command line for information on how to train the decoder
-        td_index = sys.argv.index('-train_decoder')
+        td_index = argv.index('-train_decoder')
         # Read in the type of model: 'gan', 'ae' or 'vae'
-        gen_model_type = sys.argv[td_index + 1]
+        gen_model_type = argv[td_index + 1]
         # Give training data directory to train model with
-        gen_model_train_data_exp_dir = sys.argv[td_index + 2]
+        gen_model_train_data_exp_dir = argv[td_index + 2]
 
         # Train generative model
         train_generative_model(gen_model_type, consts.CODE_SIZE,
@@ -156,7 +156,7 @@ def main():
     exp_dir_path = consts.DATA_DIR_PATH + exp_dir_name + '/'
 
     # Evolutionary run
-    if (len(sys.argv) == 1) or ('-cmaes_centroid' in sys.argv):
+    if (len(argv) == 1) or ('-cmaes_centroid' in argv):
 
         env_wrapper = EnvWrapper(consts.ENV_NAME, consts.COMPLETION_FITNESS,
                                  consts.DOMAIN_PARAMETERS, consts.DOMAIN_PARAMS_INPUT,
@@ -173,7 +173,7 @@ def main():
         print("Individual run")
 
         # Genome directory comes from the command line
-        indv_dir = sys.argv[1]
+        indv_dir = argv[1]
         indv_path = consts.DATA_DIR_PATH + indv_dir + '/' + consts.WINNER_FILE_NAME
 
         indv_run(indv_path, consts.DOMAIN_PARAMETERS)
@@ -186,4 +186,4 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

@@ -37,9 +37,6 @@ def _plot_exp_evo_data(median_bests, median_means, lq_means, uq_means, colour):
     plot_data = np.array([plot_median_bests, plot_median_means,
                           plot_uq_means, plot_lq_means])
 
-
-    legend_labels = ["Best fitness so far", "Population avg fitness",
-                     "High quantile", "Low quantile"]
     line_styles = ['--', '-', '--', '--']
     line_widths = [1., 1., 0.25, 0.25]
 
