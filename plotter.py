@@ -1,7 +1,8 @@
 import sys
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
-from data import read_agent_data
+from data import read_agent_data, read_evo_data
 import constants as consts
 
 np.set_printoptions(suppress=True)
@@ -21,6 +22,33 @@ def _plot_phenos_scatter(train_phenotypes=None, params=None, test_phenotypes=Non
         plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1])
 
     plt.show()
+
+
+def _plot_exp_evo_data(median_bests, median_means, lq_means, uq_means, colour):
+
+    # Create x axis of generations
+    gens = np.arange(1, median_bests.shape[0] + 1)
+
+    # Prepare data for plotting
+    plot_median_bests = np.column_stack((gens, median_bests))
+    plot_median_means = np.column_stack((gens, median_means))
+    plot_uq_means = np.column_stack((gens, uq_means))
+    plot_lq_means = np.column_stack((gens, lq_means))
+    plot_data = np.array([plot_median_bests, plot_median_means,
+                          plot_uq_means, plot_lq_means])
+
+
+    legend_labels = ["Best fitness so far", "Population avg fitness",
+                     "High quantile", "Low quantile"]
+    line_styles = ['--', '-', '--', '--']
+    line_widths = [1., 1., 0.25, 0.25]
+
+    for i in range(plot_data.shape[0]):
+        plt.plot(plot_data[i, :, 0], plot_data[i, :, 1],
+                 color=colour, linestyle=line_styles[i],
+                 linewidth=line_widths[i])
+
+    plt.fill_between(gens, lq_means, uq_means, color=colour, alpha=0.1)
 
 
 def _fitness_analysis(fitnesses, folder_paths):
@@ -60,13 +88,55 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     _plot_phenos_scatter(phenos, params, test_data)
 
 
-def read_and_plot_evo_data(data_dirs, data_dir_path):
-    #read_evo_data(data_dir[0], data_dir_path)
+def read_and_plot_evo_data(exp_data_dirs, data_dir_path):
 
-    pass
+    exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
+    legend_items = []
+
+    # Append data dir path to experiment directories
+    exp_data_paths = [consts.DATA_DIR_PATH + edd for edd in exp_data_dirs]
+
+    for i, exp_data_path in enumerate(exp_data_paths):
+
+        # Read experiment data
+        mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
+
+        # Calculate statistics
+        # mean_best_so_far_fitnesses = np.mean(best_fitnesses, axis=0)
+        median_best_fitnesses = np.median(best_fitnesses, axis=0)
+        median_mean_fitnesses = np.median(mean_fitnesses, axis=0)
+        lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
+        uq_mean_fitnesses = np.quantile(mean_fitnesses, 0.75, axis=0)
+
+        # Plot experiment data
+        _plot_exp_evo_data(median_best_fitnesses, median_mean_fitnesses,
+                           lq_mean_fitnesses, uq_mean_fitnesses, exp_plot_colours[i])
+
+        legend_items.append(mpatches.Patch(color=exp_plot_colours[i],
+                                           label=exp_data_dirs[i]))
+
+    plt.legend(handles=legend_items)
+
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+
+    plt.show()
 
 
 if __name__ == '__main__':
 
-    read_and_plot_phenos(exp_data_path=consts.DATA_DIR_PATH + sys.argv[1],
-                         winner_file_name=consts.WINNER_FILE_NAME)
+    # Plot phenotype data
+    if '-pheno' in sys.argv:
+
+        exp_dir = sys.argv[2]
+        read_and_plot_phenos(exp_data_path=consts.DATA_DIR_PATH + exp_dir,
+                             winner_file_name=consts.WINNER_FILE_NAME)
+
+    # Plot evolutionary run data
+    elif '-evo' in sys.argv:
+
+        exp_data_dirs = sys.argv[2]
+        # Split comma separated experiment directories
+        exp_data_dirs = exp_data_dirs.split(',')
+
+        read_and_plot_evo_data(exp_data_dirs, consts.DATA_DIR_PATH)

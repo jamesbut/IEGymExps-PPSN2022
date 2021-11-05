@@ -6,8 +6,8 @@
 INIT_SIGMA = 1.
 
 # Number of children to produce at each generation
-LAMBDA = 100
-NUM_GENS = 100
+LAMBDA = 10
+NUM_GENS = 2
 NUM_EVO_RUNS = 2
 
 # Gene bounds

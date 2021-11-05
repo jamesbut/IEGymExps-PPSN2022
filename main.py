@@ -4,7 +4,7 @@ import numpy as np
 import uuid
 import sys
 from agent import Agent
-from data import dump_data, create_exp_dir_name
+from data import dump_list, create_exp_dir_name
 from model_training import train_generative_model
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
@@ -106,8 +106,8 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
 
         # Save population statistics
         if g_saved:
-            dump_data(logbook.select('avg'), run_path, 'mean_fitnesses')
-            dump_data(logbook.select('max'), run_path, 'best_fitnesses')
+            dump_list(logbook.select('avg'), run_path, 'mean_fitnesses')
+            dump_list(logbook.select('max'), run_path, 'best_fitnesses')
 
     if consts.PARALLELISE:
         pool.close()

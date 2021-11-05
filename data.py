@@ -6,7 +6,7 @@ import numpy as np
 import json
 
 
-# Read useful information about winning agents from experiment
+# Read useful data about winning agents from experiment
 def read_agent_data(exp_data_path, winner_file_name):
 
     # Get directories in data_dir_path
@@ -29,14 +29,26 @@ def read_agent_data(exp_data_path, winner_file_name):
     return fitnesses, genos, phenos, domain_params, run_folder_paths
 
 
-# Read information regarding evolutionary runs
-def read_evo_data(data_dir, data_dir_path):
+# Read data from evolutionary runs
+def read_evo_data(exp_data_path):
 
     # Get sub folders in data_dir (different run folders)
-    folder_paths, _ = get_sub_folders(data_dir, data_dir_path)
+    run_folder_paths = get_sub_folders(exp_data_path)
 
+    exp_mean_fitnesses = []
+    exp_best_fitnesses = []
+    for rfp in run_folder_paths:
+        rfp_means = rfp + '/mean_fitnesses'
+        rfp_bests = rfp + '/best_fitnesses'
 
-    pass
+        # Read data and convert to floats
+        mean_fitnesses = list(map(float, read_list(rfp_means)))
+        best_fitnesses = list(map(float, read_list(rfp_bests)))
+
+        exp_mean_fitnesses.append(mean_fitnesses)
+        exp_best_fitnesses.append(best_fitnesses)
+
+    return np.array(exp_mean_fitnesses), np.array(exp_best_fitnesses)
 
 
 # Check for old data format
@@ -135,7 +147,8 @@ def get_sub_folders(dir_path):
     return folder_names
 
 
-def dump_data(data, dir_path, file_name):
+# Dump list into a file and check for directory existence
+def dump_list(lst, dir_path, file_name):
 
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -143,11 +156,20 @@ def dump_data(data, dir_path, file_name):
     file_path = dir_path + file_name
 
     with open(file_path, 'w') as f:
+        for val in lst:
+            f.write(str(val) + '\n')
 
-        for d in data:
-            f.write(str(d) + '\n')
 
-        f.close()
+# Read list from file
+def read_list(file_path):
+
+    with open(file_path, 'r') as f:
+        lst = f.readlines()
+
+    # Remove carriage returns
+    lst = [val.strip() for val in lst]
+
+    return lst
 
 
 # Calculates the name of the directory to store exp data in, it is looking for
