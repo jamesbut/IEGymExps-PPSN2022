@@ -172,6 +172,12 @@ def read_list(file_path):
     return lst
 
 
+# Read json
+def read_json(file_path):
+    with open(file_path, 'r') as f:
+        return json.load(f)
+
+
 # Dump dictionary as json
 def dump_json(file_path, json_dict):
     with open(file_path, 'w') as file:

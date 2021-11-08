@@ -4,75 +4,84 @@ import numpy as np
 import uuid
 import sys
 from agent import Agent
-from data import dump_list, create_exp_dir_name, dump_json
+from data import dump_list, create_exp_dir_name, dump_json, read_json
 from model_training import train_generative_model
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
-import constants as consts
 
 # Suppress scientific notation
 np.set_printoptions(suppress=True)
 
 
-def evo_run(env_wrapper, dir_path, exp_dir_path):
-    '''
-    Define neural controller according to environment
-    '''
+def evo_run(configs, exp_dir_path):
+
+    # Environment
+    env_wrapper = EnvWrapper(configs['env']['name'],
+                             configs['env']['completion_fitness'],
+                             configs['env']['domain_params'],
+                             configs['env']['domain_params_input'],
+                             configs['env']['normalise_state'],
+                             configs['env']['domain_params_low'],
+                             configs['env']['domain_params_high'])
+
+    # Read decoder for evolution if specified
+    decoder = None
+    if configs['ie']['use_decoder']:
+        try:
+            decoder = NeuralNetwork(file_path=configs['ie']['decoder_path'])
+        except IOError:
+            print("Could not find requested decoder for evolution:",
+                  configs['ie']['decoder_path'])
+
+    # Create agent
     env_wrapper.make_env()
     state = env_wrapper.reset()
 
     num_inputs = len(state)
     num_outputs = len(env_wrapper.action_space.high)
 
-    # Read decoder for evolution if specified
-    decoder = None
-    if consts.USE_DECODER:
-        try:
-            decoder = NeuralNetwork(file_path=consts.DECODER_PATH)
-        except IOError:
-            print("Could not find requested decoder for evolution:",
-                  consts.DECODER_PATH)
-
     agent = Agent(num_inputs, num_outputs,
-                  consts.NUM_HIDDEN_LAYERS, consts.NEURONS_PER_HIDDEN_LAYER,
-                  consts.HIDDEN_LAYER_ACTIV_FUNC, consts.FINAL_LAYER_ACTIV_FUNC,
-                  bias=consts.BIAS, w_lb=consts.W_LB, w_ub=consts.W_UB,
-                  enforce_wb=consts.ENFORCE_WB, decoder=decoder)
+                  configs['controller']['num_hidden_layers'],
+                  configs['controller']['neurons_per_hidden_layer'],
+                  configs['controller']['hidden_layer_activ_func'],
+                  configs['controller']['final_layer_activ_func'],
+                  configs['controller']['bias'],
+                  configs['controller']['w_lb'], configs['controller']['w_ub'],
+                  configs['controller']['enforce_wb'], decoder=decoder)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, agent=agent, env_wrapper=env_wrapper,
-                     render=consts.RENDER, avg_fitnesses=True)
+                     render=configs['optimiser']['render'], avg_fitnesses=True)
 
-    '''
-    Define evolutionary algorithm
-    '''
+    # Define evolutionary algorithm
     num_genes = agent.genotype_size
 
     centroid = get_cmaes_centroid(num_genes, sys.argv[:],
-                                  dir_path=dir_path, file_name=consts.WINNER_FILE_NAME)
+                                  dir_path=configs['logging']['data_dir_path'],
+                                  file_name=configs['logging']['winner_file_name'])
 
     # Expand gene bounds if gene bound list is only of length 1
-    g_lb = consts.G_LB
-    g_ub = consts.G_UB
-    if len(consts.G_LB) == 1:
-        g_lb *= num_genes
-    if len(consts.G_UB) == 1:
-        g_ub *= num_genes
+    if len(configs['optimiser']['g_lb']) == 1:
+        configs['optimiser']['g_lb'] *= num_genes
+    if len(configs['optimiser']['g_ub']) == 1:
+        configs['optimiser']['g_ub'] *= num_genes
 
-    strategy = cma.Strategy(centroid=centroid, sigma=consts.INIT_SIGMA,
-                            lambda_=consts.LAMBDA, lb_=g_lb, ub_=g_ub)
+    strategy = cma.Strategy(centroid=centroid,
+                            sigma=configs['optimiser']['cmaes']['init_sigma'],
+                            lambda_=configs['optimiser']['cmaes']['lambda'],
+                            lb_=configs['optimiser']['g_lb'],
+                            ub_=configs['optimiser']['g_ub'])
 
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
-    '''
-    Define execution and logs
-    '''
+    # Define execution and logs
+
     # np.random.seed(108)
 
-    if consts.PARALLELISE:
+    if configs['optimiser']['parallelise']:
         import multiprocessing
 
         pool = multiprocessing.Pool()
@@ -85,31 +94,27 @@ def evo_run(env_wrapper, dir_path, exp_dir_path):
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    '''
-    Run evolutionary algorithm
-    '''
+    # Run evolutionary algorithm
     population, logbook, complete = evo_utils.eaGenerateUpdate(
-        toolbox, ngen=consts.NUM_GENS, stats=stats,
+        toolbox, ngen=configs['optimiser']['num_gens'], stats=stats,
         halloffame=hof, completion_fitness=env_wrapper.completion_fitness)
 
-    '''
-    Write results to file
-    '''
+    # Write results to file
     run_path = exp_dir_path + str(uuid.uuid4()) + '/'
 
-    if ((consts.SAVE_WINNERS_ONLY is False)
-         or (consts.SAVE_WINNERS_ONLY is True and complete)):
+    if ((configs['logging']['save_winners_only'] is False)
+         or (configs['logging']['save_winners_only'] is True and complete)):
         agent.genotype = hof[0]
         agent.fitness = hof[0].fitness.values[0]
-        g_saved = agent.save(run_path, consts.WINNER_FILE_NAME,
-                             env_wrapper, consts.SAVE_IF_WB_EXCEEDED)
+        g_saved = agent.save(run_path, configs['logging']['winner_file_name'],
+                             env_wrapper, configs['logging']['save_if_wb_exceeded'])
 
         # Save population statistics
         if g_saved:
             dump_list(logbook.select('avg'), run_path, 'mean_fitnesses')
             dump_list(logbook.select('max'), run_path, 'best_fitnesses')
 
-    if consts.PARALLELISE:
+    if configs['optimiser']['parallelise']:
         pool.close()
 
 
@@ -129,7 +134,7 @@ def indv_run(agent_path, domain_params, render=True):
     return rewards
 
 
-def main(argv):
+def main(argv, configs):
 
     # Train decoder
     if '-train_decoder' in argv:
@@ -142,12 +147,14 @@ def main(argv):
         gen_model_train_data_exp_dir = argv[td_index + 2]
 
         # Train generative model
-        train_generative_model(gen_model_type, consts.CODE_SIZE,
-                               consts.D_NUM_HIDDEN_LAYERS,
-                               consts.D_NEURONS_PER_HIDDEN_LAYER,
-                               consts.NUM_EPOCHS, consts.BATCH_SIZE,
-                               consts.DATA_DIR_PATH + gen_model_train_data_exp_dir,
-                               consts.DECODER_PATH, consts.WINNER_FILE_NAME)
+        train_generative_model(gen_model_type, configs['ie']['code_size'],
+                               configs['ie']['num_hidden_layers'],
+                               configs['ie']['neurons_per_hidden_layer'],
+                               configs['ie']['num_epochs'], configs['ie']['batch_size'],
+                               configs['logging']['data_dir_path']
+                               + gen_model_train_data_exp_dir,
+                               configs['logging']['decoder_path'],
+                               configs['logging']['winner_file_name'])
 
         return
 
@@ -155,39 +162,28 @@ def main(argv):
     if (len(argv) == 1) or ('-cmaes_centroid' in argv):
 
         # Create experiment path
-        exp_dir_name = create_exp_dir_name(consts.DATA_DIR_PATH)
-        exp_dir_path = consts.DATA_DIR_PATH + exp_dir_name + '/'
-
-        # Create environment
-        env_wrapper = EnvWrapper(consts.ENV_NAME, consts.COMPLETION_FITNESS,
-                                 consts.DOMAIN_PARAMETERS, consts.DOMAIN_PARAMS_INPUT,
-                                 consts.NORMALISE_STATE, consts.DOMAIN_PARAMS_LOW,
-                                 consts.DOMAIN_PARAMS_HIGH)
+        exp_dir_name = create_exp_dir_name(configs['logging']['data_dir_path'])
+        exp_dir_path = configs['logging']['data_dir_path'] + exp_dir_name + '/'
 
         # Run experiment
-        for i in range(consts.NUM_EVO_RUNS):
+        for i in range(configs['optimiser']['num_runs']):
             print("Evo run: ", i)
-            evo_run(env_wrapper, consts.DATA_DIR_PATH, exp_dir_path)
+            evo_run(configs, exp_dir_path)
 
-        # Dump evolutionary algorithm information
-        evo_alg_params = {
-            'init_sigma': consts.INIT_SIGMA,
-            'lambda': consts.LAMBDA,
-            'g_lb': consts.G_LB,
-            'g_ub': consts.G_UB
-        }
-        dump_json(exp_dir_path + 'evo_alg_params.json', evo_alg_params)
+        # Dump configs
+        dump_json(exp_dir_path + 'experiment.json', configs)
 
     # Individual run
     else:
 
         print("Individual run")
 
-        # Genome directory comes from the command line
+        # Agent directory comes from the command line
         indv_dir = argv[1]
-        indv_path = consts.DATA_DIR_PATH + indv_dir + '/' + consts.WINNER_FILE_NAME
+        indv_path = configs['data_dir_path'] + indv_dir + '/' \
+                    + configs['logging']['winner_file_name']
 
-        indv_run(indv_path, consts.DOMAIN_PARAMETERS)
+        indv_run(indv_path, configs['env']['domain_params'])
 
 
 # Some bug in DEAP means that I have to create individual before
@@ -197,4 +193,5 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 if __name__ == "__main__":
-    main(sys.argv)
+    default_configs = read_json('configs/default.json')
+    main(sys.argv, default_configs)
