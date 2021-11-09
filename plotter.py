@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 from data import read_agent_data, read_evo_data
-import constants as consts
 
 np.set_printoptions(suppress=True)
 
@@ -85,13 +84,13 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     _plot_phenos_scatter(phenos, params, test_data)
 
 
-def read_and_plot_evo_data(exp_data_dirs, data_dir_path):
+def read_and_plot_evo_data(exp_data_paths, data_dir_path):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
     legend_items = []
 
     # Append data dir path to experiment directories
-    exp_data_paths = [consts.DATA_DIR_PATH + edd for edd in exp_data_dirs]
+    #exp_data_paths = [consts.DATA_DIR_PATH + edd for edd in exp_data_dirs]
 
     for i, exp_data_path in enumerate(exp_data_paths):
 

@@ -216,6 +216,28 @@ def create_exp_dir_name(base_path):
     return 'exp_' + str(max_exp_num + 1)
 
 
+def read_configs(argv):
+
+    # Read in group of config files
+    if '-config' in argv:
+
+        # Get config group directory from command line
+        config_index = argv.index('-config')
+        config_dir = argv[config_index + 1]
+
+        # Get all config files in directory
+        config_files = glob('configs/' + config_dir + '/*.json')
+
+        # Read config files
+        configs = list(map(read_json, config_files))
+
+    else:
+        # Use default config file
+        configs = [read_json('configs/default.json')]
+
+    return configs
+
+
 def create_synthetic_data(code_size, num_data_points=500):
 
     # return -10. + np.randn(500, code_size)
