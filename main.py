@@ -114,7 +114,7 @@ def evo_run(config, exp_dir_path):
             dump_list(logbook.select('avg'), run_path, 'mean_fitnesses')
             dump_list(logbook.select('max'), run_path, 'best_fitnesses')
 
-    if configs['optimiser']['parallelise']:
+    if config['optimiser']['parallelise']:
         pool.close()
 
 
