@@ -1,7 +1,7 @@
 {
     "optimiser": {
         "cmaes": {
-            "init_sigma": 0.5,
+            "init_sigma": 0.1,
             "lambda": 100
         },
         "num_gens": 100,
