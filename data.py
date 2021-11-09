@@ -254,6 +254,7 @@ def read_configs(argv):
     # Add experiment directory path to configs
     for conf in zip(configs, config_files):
         conf[0]['logging']['exp_dir_name'] = create_exp_dir_name(conf[0], conf[1])
+        conf[0]['logging']['config_file_path'] = conf[1]
 
     return configs
 

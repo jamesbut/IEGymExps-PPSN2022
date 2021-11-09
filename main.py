@@ -197,4 +197,5 @@ if __name__ == "__main__":
 
     # Run for different configuration settings
     for config in configs:
+        print('Config:', config['logging']['config_file_path'])
         main(sys.argv, config)
