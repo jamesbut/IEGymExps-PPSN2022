@@ -2,7 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from data import read_agent_data, read_evo_data
+from data import read_agent_data, read_evo_data, read_configs
 
 np.set_printoptions(suppress=True)
 
@@ -84,13 +84,13 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     _plot_phenos_scatter(phenos, params, test_data)
 
 
-def read_and_plot_evo_data(exp_data_paths, data_dir_path):
+def read_and_plot_evo_data(exp_data_dirs, data_dir_path):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
     legend_items = []
 
     # Append data dir path to experiment directories
-    #exp_data_paths = [consts.DATA_DIR_PATH + edd for edd in exp_data_dirs]
+    exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
 
     for i, exp_data_path in enumerate(exp_data_paths):
 
@@ -121,12 +121,14 @@ def read_and_plot_evo_data(exp_data_paths, data_dir_path):
 
 if __name__ == '__main__':
 
+    config = read_configs(sys.argv)[0]
+
     # Plot phenotype data
     if '-pheno' in sys.argv:
 
         exp_dir = sys.argv[2]
-        read_and_plot_phenos(exp_data_path=consts.DATA_DIR_PATH + exp_dir,
-                             winner_file_name=consts.WINNER_FILE_NAME)
+        read_and_plot_phenos(config['logging']['data_dir_path'] + exp_dir,
+                             config['logging']['winner_file_name'])
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
@@ -135,4 +137,4 @@ if __name__ == '__main__':
         # Split comma separated experiment directories
         exp_data_dirs = exp_data_dirs.split(',')
 
-        read_and_plot_evo_data(exp_data_dirs, consts.DATA_DIR_PATH)
+        read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'])
