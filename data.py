@@ -184,56 +184,76 @@ def dump_json(file_path, json_dict):
         json.dump(json_dict, file, indent=4)
 
 
-# Calculates the name of the directory to store exp data in, it is looking for
-# exp_*next integer*
-def create_exp_dir_name(base_path):
+# Calculates the name of the directory to store exp data in
+def create_exp_dir_name(config, config_file_name):
 
-    exp_full_dirs = glob(base_path + "/*")
+    # If the default config is used, search in the data directory for the next
+    # exp_ directory number
+    if config_file_name == 'configs/default.json':
 
-    max_exp_num = 0
+        exp_full_dirs = glob(config['logging']['data_dir_path'] + "/*")
 
-    if len(exp_full_dirs) == 0:
         max_exp_num = 0
 
-    else:
-        for ed in exp_full_dirs:
+        if len(exp_full_dirs) == 0:
+            max_exp_num = 0
 
-            # Get exp numbers in directory
-            split_path = ed.split("/")
-            exp_string = split_path[-1]
-            try:
-                exp_num = int(exp_string.split("_")[-1])
-            except ValueError:
-                continue
+        else:
+            for ed in exp_full_dirs:
 
-            # Find largest exp number
-            if max_exp_num is None:
-                max_exp_num = exp_num
-            else:
-                if exp_num > max_exp_num:
+                # Get exp numbers in directory
+                split_path = ed.split("/")
+                exp_string = split_path[-1]
+                try:
+                    exp_num = int(exp_string.split("_")[-1])
+                except ValueError:
+                    continue
+
+                # Find largest exp number
+                if max_exp_num is None:
                     max_exp_num = exp_num
+                else:
+                    if exp_num > max_exp_num:
+                        max_exp_num = exp_num
 
-    return 'exp_' + str(max_exp_num + 1)
+        exp_dir_name = 'exp_' + str(max_exp_num + 1)
+
+    # If the default config is not used, set the experiment directory name as a
+    # modified config file name
+    else:
+
+        # Remove configs/
+        config_file_name_split = config_file_name.split('/')[1:]
+        # Remove .json
+        config_file_name_split[-1] = config_file_name_split[-1].split('.')[0]
+        # Join back into full string
+        exp_dir_name = '/'.join(config_file_name_split)
+
+    return exp_dir_name
 
 
 def read_configs(argv):
 
     # Read in group of config files
-    if '-config' in argv:
+    if '-configs' in argv:
 
         # Get config group directory from command line
-        config_index = argv.index('-config')
+        config_index = argv.index('-configs')
         config_dir = argv[config_index + 1]
 
         # Get all config files in directory
         config_files = glob('configs/' + config_dir + '/*.json')
 
-        # Read config files
-        configs = list(map(read_json, config_files))
-
     else:
         # Use default config file
-        configs = [read_json('configs/default.json')]
+        config_files = ['configs/default.json']
+
+    # Read config files
+    configs = list(map(read_json, config_files))
+
+    # Add experiment directory path to configs
+    for conf in zip(configs, config_files):
+        conf[0]['logging']['exp_dir_name'] = create_exp_dir_name(conf[0], conf[1])
 
     return configs
 

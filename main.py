@@ -160,8 +160,8 @@ def main(argv, config):
     elif '-evo_run' in argv:
 
         # Create experiment path
-        exp_dir_name = create_exp_dir_name(config['logging']['data_dir_path'])
-        exp_dir_path = config['logging']['data_dir_path'] + exp_dir_name + '/'
+        exp_dir_path = config['logging']['data_dir_path'] \
+            + config['logging']['exp_dir_name'] + '/'
 
         # Run experiment
         for i in range(config['optimiser']['num_runs']):
