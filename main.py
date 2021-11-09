@@ -4,7 +4,7 @@ import numpy as np
 import uuid
 import sys
 from agent import Agent
-from data import dump_list, create_exp_dir_name, dump_json, read_configs
+from data import dump_list, dump_json, read_configs
 from model_training import train_generative_model
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
