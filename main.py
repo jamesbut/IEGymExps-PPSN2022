@@ -102,8 +102,8 @@ def evo_run(config, exp_dir_path):
     # Write results to file
     run_path = exp_dir_path + str(uuid.uuid4()) + '/'
 
-    if ((configs['logging']['save_winners_only'] is False)
-         or (configs['logging']['save_winners_only'] is True and complete)):
+    if ((config['logging']['save_winners_only'] is False)
+         or (config['logging']['save_winners_only'] is True and complete)):
         agent.genotype = hof[0]
         agent.fitness = hof[0].fitness.values[0]
         g_saved = agent.save(run_path, config['logging']['winner_file_name'],
