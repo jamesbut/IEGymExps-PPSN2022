@@ -1,11 +1,11 @@
 {
     "optimiser": {
         "cmaes": {
-            "init_sigma": 0.1,
+            "init_sigma": 1.0,
             "lambda": 100
         },
         "num_gens": 100,
-        "num_runs": 5,
+        "num_runs": 20,
         "g_lb": [-120.0],
         "g_ub": [120.0],
         "parallelise": true,
