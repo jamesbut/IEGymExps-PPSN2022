@@ -6,17 +6,16 @@
 import sys
 import numpy as np
 from main import indv_run
-from constants import ENV_NAME
 from formatting import format_data_table, list_to_string
 from itertools import product, filterfalse
 from helper import more_than_one_true, lists_from_bools
-from data import read_agent_data
+from data import read_agent_data, read_configs
 import copy
 
 np.set_printoptions(suppress=True)
 
 
-def find_trained_solutions(train_dirs):
+def find_trained_solutions(train_dirs, data_dir_path, winner_file_name):
 
     # Trained solution directories should be comma seperated
     train_dirs = train_dirs.split(',')
@@ -25,7 +24,8 @@ def find_trained_solutions(train_dirs):
     train_params = []
 
     for td in train_dirs:
-        fitnesses, _, _, params, paths = read_agent_data(td)
+        fitnesses, _, _, params, paths = read_agent_data(data_dir_path + td,
+                                                         winner_file_name)
 
         # If more than one solution has been read in, select solution with highest
         # fitness
@@ -44,7 +44,7 @@ def test_solutions(train_paths, train_params, test_params, render):
     for train_info in zip(train_paths, train_params):
         print('Testing solution trained on:', train_info[1])
 
-        train_rewards = indv_run(train_info[0], ENV_NAME, test_params, render=False)
+        train_rewards = indv_run(train_info[0], test_params, render=False)
         rewards.append(train_rewards)
 
     return np.array(rewards)
@@ -62,12 +62,13 @@ def add_train_to_test(test_params, train_params):
 # Argument should be a comma separated list of either a single solution
 # directory or an experiment directory of which the solution with the
 # highest fitness will be selected
-def train_test_table(argv, test_params):
+def train_test_table(argv, test_params, data_dir_path, winner_file_name):
 
     # Either read in the trained models
     if len(argv) == 2:
         train_dirs = argv[1]
-        train_paths, train_params = find_trained_solutions(train_dirs)
+        train_paths, train_params = find_trained_solutions(train_dirs, data_dir_path,
+                                                           winner_file_name)
 
     # Or train them
     elif len(argv) == 1:
@@ -112,6 +113,10 @@ def train_test_table(argv, test_params):
 
 if __name__ == "__main__":
 
-    test_parameters = [0.001000, 0.001001, 0.002]
+    config = read_configs(sys.argv)[0]
 
-    train_test_table(sys.argv, test_parameters)
+    test_parameters = [0.0008, 0.0012, 0.0016]
+
+    train_test_table(sys.argv, test_parameters,
+                     config['logging']['data_dir_path'],
+                     config['logging']['winner_file_name'])

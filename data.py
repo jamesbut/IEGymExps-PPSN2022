@@ -68,13 +68,9 @@ def read_data_new_format(folder_paths):
     phenotypes = []
     domain_params = []
 
-    # Append .json to folder paths
-    for i in range(len(folder_paths)):
-        folder_paths[i] += '.json'
-
     for fp in folder_paths:
         try:
-            with open(fp) as agent_file:
+            with open(fp + '.json') as agent_file:
                 agent = json.load(agent_file)
 
                 fitnesses.append(agent['fitness'])
