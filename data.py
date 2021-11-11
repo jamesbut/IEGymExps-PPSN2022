@@ -131,11 +131,26 @@ def read_data_old_format(folder_paths):
            np.array(domain_params) if domain_params else None
 
 
-def get_sub_folders(dir_path):
+def get_sub_folders(dir_path, recursive=True, append_dir_path=True,
+                    append_dir=False, sort=True):
 
     if os.path.isdir(dir_path):
-        # Get all folder names
-        folder_names = [x[0] for x in os.walk(dir_path)][1:]
+        # Walk directory
+        walk = os.walk(dir_path)
+
+        # Filter results
+        if recursive and append_dir_path:
+            folder_names = [x[0] for x in walk][1:]
+        if (not recursive) and (not append_dir_path):
+            folder_names = next(walk)[1]
+
+        # Sort results
+        folder_names = sorted(folder_names)
+
+        # Append top directory
+        if append_dir:
+            top_dir = dir_path.split('/')[-1]
+            folder_names = [top_dir + '/' + fn for fn in folder_names]
 
     else:
         raise NotADirectoryError("{} is not a directory".format(dir_path))
