@@ -63,16 +63,17 @@ def evo_run(config, exp_dir_path):
                                   file_name=config['logging']['winner_file_name'])
 
     # Expand gene bounds if gene bound list is only of length 1
+    g_lb = config['optimiser']['g_lb']
     if len(config['optimiser']['g_lb']) == 1:
-        config['optimiser']['g_lb'] *= num_genes
+        g_lb = config['optimiser']['g_lb'] * num_genes
+    g_ub = config['optimiser']['g_ub']
     if len(config['optimiser']['g_ub']) == 1:
-        config['optimiser']['g_ub'] *= num_genes
+        g_ub = config['optimiser']['g_ub'] * num_genes
 
     strategy = cma.Strategy(centroid=centroid,
                             sigma=config['optimiser']['cmaes']['init_sigma'],
                             lambda_=config['optimiser']['cmaes']['lambda'],
-                            lb_=config['optimiser']['g_lb'],
-                            ub_=config['optimiser']['g_ub'])
+                            lb_=g_lb, ub_=g_ub)
 
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
@@ -178,7 +179,7 @@ def main(argv, config):
 
         # Agent directory comes from the command line
         indv_dir = argv[1]
-        indv_path = config['loggin']['data_dir_path'] + indv_dir + '/' \
+        indv_path = config['logging']['data_dir_path'] + indv_dir + '/' \
                     + config['logging']['winner_file_name']
 
         indv_run(indv_path, config['env']['domain_params'])

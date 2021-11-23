@@ -31,8 +31,8 @@ class NeuralNetwork(torch.nn.Module):
             self._nn = self._read(file_path)
 
         # Set weight bounds
-        self._w_lb = w_lb
-        self._w_ub = w_ub
+        self._w_lb = copy.copy(w_lb)
+        self._w_ub = copy.copy(w_ub)
         # If the length of the weight bounds is one,
         # expand list to number of weights
         if self._w_lb and (len(self._w_lb) == 1):
