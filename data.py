@@ -246,7 +246,7 @@ def create_exp_dir_name(config, config_file_name):
 def read_configs(argv):
 
     # Read in group of config files
-    if '-configs' in argv:
+    if argv is not None and '-configs' in argv:
 
         # Get config group directory from command line
         config_index = argv.index('-configs')

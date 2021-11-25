@@ -2,6 +2,21 @@
 # Some arbitrary helper functions for which I do not have a place #
 ###################################################################
 
+import json
+
+# Modify dictionary with list of keys (for recursive dictionaries)
+def modify_dict(keys, value, dictionary):
+    if isinstance(dictionary[keys[0]], dict):
+        dictionary[keys[0]] = modify_dict(keys[1:], value, dictionary[keys[0]])
+    else:
+        dictionary[keys[0]] = value
+    return dictionary
+
+
+# Pretty print dictionary
+def print_dict(config):
+    print(json.dumps(config, indent=4))
+
 
 #Returns whether there is strictly more than one True in a list of booleans
 def more_than_one_true(bools):
