@@ -43,7 +43,7 @@
         "domain_params_low": [
             0.0
         ],
-        "domain_params_input": true,
+        "domain_params_input": false,
         "normalise_state": false
     },
     "ie": {
