@@ -50,7 +50,6 @@ class EnvWrapper():
                 # Sample domain param from distribution
                 self._domain_param = self._domain_param_distribution.next()
 
-            print('domain param: ', self._domain_param)
             env_kwargs = get_env_kwargs(self._env_name, self._domain_param)
             self._env = gym.make(self._env_name, **env_kwargs)
 

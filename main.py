@@ -99,7 +99,8 @@ def evo_run(config, exp_dir_path):
     # Run evolutionary algorithm
     population, logbook, complete = evo_utils.eaGenerateUpdate(
         toolbox, ngen=config['optimiser']['num_gens'], stats=stats,
-        halloffame=hof, completion_fitness=env_wrapper.completion_fitness)
+        halloffame=hof, completion_fitness=env_wrapper.completion_fitness,
+        quit_domain_when_complete=config['optimiser']['quit_domain_when_complete'])
 
     # Write results to file
     run_path = exp_dir_path + str(uuid.uuid4()) + '/'
@@ -166,7 +167,7 @@ def main(argv, config):
             + config['logging']['exp_dir_name'] + '/'
 
         # Run experiment
-        for i in range(config['optimiser']['num_runs']):
+        for i in range(config['execution']['num_runs']):
             print("Evo run: ", i)
             evo_run(config, exp_dir_path)
 

@@ -4,7 +4,8 @@ from deap import tools
 # This function is just a copy of the function in DEAP but it returns if some
 # completion fitness has been met - this prevents unnecessary computation
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
-                     verbose=__debug__, completion_fitness=None):
+                     verbose=__debug__, completion_fitness=None,
+                     quit_domain_when_complete=True):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -29,7 +30,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
             print(logbook.stream)
 
         # End if completion fitness has been achieved
-        if completion_fitness is not None:
+        if (completion_fitness is not None) and (quit_domain_when_complete):
             if halloffame[0].fitness.values[0] >= completion_fitness:
                 print("WINNER FOUND!")
                 return population, logbook, True

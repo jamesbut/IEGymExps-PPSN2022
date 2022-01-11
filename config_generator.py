@@ -44,7 +44,9 @@ def dump_configs(configs):
     # Check what group number we are up to and calculate next group number
     prev_group_dirs = get_sub_folders('configs', recursive=False, append_dir_path=False)
     prev_group_nums = [gd.replace('g', '') for gd in prev_group_dirs]
-    new_group_num = int(prev_group_nums[-1]) + 1
+    new_group_num = 1
+    if prev_group_nums:
+        new_group_num = int(prev_group_nums[-1]) + 1
     new_group_name = 'g' + str(new_group_num)
     new_group_path = 'configs/' + new_group_name
 
@@ -62,10 +64,9 @@ def main():
     base_config = read_configs(None)[0]
 
     hyper_params = [
-        (["env", "domain_params"], [[0.0008, 0.0012, 0.0016], [0.0008],
-                                    [0.0012], [0.0016]]),
-        (["controller", "neurons_per_hidden_layer"], [8, 16, 32, 64]),
-        (["env", "domain_params_input"], [True]),
+        (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]])
+        #(["controller", "neurons_per_hidden_layer"], [8, 16, 32, 64]),
+        #(["env", "domain_params_input"], [True]),
     ]
 
     # Generate settings and then configs from those settings
