@@ -64,9 +64,9 @@ def main():
     base_config = read_configs(None)[0]
 
     hyper_params = [
-        (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]])
+        (["env", "domain_params"], [[0.0008, 0.0012, 0.0016]])
         #(["controller", "neurons_per_hidden_layer"], [8, 16, 32, 64]),
-        #(["env", "domain_params_input"], [True]),
+        #(["env", "normalise_state"], [False, True]),
     ]
 
     # Generate settings and then configs from those settings
