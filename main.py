@@ -20,7 +20,8 @@ def evo_run(config, exp_dir_path):
     # Environment
     env_wrapper = EnvWrapper(config['env']['name'],
                              config['env']['completion_fitness'],
-                             config['env']['domain_params'],
+                             config['env'].get('domain_param_distribution', None),
+                             config['env'].get('domain_params', None),
                              config['env']['domain_params_input'],
                              config['env']['normalise_state'],
                              config['env']['domain_params_low'],

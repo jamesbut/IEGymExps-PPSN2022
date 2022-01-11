@@ -6,19 +6,24 @@
 import gym
 import numpy as np
 import json
-from maths import normalise
+from maths.maths import normalise
+from maths.distribution import Distribution
 from domain_params import get_env_kwargs
 
 
 class EnvWrapper():
 
-    def __init__(self, env_name=None, completion_fitness=None, domain_params=None,
+    def __init__(self, env_name=None, completion_fitness=None,
+                 domain_param_distribution=None, domain_params=None,
                  domain_params_input=False, normalise_state=False,
                  domain_params_low=None, domain_params_high=None,
                  env_path=None):
 
         self._env_name = env_name
         self._completion_fitness = completion_fitness
+        # This is distribution from which domain parameters are sampled
+        if domain_param_distribution is not None:
+            self._domain_param_distribution = Distribution.read(domain_param_distribution)
         # This is a list of domain parameters to use for each trial
         self._domain_params = domain_params
         self._domain_params_input = domain_params_input
@@ -34,11 +39,18 @@ class EnvWrapper():
     # The trial number determines which of the domain parameters to use
     def make_env(self, trial_num=0, seed=True):
 
-        if self._domain_params is None:
+        if (self._domain_params is None) and (self._domain_param_distribution is None):
             self._env = gym.make(self._env_name)
         else:
-            # Determine correct domain parameter
-            self._domain_param = self._domain_params[trial_num]
+            if self._domain_params is not None:
+                # Determine correct domain parameter from trial number
+                self._domain_param = self._domain_params[trial_num]
+
+            elif self._domain_param_distribution is not None:
+                # Sample domain param from distribution
+                self._domain_param = self._domain_param_distribution.next()
+
+            print('domain param: ', self._domain_param)
             env_kwargs = get_env_kwargs(self._env_name, self._domain_param)
             self._env = gym.make(self._env_name, **env_kwargs)
 

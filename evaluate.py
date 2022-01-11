@@ -54,8 +54,15 @@ def evaluate(genome=None, agent=None, env_wrapper=None,
 
     rewards = []
 
-    # The number of trials is taken as the number of domain paramaters in EnvWrapper
-    for trial_num in range(len(env_wrapper.domain_params)):
+    # Only 1 trial if a domain param distrbution is given
+    num_trials = 1
+    # The number of trials is taken as the number of domain paramaters in EnvWrapper if
+    # given
+    if env_wrapper.domain_params:
+        num_trials = len(env_wrapper.domain_params)
+
+    # Run trials
+    for trial_num in range(num_trials):
 
         if verbosity:
             print("Domain parameters:", env_wrapper.domain_params[trial_num])
