@@ -40,31 +40,31 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     return population, logbook, False
 
 
-# This function parses args for '-cmaes_centroid' and then takes the next argument
-# after that, which should be an organism directory, and uses that as the centroid.
-# This is to start off the search at the point of an already evolved organism.
-def get_cmaes_centroid(num_genes, args, dir_path=None, file_name=None):
+# This function determines the starting centroid of the CMAES algorithm.
+# It can be used to start off the search at the point of an already evolved organism.
+def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
 
-    import sys
-    from neural_network import NeuralNetwork
-
-    if '-cmaes_centroid' in args:
-
-        try:
-            org_dir = args[args.index('-cmaes_centroid') + 1]
-        except IndexError:
-            print('Please provide organism directory after -cmaes_centroid '
-                  '(relative to ..../data/)')
-            sys.exit(1)
-
-        # Build path of organism
-        org_path = dir_path + org_dir + '/' + file_name
-
-        # Read in genotype of organism
-        org_nn = NeuralNetwork(genotype_dir=org_path)
-        weights = org_nn.get_weights()
-
-        return weights
+    # If no centroid is given, set it to be 0.0
+    if 'centroid' not in json:
+        return [0.0] * num_weights
 
     else:
-        return [0.] * num_genes
+        # Read in centroid
+        centroid_json = json['centroid']
+
+        # If centroid is string, read in genome from file path
+        if isinstance(centroid_json, str):
+
+            import sys
+            from agent import Agent
+
+            # Build organism path
+            org_path = dir_path + centroid_json + '/' + file_name
+
+            # Read in genotype of organism
+            org = Agent(agent_path=org_path)
+            return org.genotype
+
+        # If centroid is number, return number as vector
+        else:
+            return [centroid_json] * num_weights

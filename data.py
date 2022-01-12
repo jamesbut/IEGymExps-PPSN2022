@@ -4,6 +4,7 @@ import csv
 from glob import glob
 import numpy as np
 import json
+from helper import remove_dirs_from_path
 
 
 # Read useful data about winning agents from experiment
@@ -131,21 +132,27 @@ def read_data_old_format(folder_paths):
            np.array(domain_params) if domain_params else None
 
 
-def get_sub_folders(dir_path, recursive=True, append_dir_path=True,
-                    append_dir=False, sort=True):
+def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=False,
+                    final_sub_dirs_only=False, num_top_dirs_removed=0):
 
     if os.path.isdir(dir_path):
         # Walk directory
-        walk = os.walk(dir_path)
+        walk = list(os.walk(dir_path))
 
-        # Filter results
-        if recursive and append_dir_path:
+        # If final subdirectories are needed only
+        if final_sub_dirs_only:
+            folder_names = [x[0] for x in walk if not x[1]]
+        elif recursive and append_dir_path:
             folder_names = [x[0] for x in walk][1:]
-        if (not recursive) and (not append_dir_path):
-            folder_names = next(walk)[1]
+        elif (not recursive) and (not append_dir_path):
+            folder_names = walk[0][1]
 
         # Sort results
         folder_names = sorted(folder_names)
+
+        # Remove top directories
+        folder_names = [remove_dirs_from_path(x, num_top_dirs_removed)
+                        for x in folder_names]
 
         # Append top directory
         if append_dir:

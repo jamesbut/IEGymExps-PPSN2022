@@ -1,13 +1,17 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": "g5/g5_exp_0/14a95849-5444-4398-9bea-2736b368a129",
+            "centroid": "g6/g6_exp_0/2c8437fe-303e-428f-895c-edb664ca5b93",
             "init_sigma": 1.0,
             "lambda": 100
         },
         "num_gens": 100,
-        "g_lb": [-120.0],
-        "g_ub": [120.0],
+        "g_lb": [
+            -120.0
+        ],
+        "g_ub": [
+            120.0
+        ],
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false
@@ -18,16 +22,24 @@
         "bias": false,
         "hidden_layer_activ_func": "relu",
         "final_layer_activ_func": "sigmoid",
-        "w_lb": [-10.0],
-        "w_ub": [120.0],
+        "w_lb": [
+            -10.0
+        ],
+        "w_ub": [
+            120.0
+        ],
         "enforce_wb": false
     },
     "env": {
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.2,
-        "domain_params": [0.0008],
-        "domain_params_high": [0.004],
-        "domain_params_low": [0.0],
+        "domain_params": 0.0012,
+        "domain_params_high": [
+            0.004
+        ],
+        "domain_params_low": [
+            0.0
+        ],
         "domain_params_input": false,
         "normalise_state": true
     },
@@ -47,6 +59,8 @@
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
-        "save_winners_only": false
+        "save_winners_only": false,
+        "exp_dir_name": "exp_1",
+        "config_file_path": "configs/default.json"
     }
 }

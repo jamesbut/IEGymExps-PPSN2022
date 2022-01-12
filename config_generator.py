@@ -63,10 +63,12 @@ def dump_configs(configs):
 def main():
     base_config = read_configs(None)[0]
 
+    centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
+                                    num_top_dirs_removed=1)
+
     hyper_params = [
-        (["env", "domain_params"], [[0.0008, 0.0012, 0.0016]])
-        #(["controller", "neurons_per_hidden_layer"], [8, 16, 32, 64]),
-        #(["env", "normalise_state"], [False, True]),
+        (["env", "domain_params"], [0.0008, 0.0010, 0.0012, 0.0014, 0.0016]),
+        (["optimiser", "cmaes", "centroid"], centroid_dirs)
     ]
 
     # Generate settings and then configs from those settings

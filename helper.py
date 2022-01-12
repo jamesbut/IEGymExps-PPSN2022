@@ -60,3 +60,9 @@ def list_from_bools(l, bools):
             filtered_list.append(v[1])
 
     return filtered_list
+
+
+# Removes a number of directories from a path string
+def remove_dirs_from_path(path, num_dirs_removed=1):
+    return '/'.join(path.split('/')[num_dirs_removed:])
+

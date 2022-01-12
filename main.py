@@ -59,7 +59,8 @@ def evo_run(config, exp_dir_path):
     # Define evolutionary algorithm
     num_genes = agent.genotype_size
 
-    centroid = get_cmaes_centroid(num_genes, sys.argv[:],
+    # Determine initial centroid of CMAES
+    centroid = get_cmaes_centroid(num_genes, config['optimiser']['cmaes'],
                                   dir_path=config['logging']['data_dir_path'],
                                   file_name=config['logging']['winner_file_name'])
 
