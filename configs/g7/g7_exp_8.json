@@ -33,7 +33,9 @@
     "env": {
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.2,
-        "domain_params": 0.001,
+        "domain_params": [
+            0.001
+        ],
         "domain_params_high": [
             0.004
         ],

@@ -67,7 +67,7 @@ def main():
                                     num_top_dirs_removed=1)
 
     hyper_params = [
-        (["env", "domain_params"], [0.0008, 0.0010, 0.0012, 0.0014, 0.0016]),
+        (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),
         (["optimiser", "cmaes", "centroid"], centroid_dirs)
     ]
 
