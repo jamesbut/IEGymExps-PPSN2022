@@ -140,18 +140,20 @@ def indv_run(agent_path, domain_params, render=True):
 
 def main(argv, config):
 
-    # Train decoder
     if '-train_decoder' in argv:
 
-        # Train generative model
-        train_generative_model(config['ie']['name'], config['ie']['code_size'],
-                               config['ie']['num_hidden_layers'],
-                               config['ie']['neurons_per_hidden_layer'],
-                               config['ie']['num_epochs'], config['ie']['batch_size'],
-                               config['logging']['data_dir_path'] +
-                               config['ie']['training_data_dir'],
-                               config['ie']['dump_model_dir'],
-                               config['logging']['winner_file_name'])
+        # Train generative models
+        for _ in range(config['ie']['num_trains']):
+            train_generative_model(
+                config['ie']['name'], config['ie']['code_size'],
+                config['ie']['num_hidden_layers'],
+                config['ie']['neurons_per_hidden_layer'],
+                config['ie']['num_epochs'], config['ie']['batch_size'],
+                config['logging']['data_dir_path'] +
+                config['ie']['training_data_dir'],
+                config['ie']['dump_model_dir'],
+                config['logging']['winner_file_name'],
+                config['ie']['optimiser'])
 
     # Evolutionary run
     elif '-evo_run' in argv:

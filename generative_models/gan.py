@@ -8,7 +8,7 @@ from neural_network import NeuralNetwork
 class GAN():
 
     def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, read_decoder=False):
+                 neurons_per_hidden_layer, g_lr=2e-4, d_lr=5e-4, read_decoder=False):
 
         self._generator = NeuralNetwork(
             num_inputs=code_size,
@@ -28,9 +28,9 @@ class GAN():
             self._generator = NeuralNetwork(file_path='decoder.pt')
 
         self._g_optimiser = torch.optim.RMSprop(self._generator.parameters(),
-                                                lr=2e-4)
+                                                lr=g_lr)
         self._d_optimiser = torch.optim.RMSprop(self._discriminator.parameters(),
-                                                lr=5e-4)
+                                                lr=d_lr)
 
         self._code_size = code_size
 

@@ -6,7 +6,7 @@ from neural_network import NeuralNetwork
 class VAE(torch.nn.Module):
 
     def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, read_decoder=False):
+                 neurons_per_hidden_layer, lr=1e-3, read_decoder=False):
         super().__init__()
 
         self._encoder = NeuralNetwork(
@@ -26,7 +26,7 @@ class VAE(torch.nn.Module):
             neurons_per_hidden_layer=neurons_per_hidden_layer,
             final_activ_func=None)
 
-        self._optimiser = torch.optim.Adam(self.parameters(), lr=1e-3)
+        self._optimiser = torch.optim.Adam(self.parameters(), lr=lr)
 
     def train(self, train_data, num_epochs, batch_size):
 

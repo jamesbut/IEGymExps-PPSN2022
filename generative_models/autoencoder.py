@@ -8,7 +8,7 @@ from neural_network import NeuralNetwork
 class Autoencoder(torch.nn.Module):
 
     def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, read_decoder=False):
+                 neurons_per_hidden_layer, lr=1e-3, read_decoder=False):
         super().__init__()
 
         self._encoder = NeuralNetwork(
@@ -27,7 +27,7 @@ class Autoencoder(torch.nn.Module):
         if read_decoder:
             self._decoder = NeuralNetwork(file_path='decoder.pt')
 
-        self._optimiser = torch.optim.Adam(self.parameters(), lr=1e-3)
+        self._optimiser = torch.optim.Adam(self.parameters(), lr=lr)
 
     def train(self, train_data, num_epochs, batch_size):
 

@@ -7,7 +7,8 @@ from torch import Tensor
 
 def train_generative_model(gen_model_type, code_size, num_hidden_layers,
                            neurons_per_hidden_layer, num_epochs, batch_size,
-                           train_data_exp_path, dump_model_dir, winner_file_name):
+                           train_data_exp_path, dump_model_dir, winner_file_name,
+                           optimiser_json):
 
     # Read training data
     _, _, phenotypes, _, _ = read_agent_data(train_data_exp_path, winner_file_name)
@@ -15,7 +16,8 @@ def train_generative_model(gen_model_type, code_size, num_hidden_layers,
 
     # Build model
     gen_model = build_generative_model(gen_model_type, code_size, train_data.size(1),
-                                       num_hidden_layers, neurons_per_hidden_layer)
+                                       num_hidden_layers, neurons_per_hidden_layer,
+                                       optimiser_json)
 
     # Train model
     gen_model.train(train_data, num_epochs, batch_size)
@@ -29,17 +31,21 @@ def train_generative_model(gen_model_type, code_size, num_hidden_layers,
 
 
 def build_generative_model(gen_model_type, code_size, data_size,
-                           num_hidden_layers, neurons_per_hidden_layer):
+                           num_hidden_layers, neurons_per_hidden_layer,
+                           optimiser_json):
 
     if gen_model_type == 'ae':
         return Autoencoder(code_size, data_size,
-                           num_hidden_layers, neurons_per_hidden_layer)
+                           num_hidden_layers, neurons_per_hidden_layer,
+                           optimiser_json['lr'])
     elif gen_model_type == 'vae':
         return VAE(code_size, data_size,
-                   num_hidden_layers, neurons_per_hidden_layer)
+                   num_hidden_layers, neurons_per_hidden_layer,
+                   optimiser_json['lr'])
     elif gen_model_type == 'gan':
         return GAN(code_size, data_size,
-                   num_hidden_layers, neurons_per_hidden_layer)
+                   num_hidden_layers, neurons_per_hidden_layer,
+                   optimiser_json['g_lr'], optimiser_json['d_lr'])
     else:
         raise ValueError('{} is not a valid generative model type'
                          .format(gen_model_type))
