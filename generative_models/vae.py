@@ -30,6 +30,9 @@ class VAE(torch.nn.Module):
 
     def train(self, train_data, num_epochs, batch_size):
 
+        self._num_epochs = num_epochs
+        self._batch_size = batch_size
+
         batches = generate_batches(train_data, batch_size, shuffle=True)
 
         for epoch in range(num_epochs):
@@ -52,6 +55,8 @@ class VAE(torch.nn.Module):
             loss = loss / len(batches)
 
             print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, num_epochs, loss))
+
+        self._final_loss = loss
 
     def forward(self, inputs, verbosity=False):
 
@@ -107,6 +112,24 @@ class VAE(torch.nn.Module):
 
     def test(self):
         self(self.training_data, verbosity=True)
+
+    def to_dict(self, train_data_exp_dir_path):
+
+        return {
+            'num_epochs': self._num_epochs,
+            'batch_size': self._batch_size,
+            'final_loss': self._final_loss,
+            'train_data_exp_dir_path': train_data_exp_dir_path,
+            'encoder': self._encoder.to_dict(),
+            'decoder': self._decoder.to_dict()
+        }
+
+    def dump_config(self, config_path, train_data_exp_dir_path):
+
+        import json
+
+        with open(config_path + '.json', 'w') as f:
+            json.dump(self.to_dict(train_data_exp_dir_path), f, indent=4)
 
     def dump_decoder(self, file_path):
         self._decoder.save(file_path)

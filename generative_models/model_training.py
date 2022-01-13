@@ -23,7 +23,9 @@ def train_generative_model(gen_model_type, code_size, num_hidden_layers,
     gen_model.train(train_data, num_epochs, batch_size)
 
     # Dump model
-    gen_model.dump_decoder(get_model_path(gen_model_type, dump_model_dir))
+    model_path = get_model_path(gen_model_type, dump_model_dir)
+    gen_model.dump_decoder(model_path + '.pt')
+    gen_model.dump_config(model_path, train_data_exp_path)
 
     # Test model
     #gen_model.test(plot=True, train_data_path=train_data_exp_path,
@@ -64,7 +66,7 @@ def get_model_path(gen_model_type, dump_model_dir):
         raise ValueError('{} is not a valid generative model type'
                          .format(gen_model_type))
 
-    return dump_model_dir + '/' + model_file_name + '.pt'
+    return dump_model_dir + '/' + model_file_name
 
 
 # Increments model number so that other models are not overwritten

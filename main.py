@@ -5,7 +5,6 @@ import uuid
 import sys
 from agent import Agent
 from data import dump_list, dump_json, read_configs
-from model_training import train_generative_model
 from evo_utils import get_cmaes_centroid
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
@@ -141,6 +140,8 @@ def indv_run(agent_path, domain_params, render=True):
 def main(argv, config):
 
     if '-train_decoder' in argv:
+
+        from generative_models.model_training import train_generative_model
 
         # Train generative models
         for _ in range(config['ie']['num_trains']):

@@ -36,6 +36,9 @@ class GAN():
 
     def train(self, train_data, num_epochs, batch_size):
 
+        self._num_epochs = num_epochs
+        self._batch_size = batch_size
+
         loss = torch.nn.BCELoss()
 
         # Generate batches
@@ -86,6 +89,9 @@ class GAN():
                                                                    d_avg_loss,
                                                                    g_avg_loss))
 
+        self._final_d_avg_loss = d_avg_loss.item()
+        self._final_g_avg_loss = g_avg_loss.item()
+
     def test(self, rand_code=False, plot=False,
              train_data_exp_path=None, winner_file_name=None):
 
@@ -102,6 +108,25 @@ class GAN():
         if plot:
             read_and_plot_phenos(train_data_exp_path, winner_file_name,
                                  fake_data.detach().numpy())
+
+    def to_dict(self, train_data_exp_dir_path):
+
+        return {
+            'num_epochs': self._num_epochs,
+            'batch_size': self._batch_size,
+            'final_g_loss': self._final_g_avg_loss,
+            'final_d_loss': self._final_d_avg_loss,
+            'train_data_exp_dir_path': train_data_exp_dir_path,
+            'generator': self._generator.to_dict(),
+            'discriminator': self._discriminator.to_dict()
+        }
+
+    def dump_config(self, config_path, train_data_exp_dir_path):
+
+        import json
+
+        with open(config_path + '.json', 'w') as f:
+            json.dump(self.to_dict(train_data_exp_dir_path), f, indent=4)
 
     def dump_decoder(self, file_path):
         self._generator.save(file_path)
