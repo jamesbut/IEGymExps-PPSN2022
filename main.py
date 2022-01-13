@@ -143,21 +143,14 @@ def main(argv, config):
     # Train decoder
     if '-train_decoder' in argv:
 
-        # Parse command line for information on how to train the decoder
-        td_index = argv.index('-train_decoder')
-        # Read in the type of model: 'gan', 'ae' or 'vae'
-        gen_model_type = argv[td_index + 1]
-        # Give training data directory to train model with
-        gen_model_train_data_exp_dir = argv[td_index + 2]
-
         # Train generative model
-        train_generative_model(gen_model_type, configs['ie']['code_size'],
+        train_generative_model(config['ie']['name'], config['ie']['code_size'],
                                config['ie']['num_hidden_layers'],
                                config['ie']['neurons_per_hidden_layer'],
                                config['ie']['num_epochs'], config['ie']['batch_size'],
-                               config['logging']['data_dir_path']
-                               + gen_model_train_data_exp_dir,
-                               config['logging']['decoder_path'],
+                               config['logging']['data_dir_path'] +
+                               config['ie']['training_data_dir'],
+                               config['ie']['dump_model_dir'],
                                config['logging']['winner_file_name'])
 
     # Evolutionary run

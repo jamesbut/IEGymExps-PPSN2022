@@ -32,13 +32,15 @@
         "normalise_state": true
     },
     "ie": {
+        "name": "ae",
         "use_decoder": false,
         "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
-        "num_epochs": 2000,
+        "num_epochs": 200,
         "batch_size": 64,
-        "decoder_path": "decoder.pt"
+        "training_data_dir": "scp_train_data_non_norm",
+        "dump_model_dir": "models"
     },
     "execution": {
         "num_runs": 5
