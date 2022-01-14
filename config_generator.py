@@ -43,10 +43,11 @@ def dump_configs(configs):
 
     # Check what group number we are up to and calculate next group number
     prev_group_dirs = get_sub_folders('configs', recursive=False, append_dir_path=False)
-    prev_group_nums = [gd.replace('g', '') for gd in prev_group_dirs]
+    prev_group_nums = map(int, [gd.replace('g', '') for gd in prev_group_dirs])
     new_group_num = 1
     if prev_group_nums:
-        new_group_num = int(prev_group_nums[-1]) + 1
+        new_group_num = max(prev_group_nums) + 1
+
     new_group_name = 'g' + str(new_group_num)
     new_group_path = 'configs/' + new_group_name
 

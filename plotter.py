@@ -23,17 +23,18 @@ def _plot_phenos_scatter(train_phenotypes=None, params=None, test_phenotypes=Non
     plt.show()
 
 
-def _plot_exp_evo_data(median_bests, median_means, lq_means, uq_means, colour):
+def _plot_exp_evo_data(mean_bests, median_bests, median_means, lq_means, uq_means, colour):
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
 
     # Prepare data for plotting
+    plot_mean_bests = np.column_stack((gens, mean_bests))
     plot_median_bests = np.column_stack((gens, median_bests))
     plot_median_means = np.column_stack((gens, median_means))
     plot_uq_means = np.column_stack((gens, uq_means))
     plot_lq_means = np.column_stack((gens, lq_means))
-    plot_data = np.array([plot_median_bests, plot_median_means,
+    plot_data = np.array([plot_mean_bests, plot_median_means,
                           plot_uq_means, plot_lq_means])
 
     line_styles = ['--', '-', '--', '--']
@@ -55,14 +56,14 @@ def _fitness_analysis(fitnesses, folder_paths):
 
     print("Max fitness: {}              File: {}".format(max_fitness, max_file))
 
+    mean_fitness = np.mean(fitnesses)
+    print("Mean fitness:", mean_fitness)
+
     min_arg = np.argmin(fitnesses)
     min_fitness = fitnesses[min_arg]
     min_file = folder_paths[min_arg]
 
     print("Min fitness: {}              File: {}".format(min_fitness, min_file))
-
-    mean_fitness = np.mean(fitnesses)
-    print("Mean fitness:", mean_fitness)
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None):
@@ -97,16 +98,20 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path):
         # Read experiment data
         mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
 
+        # Print number of runs
+        print('Number of runs:', len(best_fitnesses))
+
         # Calculate statistics
-        # mean_best_so_far_fitnesses = np.mean(best_fitnesses, axis=0)
+        mean_best_fitnesses = np.mean(best_fitnesses, axis=0)
         median_best_fitnesses = np.median(best_fitnesses, axis=0)
         median_mean_fitnesses = np.median(mean_fitnesses, axis=0)
         lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
         uq_mean_fitnesses = np.quantile(mean_fitnesses, 0.75, axis=0)
 
         # Plot experiment data
-        _plot_exp_evo_data(median_best_fitnesses, median_mean_fitnesses,
-                           lq_mean_fitnesses, uq_mean_fitnesses, exp_plot_colours[i])
+        _plot_exp_evo_data(mean_best_fitnesses, median_best_fitnesses,
+                           median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
+                           exp_plot_colours[i])
 
         legend_items.append(mpatches.Patch(color=exp_plot_colours[i],
                                            label=exp_data_dirs[i]))
