@@ -46,7 +46,7 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
 
     # If no centroid is given, set it to be 0.0
     if 'centroid' not in json:
-        return [0.0] * num_weights
+        return [0.0] * num_genes
 
     else:
         # Read in centroid
@@ -67,4 +67,4 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
 
         # If centroid is number, return number as vector
         else:
-            return [centroid_json] * num_weights
+            return [centroid_json] * num_genes

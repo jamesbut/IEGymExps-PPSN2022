@@ -30,10 +30,12 @@ def evo_run(config, exp_dir_path):
     decoder = None
     if config['ie']['use_decoder']:
         try:
-            decoder = NeuralNetwork(file_path=config['ie']['decoder_path'])
+            decoder_file_path = config['ie']['dump_model_dir'] + '/' + \
+                                config['ie']['name'] + '_' + \
+                                str(config['ie']['decoder_file_num']) + '.pt'
+            decoder = NeuralNetwork(file_path=decoder_file_path)
         except IOError:
-            print("Could not find requested decoder for evolution:",
-                  config['ie']['decoder_path'])
+            print("Could not find requested decoder for evolution:", decoder_file_path)
 
     # Create agent
     env_wrapper.make_env()

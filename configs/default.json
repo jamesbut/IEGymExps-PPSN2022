@@ -1,7 +1,6 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": "g5/g5_exp_0/14a95849-5444-4398-9bea-2736b368a129",
             "init_sigma": 1.0,
             "lambda": 100
         },
@@ -29,11 +28,12 @@
         "domain_params_high": [0.004],
         "domain_params_low": [0.0],
         "domain_params_input": false,
-        "normalise_state": true
+        "normalise_state": false
     },
     "ie": {
         "name": "ae",
-        "use_decoder": false,
+        "use_decoder": true,
+        "decoder_file_num": 0,
         "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
@@ -45,10 +45,10 @@
         },
         "training_data_dir": "scp_train_data_non_norm",
         "dump_model_dir": "models",
-        "num_trains": 1
+        "num_trains": 5
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",
