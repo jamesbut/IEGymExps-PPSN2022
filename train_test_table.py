@@ -142,14 +142,16 @@ def train_test_table(argv, test_params, data_dir_path, winner_file_name):
 
     # Format results in table
     format_data_table(rewards_w_means, train_params_str, test_params_str,
-                      row_axis='train', column_axis='test')
+                      row_axis='train', column_axis='test', show_all_columns=True,
+                      dump_file_path=data_dir_path + 'train_test_table.csv')
 
 
 if __name__ == "__main__":
 
     config = read_configs(sys.argv)[0]
 
-    test_parameters = [0.0008, 0.0012, 0.0016]
+    test_parameters = [0.0008, 0.0010, 0.0012, 0.0014, 0.0016]
+    #test_parameters = [0.0010, 0.0014]
 
     train_test_table(sys.argv, test_parameters,
                      config['logging']['data_dir_path'],

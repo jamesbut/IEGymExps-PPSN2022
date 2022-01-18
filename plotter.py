@@ -23,7 +23,8 @@ def _plot_phenos_scatter(train_phenotypes=None, params=None, test_phenotypes=Non
     plt.show()
 
 
-def _plot_exp_evo_data(mean_bests, median_bests, median_means, lq_means, uq_means, colour):
+def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_means,
+                       lq_means, uq_means, colour, plot_q_means=True, plot_q_bests=True):
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
@@ -31,21 +32,37 @@ def _plot_exp_evo_data(mean_bests, median_bests, median_means, lq_means, uq_mean
     # Prepare data for plotting
     plot_mean_bests = np.column_stack((gens, mean_bests))
     plot_median_bests = np.column_stack((gens, median_bests))
+    plot_lq_bests = np.column_stack((gens, lq_bests))
+    plot_uq_bests = np.column_stack((gens, uq_bests))
+
     plot_median_means = np.column_stack((gens, median_means))
     plot_uq_means = np.column_stack((gens, uq_means))
     plot_lq_means = np.column_stack((gens, lq_means))
-    plot_data = np.array([plot_mean_bests, plot_median_means,
-                          plot_uq_means, plot_lq_means])
 
-    line_styles = ['--', '-', '--', '--']
-    line_widths = [1., 1., 0.25, 0.25]
+    # Select data to plot
+    plot_data = np.array([plot_median_bests, plot_median_means])
+    line_styles = ['--', '-']
+    line_widths = [1., 1.]
+    if plot_q_bests:
+        plot_data = np.concatenate((plot_data, np.array([plot_lq_bests, plot_uq_bests])))
+        line_styles += ['--', '--']
+        line_widths += [0.25, 0.25]
+    if plot_q_means:
+        plot_data = np.concatenate((plot_data, np.array([plot_lq_means, plot_uq_means])))
+        line_styles += ['--', '--']
+        line_widths += [0.25, 0.25]
 
+    # Plot data
     for i in range(plot_data.shape[0]):
         plt.plot(plot_data[i, :, 0], plot_data[i, :, 1],
                  color=colour, linestyle=line_styles[i],
                  linewidth=line_widths[i])
 
-    plt.fill_between(gens, lq_means, uq_means, color=colour, alpha=0.1)
+    # Fill between IQRs
+    if plot_q_means:
+        plt.fill_between(gens, lq_means, uq_means, color=colour, alpha=0.1)
+    if plot_q_bests:
+        plt.fill_between(gens, lq_bests, uq_bests, color=colour, alpha=0.1)
 
 
 def _fitness_analysis(fitnesses, folder_paths):
@@ -85,7 +102,8 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     _plot_phenos_scatter(phenos, params, test_data)
 
 
-def read_and_plot_evo_data(exp_data_dirs, data_dir_path):
+def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
+                           plot_q_means=True, plot_q_bests=True):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
     legend_items = []
@@ -104,14 +122,18 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path):
         # Calculate statistics
         mean_best_fitnesses = np.mean(best_fitnesses, axis=0)
         median_best_fitnesses = np.median(best_fitnesses, axis=0)
+        lq_best_fitnesses = np.quantile(best_fitnesses, 0.25, axis=0)
+        uq_best_fitnesses = np.quantile(best_fitnesses, 0.75, axis=0)
+
         median_mean_fitnesses = np.median(mean_fitnesses, axis=0)
         lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
         uq_mean_fitnesses = np.quantile(mean_fitnesses, 0.75, axis=0)
 
         # Plot experiment data
         _plot_exp_evo_data(mean_best_fitnesses, median_best_fitnesses,
+                           lq_best_fitnesses, uq_best_fitnesses,
                            median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
-                           exp_plot_colours[i])
+                           exp_plot_colours[i], plot_q_means, plot_q_bests)
 
         legend_items.append(mpatches.Patch(color=exp_plot_colours[i],
                                            label=exp_data_dirs[i]))
@@ -142,4 +164,7 @@ if __name__ == '__main__':
         # Split comma separated experiment directories
         exp_data_dirs = exp_data_dirs.split(',')
 
-        read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'])
+        read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'],
+                               # Turns off the plotting of the inter-quartile ranges
+                               False if '-q_means_off' in sys.argv else True,
+                               False if '-q_bests_off' in sys.argv else True)
