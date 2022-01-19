@@ -2,7 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from data import read_agent_data, read_evo_data, read_configs
+from data import read_agent_data, read_evo_data, read_configs, get_sub_folders
 
 np.set_printoptions(suppress=True)
 
@@ -83,23 +83,35 @@ def _fitness_analysis(fitnesses, folder_paths):
     print("Min fitness: {}              File: {}".format(min_fitness, min_file))
 
 
-def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None):
+def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
+                         group=False):
 
-    # Read agent data
-    if exp_data_path is not None:
-        fitnesses, genos, phenos, params, folder_paths = \
-            read_agent_data(exp_data_path, winner_file_name)
+    # Get all experiments from group
+    if group:
+        exp_data_paths = get_sub_folders(exp_data_path, recursive=False)
+    # Otherwise just process given experiment
+    else:
+        exp_data_paths = [exp_data_path]
 
-    print("Fitnesses:\n", fitnesses)
-    print("Genotypes:\n", genos)
-    print("Phenotypes:\n", phenos)
-    print("Params:\n", params[0])
+    # For all experiments, show pheno data
+    for exp_data_path in exp_data_paths:
+        print(exp_data_path)
 
-    # Provide fitness analysis
-    _fitness_analysis(fitnesses, folder_paths)
+        # Read agent data
+        if exp_data_path is not None:
+            fitnesses, genos, phenos, params, folder_paths = \
+                read_agent_data(exp_data_path, winner_file_name)
 
-    # Plot training and/or test data
-    _plot_phenos_scatter(phenos, params, test_data)
+        print("Fitnesses:\n", fitnesses)
+        print("Genotypes:\n", genos)
+        print("Phenotypes:\n", phenos)
+        print("Params:\n", params[0])
+
+        # Provide fitness analysis
+        _fitness_analysis(fitnesses, folder_paths)
+
+        # Plot training and/or test data
+        _plot_phenos_scatter(phenos, params, test_data)
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
@@ -153,9 +165,16 @@ if __name__ == '__main__':
     # Plot phenotype data
     if '-pheno' in sys.argv:
 
-        exp_dir = sys.argv[2]
+        # Can pass in entire experiment group
+        if '-group' in sys.argv:
+            exp_dir = sys.argv[3]
+        # Or just single experiment
+        else:
+            exp_dir = sys.argv[2]
+
         read_and_plot_phenos(config['logging']['data_dir_path'] + exp_dir,
-                             config['logging']['winner_file_name'])
+                             config['logging']['winner_file_name'],
+                             group=True if '-group' in sys.argv else False)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:

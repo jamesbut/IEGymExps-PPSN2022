@@ -144,8 +144,10 @@ def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=F
             folder_names = [x[0] for x in walk if not x[1]]
         elif recursive and append_dir_path:
             folder_names = [x[0] for x in walk][1:]
-        elif (not recursive) and (not append_dir_path):
+        elif not recursive:
             folder_names = walk[0][1]
+            if append_dir_path:
+                folder_names = list(map(lambda fn: dir_path + '/' + fn, folder_names))
 
         # Sort results
         folder_names = sorted(folder_names)
