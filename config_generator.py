@@ -8,6 +8,7 @@ from helper import modify_dict, print_dict
 import itertools
 import copy
 import os
+import re
 
 
 # Generate new config file using a base config and setting modifications
@@ -41,9 +42,13 @@ def create_settings(hyper_params):
 # Dump configs into directory
 def dump_configs(configs):
 
+    # Get all directories in configs dir
+    config_dirs = get_sub_folders('configs', recursive=False, append_dir_path=False)
+    # Filter to just get group directories
+    prev_group_dirs = [cd for cd in config_dirs if re.search("^g[0-9]+", cd) is not None]
+
     # Check what group number we are up to and calculate next group number
-    prev_group_dirs = get_sub_folders('configs', recursive=False, append_dir_path=False)
-    prev_group_nums = map(int, [gd.replace('g', '') for gd in prev_group_dirs])
+    prev_group_nums = list(map(int, [gd.replace('g', '') for gd in prev_group_dirs]))
     new_group_num = 1
     if prev_group_nums:
         new_group_num = max(prev_group_nums) + 1
@@ -65,12 +70,12 @@ def main():
     base_config = read_configs(None)[0]
 
     # Get centroid directories for universal controllers
-    centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
-                                    num_top_dirs_removed=1)
+    #centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
+    #                                num_top_dirs_removed=1)
 
     hyper_params = [
         (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),
-        (["ie", "decoder_file_num"], [0, 1, 2, 3, 4]),
+        #(["ie", "decoder_file_num"], [0, 1, 2, 3, 4]),
     ]
 
     # Generate settings and then configs from those settings
