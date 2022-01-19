@@ -57,7 +57,8 @@ def evo_run(config, exp_dir_path):
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, agent=agent, env_wrapper=env_wrapper,
-                     render=config['optimiser']['render'], avg_fitnesses=True)
+                     render=config['optimiser']['render'], avg_fitnesses=True,
+                     env_seed=config['env'].get('seed', None))
 
     # Define evolutionary algorithm
     num_genes = agent.genotype_size
@@ -84,9 +85,6 @@ def evo_run(config, exp_dir_path):
     toolbox.register("update", strategy.update)
 
     # Define execution and logs
-
-    # np.random.seed(108)
-
     if config['optimiser']['parallelise']:
         import multiprocessing
 
@@ -126,8 +124,6 @@ def evo_run(config, exp_dir_path):
 
 
 def indv_run(agent_path, domain_params, render=True):
-
-    # render = False
 
     agent = Agent(agent_path=agent_path)
     env_wrapper = EnvWrapper(env_path=agent_path, domain_params=domain_params)

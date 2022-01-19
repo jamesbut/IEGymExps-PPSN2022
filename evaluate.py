@@ -45,7 +45,8 @@ def run(agent, env, render=False):
 # Either pass in a genome and an agent with the required architecture OR
 # an agent with the network weights already set
 def evaluate(genome=None, agent=None, env_wrapper=None,
-             render=False, verbosity=False, avg_fitnesses=False):
+             render=False, verbosity=False, avg_fitnesses=False,
+             env_seed=None):
 
     env_wrapper = copy.deepcopy(env_wrapper)
 
@@ -67,7 +68,7 @@ def evaluate(genome=None, agent=None, env_wrapper=None,
         if verbosity:
             print("Domain parameters:", env_wrapper.domain_params[trial_num])
 
-        env_wrapper.make_env(trial_num)
+        env_wrapper.make_env(trial_num, env_seed)
         r = run(agent, env_wrapper, render)
         rewards.append(r)
 

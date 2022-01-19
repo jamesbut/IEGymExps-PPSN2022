@@ -23,7 +23,8 @@
         "domain_params_high": [0.004],
         "domain_params_low": [0.0],
         "domain_params_input": false,
-        "normalise_state": false
+        "normalise_state": false,
+        "seed": 108
     },
     "ie": {
         "name": "ae",

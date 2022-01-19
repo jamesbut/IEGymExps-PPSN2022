@@ -37,7 +37,7 @@ class EnvWrapper():
         self._domain_param = None
 
     # The trial number determines which of the domain parameters to use
-    def make_env(self, trial_num=0, seed=True):
+    def make_env(self, trial_num=0, seed=None):
 
         if (self._domain_params is None) and (self._domain_param_distribution is None):
             self._env = gym.make(self._env_name)
@@ -53,8 +53,8 @@ class EnvWrapper():
             env_kwargs = get_env_kwargs(self._env_name, self._domain_param)
             self._env = gym.make(self._env_name, **env_kwargs)
 
-        if seed:
-            self._env.seed(108)
+        if seed is not None:
+            self._env.seed(seed)
 
     def step(self, actions):
         state, r, done, info = self._env.step(actions)
