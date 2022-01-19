@@ -50,8 +50,10 @@ def evo_run(config, exp_dir_path):
                   config['controller']['hidden_layer_activ_func'],
                   config['controller']['final_layer_activ_func'],
                   config['controller']['bias'],
-                  config['controller']['w_lb'], config['controller']['w_ub'],
-                  config['controller']['enforce_wb'], decoder=decoder)
+                  config['controller'].get('w_lb', None),
+                  config['controller'].get('w_ub', None),
+                  config['controller'].get('enforce_wb', False),
+                  decoder=decoder)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, agent=agent, env_wrapper=env_wrapper,
@@ -66,12 +68,12 @@ def evo_run(config, exp_dir_path):
                                   file_name=config['logging']['winner_file_name'])
 
     # Expand gene bounds if gene bound list is only of length 1
-    g_lb = config['optimiser']['g_lb']
-    if len(config['optimiser']['g_lb']) == 1:
-        g_lb = config['optimiser']['g_lb'] * num_genes
-    g_ub = config['optimiser']['g_ub']
-    if len(config['optimiser']['g_ub']) == 1:
-        g_ub = config['optimiser']['g_ub'] * num_genes
+    g_lb = config['optimiser'].get('g_lb', None)
+    if g_lb is not None and len(g_lb) == 1:
+        g_lb *= num_genes
+    g_ub = config['optimiser'].get('g_ub', None)
+    if g_ub is not None and len(g_ub) == 1:
+        g_ub *= num_genes
 
     strategy = cma.Strategy(centroid=centroid,
                             sigma=config['optimiser']['cmaes']['init_sigma'],

@@ -1,12 +1,10 @@
 {
     "optimiser": {
         "cmaes": {
-            "init_sigma": 1.0,
+            "init_sigma": 10.0,
             "lambda": 100
         },
         "num_gens": 100,
-        "g_lb": [-120.0],
-        "g_ub": [120.0],
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false
@@ -16,10 +14,7 @@
         "neurons_per_hidden_layer": 0,
         "bias": false,
         "hidden_layer_activ_func": "relu",
-        "final_layer_activ_func": "sigmoid",
-        "w_lb": [-10.0],
-        "w_ub": [120.0],
-        "enforce_wb": false
+        "final_layer_activ_func": "sigmoid"
     },
     "env": {
         "name": "MountainCarContinuous-v0",
@@ -28,11 +23,11 @@
         "domain_params_high": [0.004],
         "domain_params_low": [0.0],
         "domain_params_input": false,
-        "normalise_state": true
+        "normalise_state": false
     },
     "ie": {
-        "name": "gan",
-        "use_decoder": true,
+        "name": "ae",
+        "use_decoder": false,
         "decoder_file_num": 0,
         "code_size": 2,
         "num_hidden_layers": 1,
@@ -41,15 +36,14 @@
         "batch_size": 64,
         "optimiser": {
             "name": "adam",
-            "g_lr": 2e-4,
-            "d_lr": 5e-4
+            "lr": 1e-3
         },
         "training_data_dir": "scp_train_data_non_norm",
         "dump_model_dir": "models",
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",
