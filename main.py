@@ -150,8 +150,8 @@ def main(argv, config):
                 config['ie']['num_hidden_layers'],
                 config['ie']['neurons_per_hidden_layer'],
                 config['ie']['num_epochs'], config['ie']['batch_size'],
-                config['logging']['data_dir_path'] +
-                config['ie']['training_data_dir'],
+                config['logging']['data_dir_path']
+                + config['ie']['training_data_dir'],
                 config['ie']['dump_model_dir'],
                 config['logging']['winner_file_name'],
                 config['ie']['optimiser'])

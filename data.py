@@ -200,8 +200,12 @@ def read_json(file_path):
 
 # Dump dictionary as json
 def dump_json(file_path, json_dict):
-    with open(file_path, 'w') as file:
-        json.dump(json_dict, file, indent=4)
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(json_dict, file, indent=4)
+    # If directory is not created, do not do anything
+    except FileNotFoundError:
+        pass
 
 
 # Calculates the name of the directory to store exp data in

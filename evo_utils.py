@@ -9,6 +9,8 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
+    complete = False
+
     for gen in range(ngen):
         # Generate a new population
         population = list(toolbox.generate())
@@ -29,15 +31,17 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         if verbose:
             print(logbook.stream)
 
-        # End if completion fitness has been achieved
-        if (completion_fitness is not None) and (quit_domain_when_complete):
+        # Check whether domain is complete
+        if completion_fitness is not None:
             if halloffame[0].fitness.values[0] >= completion_fitness:
-                print("WINNER FOUND!")
-                return population, logbook, True
+                complete = True
+                # End if domain is complete
+                if quit_domain_when_complete:
+                    print("WINNER FOUND!")
+                    return population, logbook, True
 
-    print("No winner found :(")
-
-    return population, logbook, False
+    print("WINNER FOUND!") if complete else print("No winner found :(")
+    return population, logbook, complete
 
 
 # This function determines the starting centroid of the CMAES algorithm.
