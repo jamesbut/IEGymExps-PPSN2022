@@ -63,6 +63,7 @@ class EnvWrapper():
 
     # Applies normalisation and includes domain parameters in state if specified
     def _process_state(self, state):
+
         if self._normalise_state:
             # Normalise state to [0, 1]
             state = normalise(state, self._env.observation_space.high,

@@ -7,12 +7,12 @@ from data import read_agent_data, read_evo_data, read_configs, get_sub_folders
 np.set_printoptions(suppress=True)
 
 
-def _plot_phenos_scatter(train_phenotypes=None, params=None, test_phenotypes=None):
+def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotypes=None):
 
     if train_phenotypes is not None:
-        if params is not None:
+        if colour_vals is not None:
             plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1],
-                        c=params[:, 0], cmap='plasma')
+                        c=colour_vals, cmap='plasma')
             plt.colorbar()
         else:
             plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1])
@@ -24,13 +24,14 @@ def _plot_phenos_scatter(train_phenotypes=None, params=None, test_phenotypes=Non
 
 
 def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_means,
-                       lq_means, uq_means, colour, plot_q_means=True, plot_q_bests=True):
+                       lq_means, uq_means, colour,
+                       plot_q_means=True, plot_q_bests=True):
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
 
     # Prepare data for plotting
-    plot_mean_bests = np.column_stack((gens, mean_bests))
+    # plot_mean_bests = np.column_stack((gens, mean_bests))
     plot_median_bests = np.column_stack((gens, median_bests))
     plot_lq_bests = np.column_stack((gens, lq_bests))
     plot_uq_bests = np.column_stack((gens, uq_bests))
@@ -84,7 +85,7 @@ def _fitness_analysis(fitnesses, folder_paths):
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
-                         group=False):
+                         group=False, colour_params=False):
 
     # Get all experiments from group
     if group:
@@ -102,16 +103,18 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
             fitnesses, genos, phenos, params, folder_paths = \
                 read_agent_data(exp_data_path, winner_file_name)
 
-        print("Fitnesses:\n", fitnesses)
-        print("Genotypes:\n", genos)
-        print("Phenotypes:\n", phenos)
-        print("Params:\n", params[0])
+        # Flatten params for now - this might not work when training has been on
+        # more than one param
+        params = params.flatten()
 
         # Provide fitness analysis
         _fitness_analysis(fitnesses, folder_paths)
 
         # Plot training and/or test data
-        _plot_phenos_scatter(phenos, params, test_data)
+        colour_vals = fitnesses
+        if colour_params:
+            colour_vals = params
+        _plot_phenos_scatter(phenos, colour_vals, test_data)
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
@@ -174,7 +177,9 @@ if __name__ == '__main__':
 
         read_and_plot_phenos(config['logging']['data_dir_path'] + exp_dir,
                              config['logging']['winner_file_name'],
-                             group=True if '-group' in sys.argv else False)
+                             group=True if '-group' in sys.argv else False,
+                             colour_params=True if '-colour_params' in sys.argv
+                                                else False)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
