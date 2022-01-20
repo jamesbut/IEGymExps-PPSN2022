@@ -35,6 +35,8 @@ def read_evo_data(exp_data_path):
 
     # Get sub folders in data_dir (different run folders)
     run_folder_paths = get_sub_folders(exp_data_path)
+    if not run_folder_paths:
+        run_folder_paths = [exp_data_path]
 
     exp_mean_fitnesses = []
     exp_best_fitnesses = []

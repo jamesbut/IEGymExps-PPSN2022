@@ -77,11 +77,29 @@ def _fitness_analysis(fitnesses, folder_paths):
     mean_fitness = np.mean(fitnesses)
     print("Mean fitness:", mean_fitness)
 
+    median_fitness = np.median(fitnesses)
+    print("Median fitness:", median_fitness)
+
     min_arg = np.argmin(fitnesses)
     min_fitness = fitnesses[min_arg]
     min_file = folder_paths[min_arg]
 
     print("Min fitness: {}              File: {}".format(min_fitness, min_file))
+
+
+# Calculate best fitnesses so far from the best fitnesses for each generation
+def calculate_best_fitnesses_so_far(best_fitnesses):
+
+    def insert_best_fitnesses_so_far(run_best_fitnesses):
+        # Calculate max fitness argument
+        max_fitness_arg = np.argmax(run_best_fitnesses)
+        # Fill remaining fitnesses as this max fitness
+        best_fitnesses_so_far = np.copy(run_best_fitnesses)
+        best_fitnesses_so_far[max_fitness_arg:] = run_best_fitnesses[max_fitness_arg]
+        return best_fitnesses_so_far
+
+    # For each evolutionary run
+    return np.apply_along_axis(insert_best_fitnesses_so_far, 1, best_fitnesses)
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
@@ -102,6 +120,11 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         if exp_data_path is not None:
             fitnesses, genos, phenos, params, folder_paths = \
                 read_agent_data(exp_data_path, winner_file_name)
+
+        print("Fitnesses:\n", fitnesses)
+        print("Genotypes:\n", genos)
+        print("Phenotypes:\n", phenos)
+        print("Params:\n", params[0])
 
         # Flatten params for now - this might not work when training has been on
         # more than one param
@@ -131,14 +154,17 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
         # Read experiment data
         mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
 
+        # Calculate best fitnesses so far
+        best_fitnesses_so_far = calculate_best_fitnesses_so_far(best_fitnesses)
+
         # Print number of runs
         print('Number of runs:', len(best_fitnesses))
 
         # Calculate statistics
-        mean_best_fitnesses = np.mean(best_fitnesses, axis=0)
-        median_best_fitnesses = np.median(best_fitnesses, axis=0)
-        lq_best_fitnesses = np.quantile(best_fitnesses, 0.25, axis=0)
-        uq_best_fitnesses = np.quantile(best_fitnesses, 0.75, axis=0)
+        mean_best_fitnesses = np.mean(best_fitnesses_so_far, axis=0)
+        median_best_fitnesses = np.median(best_fitnesses_so_far, axis=0)
+        lq_best_fitnesses = np.quantile(best_fitnesses_so_far, 0.25, axis=0)
+        uq_best_fitnesses = np.quantile(best_fitnesses_so_far, 0.75, axis=0)
 
         median_mean_fitnesses = np.median(mean_fitnesses, axis=0)
         lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
