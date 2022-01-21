@@ -1,7 +1,7 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": "g5/g5_exp_0/0522d36c-41d2-42d3-b954-bb000ac34ba1",
+            "centroid": "g6/g6_exp_0/5514426b-6a84-4636-99e5-90034a1dea71",
             "init_sigma": 1.0,
             "lambda": 100
         },
