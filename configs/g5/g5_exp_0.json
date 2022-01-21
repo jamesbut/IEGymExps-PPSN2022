@@ -19,11 +19,19 @@
     "env": {
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.2,
-        "domain_params": [0.0008],
-        "domain_params_high": [0.004],
-        "domain_params_low": [0.0],
+        "domain_params": [
+            0.0008,
+            0.0012,
+            0.0016
+        ],
+        "domain_params_high": [
+            0.004
+        ],
+        "domain_params_low": [
+            0.0
+        ],
         "domain_params_input": false,
-        "normalise_state": true,
+        "normalise_state": false,
         "seed": 108
     },
     "ie": {
@@ -37,7 +45,7 @@
         "batch_size": 64,
         "optimiser": {
             "name": "adam",
-            "lr": 1e-3
+            "lr": 0.001
         },
         "training_data_dir": "scp_train_data_non_norm",
         "dump_model_dir": "models",
@@ -50,6 +58,8 @@
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
-        "save_winners_only": false
+        "save_winners_only": false,
+        "exp_dir_name": "exp_1",
+        "config_file_path": "configs/default.json"
     }
 }
