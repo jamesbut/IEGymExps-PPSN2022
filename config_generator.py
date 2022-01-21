@@ -2,7 +2,6 @@
 # Can generate a number of configs #
 ####################################
 
-import json
 from data import read_configs, get_sub_folders, dump_json
 from helper import modify_dict, print_dict
 import itertools
@@ -70,12 +69,14 @@ def main():
     base_config = read_configs(None)[0]
 
     # Get centroid directories for universal controllers
-    #centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
+    # centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
     #                                num_top_dirs_removed=1)
 
     hyper_params = [
-        (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),
-        #(["ie", "decoder_file_num"], [0, 1, 2, 3, 4]),
+        # (["env", "domain_params"],
+        #    [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),
+        (["env", "domain_params"], [[0.0008, 0.0012, 0.0016]])
+        # (["ie", "decoder_file_num"], [0, 1, 2, 3, 4]),
     ]
 
     # Generate settings and then configs from those settings
