@@ -90,16 +90,18 @@ def _fitness_analysis(fitnesses, folder_paths):
 # Calculate best fitnesses so far from the best fitnesses for each generation
 def calculate_best_fitnesses_so_far(best_fitnesses):
 
-    def insert_best_fitnesses_so_far(run_best_fitnesses):
-        # Calculate max fitness argument
-        max_fitness_arg = np.argmax(run_best_fitnesses)
-        # Fill remaining fitnesses as this max fitness
-        best_fitnesses_so_far = np.copy(run_best_fitnesses)
-        best_fitnesses_so_far[max_fitness_arg:] = run_best_fitnesses[max_fitness_arg]
+    def create_best_fitnesses_so_far(run_best_fitnesses):
+        best_fitnesses_so_far = np.empty_like(run_best_fitnesses)
+        best_fitness_so_far = run_best_fitnesses[0]
+        # Calculate best winner so far at each generation
+        for i, f in enumerate(run_best_fitnesses):
+            if f > best_fitness_so_far:
+                best_fitness_so_far = f
+            best_fitnesses_so_far[i] = best_fitness_so_far
         return best_fitnesses_so_far
 
     # For each evolutionary run
-    return np.apply_along_axis(insert_best_fitnesses_so_far, 1, best_fitnesses)
+    return np.apply_along_axis(create_best_fitnesses_so_far, 1, best_fitnesses)
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
