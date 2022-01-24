@@ -1,30 +1,35 @@
 import torch
 from generative_models.batch_utils import generate_batches
 from neural_network import NeuralNetwork
+from generative_models.model_testing import code_in_range
+from plotter import read_and_plot_phenos
 
 
 class VAE(torch.nn.Module):
 
-    def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, lr=1e-3, read_decoder=False):
+    def __init__(self, code_size=None, train_data_vec_size=None, num_hidden_layers=None,
+                 neurons_per_hidden_layer=None, lr=1e-3, decoder_file_path=None):
         super().__init__()
 
-        self._encoder = NeuralNetwork(
-            num_inputs=train_data_vec_size,
-            num_outputs=code_size,
-            num_hidden_layers=num_hidden_layers,
-            neurons_per_hidden_layer=neurons_per_hidden_layer,
-            final_activ_func=None)
+        if decoder_file_path:
+            self._decoder = NeuralNetwork(file_path=decoder_file_path)
+        else:
+            self._encoder = NeuralNetwork(
+                num_inputs=train_data_vec_size,
+                num_outputs=code_size,
+                num_hidden_layers=num_hidden_layers,
+                neurons_per_hidden_layer=neurons_per_hidden_layer,
+                final_activ_func=None)
 
-        self._hidden2mu = torch.nn.Linear(code_size, code_size)
-        self._hidden2log_var = torch.nn.Linear(code_size, code_size)
+            self._hidden2mu = torch.nn.Linear(code_size, code_size)
+            self._hidden2log_var = torch.nn.Linear(code_size, code_size)
 
-        self._decoder = NeuralNetwork(
-            num_inputs=code_size,
-            num_outputs=train_data_vec_size,
-            num_hidden_layers=num_hidden_layers,
-            neurons_per_hidden_layer=neurons_per_hidden_layer,
-            final_activ_func=None)
+            self._decoder = NeuralNetwork(
+                num_inputs=code_size,
+                num_outputs=train_data_vec_size,
+                num_hidden_layers=num_hidden_layers,
+                neurons_per_hidden_layer=neurons_per_hidden_layer,
+                final_activ_func=None)
 
         self._optimiser = torch.optim.Adam(self.parameters(), lr=lr)
 
@@ -109,6 +114,15 @@ class VAE(torch.nn.Module):
         reconstruction_loss = recon_loss_criterion(inputs, outputs)
 
         return reconstruction_loss + kl_loss
+
+    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
+        code_range = code_in_range(self._decoder.num_inputs, -4., 4., step_size=0.01)
+        output = self._decoder(code_range)
+        print(output)
+
+        if plot:
+            read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
+                                 winner_file_name=winner_file_name)
 
     def test(self):
         self(self.training_data, verbosity=True)

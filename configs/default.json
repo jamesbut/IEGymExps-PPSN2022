@@ -28,21 +28,22 @@
         "seed": 108
     },
     "ie": {
-        "name": "ae",
+        "name": "gan",
         "use_decoder": false,
         "decoder_file_num": 0,
         "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
-        "num_epochs": 2000,
+        "num_epochs": 5000,
         "batch_size": 64,
         "optimiser": {
             "name": "adam",
-            "lr": 1e-3
+            "g_lr": 2e-4,
+            "d_lr": 5e-4
         },
         "training_data_dir": "scp_train_data_non_norm",
         "dump_model_dir": "models",
-        "num_trains": 5
+        "num_trains": 1
     },
     "execution": {
         "num_runs": 5

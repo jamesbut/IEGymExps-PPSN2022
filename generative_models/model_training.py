@@ -28,8 +28,7 @@ def train_generative_model(gen_model_type, code_size, num_hidden_layers,
     gen_model.dump_config(model_path, train_data_exp_path)
 
     # Test model
-    #gen_model.test(plot=True, train_data_path=train_data_exp_path,
-    #               winner_file_name=winner_file_name)
+    # gen_model.test(plot=True, train_data_path=train_data_exp_path)
 
 
 def build_generative_model(gen_model_type, code_size, data_size,
@@ -73,7 +72,6 @@ def get_model_path(gen_model_type, dump_model_dir):
 def get_model_num(gen_model_type, dump_model_dir):
 
     import glob
-    import sys
 
     # Read previous model files
     prev_model_files = glob.glob(dump_model_dir + '/' + gen_model_type + '_*.pt')

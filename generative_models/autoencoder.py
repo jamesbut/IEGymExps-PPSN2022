@@ -7,25 +7,25 @@ from neural_network import NeuralNetwork
 
 class Autoencoder(torch.nn.Module):
 
-    def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, lr=1e-3, read_decoder=False):
+    def __init__(self, code_size=None, train_data_vec_size=None, num_hidden_layers=None,
+                 neurons_per_hidden_layer=None, lr=1e-3, decoder_file_path=None):
         super().__init__()
 
-        self._encoder = NeuralNetwork(
-            num_inputs=train_data_vec_size,
-            num_outputs=code_size,
-            num_hidden_layers=num_hidden_layers,
-            neurons_per_hidden_layer=neurons_per_hidden_layer,
-            final_activ_func=None)
-        self._decoder = NeuralNetwork(
-            num_inputs=code_size,
-            num_outputs=train_data_vec_size,
-            num_hidden_layers=num_hidden_layers,
-            neurons_per_hidden_layer=neurons_per_hidden_layer,
-            final_activ_func=None)
-
-        if read_decoder:
-            self._decoder = NeuralNetwork(file_path='decoder.pt')
+        if decoder_file_path:
+            self._decoder = NeuralNetwork(file_path=decoder_file_path)
+        else:
+            self._encoder = NeuralNetwork(
+                num_inputs=train_data_vec_size,
+                num_outputs=code_size,
+                num_hidden_layers=num_hidden_layers,
+                neurons_per_hidden_layer=neurons_per_hidden_layer,
+                final_activ_func=None)
+            self._decoder = NeuralNetwork(
+                num_inputs=code_size,
+                num_outputs=train_data_vec_size,
+                num_hidden_layers=num_hidden_layers,
+                neurons_per_hidden_layer=neurons_per_hidden_layer,
+                final_activ_func=None)
 
         self._optimiser = torch.optim.Adam(self.parameters(), lr=lr)
 
@@ -73,13 +73,15 @@ class Autoencoder(torch.nn.Module):
 
         return output
 
-    def test_decoder(self, plot=False, train_data_exp_path=None):
-        code_range = code_in_range(self._code_size, 0., 1., step_size=0.002)
+    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
+
+        code_range = code_in_range(self._decoder.num_inputs, 0., 1., step_size=0.002)
         output = self._decoder(code_range)
         print(output)
 
         if plot:
-            read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy())
+            read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
+                                 winner_file_name=winner_file_name)
 
     def test(self):
         self(self.training_data, verbosity=True)

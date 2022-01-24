@@ -7,32 +7,31 @@ from neural_network import NeuralNetwork
 
 class GAN():
 
-    def __init__(self, code_size, train_data_vec_size, num_hidden_layers,
-                 neurons_per_hidden_layer, g_lr=2e-4, d_lr=5e-4, read_decoder=False):
+    def __init__(self, code_size=None, train_data_vec_size=None, num_hidden_layers=None,
+                 neurons_per_hidden_layer=None, g_lr=2e-4, d_lr=5e-4,
+                 decoder_file_path=None):
 
-        self._generator = NeuralNetwork(
-            num_inputs=code_size,
-            num_outputs=train_data_vec_size,
-            num_hidden_layers=num_hidden_layers,
-            neurons_per_hidden_layer=neurons_per_hidden_layer,
-            final_activ_func=None)
+        if decoder_file_path:
+            self._generator = NeuralNetwork(file_path=decoder_file_path)
+        else:
+            self._generator = NeuralNetwork(
+                num_inputs=code_size,
+                num_outputs=train_data_vec_size,
+                num_hidden_layers=num_hidden_layers,
+                neurons_per_hidden_layer=neurons_per_hidden_layer,
+                final_activ_func=None)
 
-        self._discriminator = NeuralNetwork(
-            num_inputs=train_data_vec_size,
-            num_outputs=1,
-            num_hidden_layers=num_hidden_layers,
-            neurons_per_hidden_layer=neurons_per_hidden_layer,
-            final_activ_func='sigmoid')
+            self._discriminator = NeuralNetwork(
+                num_inputs=train_data_vec_size,
+                num_outputs=1,
+                num_hidden_layers=num_hidden_layers,
+                neurons_per_hidden_layer=neurons_per_hidden_layer,
+                final_activ_func='sigmoid')
 
-        if read_decoder:
-            self._generator = NeuralNetwork(file_path='decoder.pt')
-
-        self._g_optimiser = torch.optim.RMSprop(self._generator.parameters(),
-                                                lr=g_lr)
-        self._d_optimiser = torch.optim.RMSprop(self._discriminator.parameters(),
-                                                lr=d_lr)
-
-        self._code_size = code_size
+            self._g_optimiser = torch.optim.RMSprop(self._generator.parameters(),
+                                                    lr=g_lr)
+            self._d_optimiser = torch.optim.RMSprop(self._discriminator.parameters(),
+                                                    lr=d_lr)
 
     def train(self, train_data, num_epochs, batch_size):
 
@@ -59,7 +58,7 @@ class GAN():
                 d_real_loss.backward()
 
                 # Generate fake data using generator
-                noise = torch.randn(batch.size(0), self._code_size)
+                noise = torch.randn(batch.size(0), self._generator.num_inputs)
                 fake_data = self._generator(noise)
 
                 # Train discriminator on false data
@@ -92,22 +91,15 @@ class GAN():
         self._final_d_avg_loss = d_avg_loss.item()
         self._final_g_avg_loss = g_avg_loss.item()
 
-    def test(self, rand_code=False, plot=False,
-             train_data_exp_path=None, winner_file_name=None):
+    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
 
-        # Generate fake data using generator
-        if rand_code:
-            noise = torch.randn(self._training_data.size(0), self._code_size)
-        else:
-            noise = code_in_range(self._code_size, -4., 4., step_size=0.01)
-        fake_data = self._generator(noise)
-
-        print('Testing, fake data:')
-        print(fake_data)
+        code_range = code_in_range(self._generator.num_inputs, -4., 4., step_size=0.01)
+        output = self._generator(code_range)
+        print(output)
 
         if plot:
-            read_and_plot_phenos(train_data_exp_path, winner_file_name,
-                                 fake_data.detach().numpy())
+            read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
+                                 winner_file_name=winner_file_name)
 
     def to_dict(self, train_data_exp_dir_path):
 
