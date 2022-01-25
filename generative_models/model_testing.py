@@ -15,6 +15,8 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
         print("Could not find requested decoder for testing:", decoder_file_path)
         return
 
+    print('Testing decoder:', decoder_file_path)
+
     # Test decoder
     gen_model.test_decoder(plot=True, train_data_exp_path=train_data_path,
                            winner_file_name=winner_file_name)

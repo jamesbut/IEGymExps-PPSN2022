@@ -18,7 +18,7 @@ def read_agent_data(exp_data_path, winner_file_name):
 
     # Append winner file name to folder paths
     for i in range(len(run_folder_paths)):
-        run_folder_paths[i] += '/' + winner_file_name
+        run_folder_paths[i] += '/' + winner_file_name + '.json'
 
     # Read data
     fitnesses, genos, phenos, domain_params = read_data(run_folder_paths)
@@ -60,7 +60,7 @@ def read_data(folder_paths):
 
     for fp in folder_paths:
         try:
-            with open(fp + '.json') as agent_file:
+            with open(fp) as agent_file:
                 agent = json.load(agent_file)
 
                 fitnesses.append(agent['fitness'])

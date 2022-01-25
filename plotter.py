@@ -105,7 +105,8 @@ def calculate_best_fitnesses_so_far(best_fitnesses):
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
-                         group=False, colour_params=False, full_print=False):
+                         group=False, colour_params=False, full_print=False,
+                         print_train_data=True):
 
     # Get all experiments from group
     if group:
@@ -127,10 +128,11 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
             fitnesses, genos, phenos, params, folder_paths = \
                 read_agent_data(exp_data_path, winner_file_name)
 
-        print("Fitnesses:\n", fitnesses)
-        print("Genotypes:\n", genos)
-        print("Phenotypes:\n", phenos)
-        print("Params:\n", params[0])
+        if print_train_data:
+            print("Fitnesses:\n", fitnesses)
+            print("Genotypes:\n", genos)
+            print("Phenotypes:\n", phenos)
+            print("Params:\n", params[0])
 
         # Flatten params for now - this might not work when training has been on
         # more than one param

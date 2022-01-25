@@ -81,7 +81,8 @@ class Autoencoder(torch.nn.Module):
 
         if plot:
             read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
-                                 winner_file_name=winner_file_name)
+                                 winner_file_name=winner_file_name,
+                                 print_train_data=False)
 
     def test(self):
         self(self.training_data, verbosity=True)
