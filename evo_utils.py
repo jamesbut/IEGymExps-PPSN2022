@@ -59,7 +59,6 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
         # If centroid is string, read in genome from file path
         if isinstance(centroid_json, str):
 
-            import sys
             from agent import Agent
 
             # Build organism path
@@ -71,4 +70,4 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
 
         # If centroid is number, return number as vector
         else:
-            return [centroid_json] * num_genes
+            return centroid_json * num_genes
