@@ -24,7 +24,7 @@
         "domain_params_high": [0.004],
         "domain_params_low": [0.0],
         "domain_params_input": false,
-        "normalise_state": false,
+        "normalise_state": true,
         "seed": 108
     },
     "ie": {
@@ -38,11 +38,11 @@
         "batch_size": 64,
         "optimiser": {
             "name": "adam",
-            "lr": 1e-4
+            "lr": 2e-4
         },
-        "training_data_dir": "scp_train_data_non_norm",
+        "training_data_dir": "scp_train_data_norm",
         "dump_model_dir": "models",
-        "num_trains": 5
+        "num_trains": 1
     },
     "execution": {
         "num_runs": 5

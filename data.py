@@ -1,6 +1,5 @@
 import os
 import sys
-import csv
 from glob import glob
 import numpy as np
 import json
@@ -21,11 +20,8 @@ def read_agent_data(exp_data_path, winner_file_name):
     for i in range(len(run_folder_paths)):
         run_folder_paths[i] += '/' + winner_file_name
 
-    # Check for old data format
-    if check_for_old_format(run_folder_paths[0]):
-        fitnesses, genos, phenos, domain_params = read_data_old_format(run_folder_paths)
-    else:
-        fitnesses, genos, phenos, domain_params = read_data_new_format(run_folder_paths)
+    # Read data
+    fitnesses, genos, phenos, domain_params = read_data(run_folder_paths)
 
     return fitnesses, genos, phenos, domain_params, run_folder_paths
 
@@ -54,17 +50,8 @@ def read_evo_data(exp_data_path):
     return np.array(exp_mean_fitnesses), np.array(exp_best_fitnesses)
 
 
-# Check for old data format
-def check_for_old_format(data_path):
-    try:
-        open(data_path)
-        return True
-    except FileNotFoundError:
-        return False
-
-
 # Read new data format that uses json files
-def read_data_new_format(folder_paths):
+def read_data(folder_paths):
 
     fitnesses = []
     genotypes = []
@@ -86,52 +73,6 @@ def read_data_new_format(folder_paths):
 
     return np.array(fitnesses), np.array(genotypes), np.array(phenotypes), \
            np.array(domain_params)
-
-
-# Read old data format that was used by NeuroEvo C++ code
-def read_data_old_format(folder_paths):
-
-    fitnesses = []
-    genotypes = []
-    phenotypes = []
-    domain_params = []
-
-    for fp in folder_paths:
-        try:
-            with open(fp) as data_file:
-
-                csv_reader = csv.reader(data_file, delimiter=',')
-
-                for i, row in enumerate(csv_reader):
-
-                    # Convert to floats
-                    row = [float(i) for i in row]
-
-                    # First row is fitness and genotype
-                    if i == 0:
-                        fitnesses.append(row[0])
-                        genotypes.append(row[1:])
-
-                    # Second row is parameters, if they are there
-                    elif i == 1:
-                        domain_params.append(row)
-
-                    # If an IE was used the phenotype is on the third row
-                    elif i == 2:
-                        phenotypes.append(row)
-
-        except FileNotFoundError:
-            sys.exit("Could not find file named: " + fp)
-
-    # If phenotypes are not in file, make phenotypes equal to the genotypes
-    if not phenotypes:
-        import copy
-        phenotypes = copy.deepcopy(genotypes)
-
-    return np.array(fitnesses), \
-           np.array(genotypes), \
-           np.array(phenotypes) if phenotypes else None, \
-           np.array(domain_params) if domain_params else None
 
 
 def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=False,
