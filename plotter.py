@@ -105,7 +105,7 @@ def calculate_best_fitnesses_so_far(best_fitnesses):
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
-                         group=False, colour_params=False):
+                         group=False, colour_params=False, full_print=False):
 
     # Get all experiments from group
     if group:
@@ -113,6 +113,10 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     # Otherwise just process given experiment
     else:
         exp_data_paths = [exp_data_path]
+
+    # Print full numpy arrays
+    if full_print:
+        np.set_printoptions(threshold=sys.maxsize)
 
     # For all experiments, show pheno data
     for exp_data_path in exp_data_paths:
@@ -207,7 +211,8 @@ if __name__ == '__main__':
                              config['logging']['winner_file_name'],
                              group=True if '-group' in sys.argv else False,
                              colour_params=True if '-colour_params' in sys.argv
-                                                else False)
+                                                else False,
+                             full_print=True if '-full_print' in sys.argv else False)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
