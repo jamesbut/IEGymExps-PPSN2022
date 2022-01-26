@@ -62,7 +62,7 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
             from agent import Agent
 
             # Build organism path
-            org_path = dir_path + centroid_json + '/' + file_name
+            org_path = dir_path + centroid_json + '/' + file_name + '.json'
 
             # Read in genotype of organism
             org = Agent(agent_path=org_path)
