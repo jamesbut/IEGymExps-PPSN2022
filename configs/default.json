@@ -25,8 +25,8 @@
         "domain_params": [0.0008],
         "domain_params_high": [0.004],
         "domain_params_low": [0.0],
-        "domain_params_input": true,
-        "normalise_state": true,
+        "domain_params_input": false,
+        "normalise_state": false,
         "seed": 108
     },
     "ie": {
@@ -47,7 +47,7 @@
         "num_trains": 1
     },
     "execution": {
-        "num_runs": 10
+        "num_runs": 5
     },
     "logging": {
         "data_dir_path": "data/",

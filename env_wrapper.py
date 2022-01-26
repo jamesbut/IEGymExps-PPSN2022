@@ -83,7 +83,7 @@ class EnvWrapper():
 
     def _read(self, file_path):
 
-        with open(file_path + '.json', 'r') as f:
+        with open(file_path, 'r') as f:
             data = json.load(f)
 
         env_data = data['env']

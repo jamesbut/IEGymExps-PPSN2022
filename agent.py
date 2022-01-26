@@ -109,9 +109,12 @@ class Agent():
     def _read(self, agent_filepath):
 
         # Read genotype
-        with open(agent_filepath + '.json', 'r') as f:
+        with open(agent_filepath, 'r') as f:
             data = json.load(f)
             genotype = data['genotype']
+
+        # Remove .json suffix
+        agent_filepath = agent_filepath.removesuffix('.json')
 
         # Attempt to read decoder
         try:
