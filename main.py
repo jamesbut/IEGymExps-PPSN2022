@@ -193,7 +193,7 @@ def main(argv, config):
         # Agent directory comes from the command line
         indv_dir = argv[1]
         indv_path = config['logging']['data_dir_path'] + indv_dir + '/' \
-                    + config['logging']['winner_file_name']
+                    + config['logging']['winner_file_name'] + '.json'
 
         indv_run(indv_path, config['env']['domain_params'])
 
