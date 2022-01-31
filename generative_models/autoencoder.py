@@ -1,7 +1,6 @@
 import torch
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
-from plotter import read_and_plot_phenos
 from neural_network import NeuralNetwork
 
 
@@ -73,16 +72,11 @@ class Autoencoder(torch.nn.Module):
 
         return output
 
-    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
+    def test_decoder(self):
 
-        code_range = code_in_range(self._decoder.num_inputs, 0., 1., step_size=0.005)
+        code_range = code_in_range(self._decoder.num_inputs, 0., 1., step_size=0.004)
         output = self._decoder(code_range)
-        print(output)
-
-        if plot:
-            read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
-                                 winner_file_name=winner_file_name,
-                                 print_train_data=False)
+        return output.detach().numpy()
 
     def test(self):
         self(self.training_data, verbosity=True)

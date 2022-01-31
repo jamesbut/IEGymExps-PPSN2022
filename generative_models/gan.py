@@ -1,7 +1,6 @@
 import torch
 from generative_models.batch_utils import generate_batches
 from generative_models.model_testing import code_in_range
-from plotter import read_and_plot_phenos
 from neural_network import NeuralNetwork
 
 
@@ -91,15 +90,11 @@ class GAN():
         self._final_d_avg_loss = d_avg_loss.item()
         self._final_g_avg_loss = g_avg_loss.item()
 
-    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
+    def test_decoder(self):
 
-        code_range = code_in_range(self._generator.num_inputs, -4., 4., step_size=0.01)
+        code_range = code_in_range(self._generator.num_inputs, -3., 3., step_size=0.01)
         output = self._generator(code_range)
-        print(output)
-
-        if plot:
-            read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
-                                 winner_file_name=winner_file_name)
+        return output.detach().numpy()
 
     def to_dict(self, train_data_exp_dir_path):
 

@@ -158,17 +158,34 @@ def main(argv, config):
         train_data_path = config['logging']['data_dir_path'] \
                           + config['ie']['training_data_dir']
 
-        # Expand gene bounds from config
-        g_lb, g_ub = expand_gene_bounds(config)
+        # Get decoder from command line
+        try:
+            decoder_type = argv[2]
+            decoder_num = argv[3]
+        except IndexError:
+            print('argv:', argv)
+            print('Example call: python main.py -test_decoder *decoder_type* '
+                  '*decoder_num*')
+            return
+
+        # Get axis limits from command line
+        plot_axis_lb = None
+        plot_axis_ub = None
+        if '-fixed_axis' in argv:
+            try:
+                plot_axis_lb = float(argv[5])
+                plot_axis_ub = float(argv[6])
+            except IndexError:
+                pass
 
         # Test decoder
         test_decoder(config['ie']['dump_model_dir'],
-                     config['ie']['name'],
-                     config['ie']['decoder_file_num'],
+                     decoder_type,
+                     decoder_num,
                      train_data_path,
                      config['logging']['winner_file_name'],
-                     train_g_lb=g_lb if '-fixed_axis' in argv else None,
-                     train_g_ub=g_ub if '-fixed_axis' in argv else None)
+                     plot_axis_lb=plot_axis_lb,
+                     plot_axis_ub=plot_axis_ub)
 
     # Evolutionary run
     elif '-evo_run' in argv:
