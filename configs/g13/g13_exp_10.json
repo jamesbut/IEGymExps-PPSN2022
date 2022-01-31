@@ -1,7 +1,9 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": [0.0],
+            "centroid": [
+                0.0
+            ],
             "init_sigma": 1.0,
             "lambda": 100
         },
@@ -9,8 +11,12 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "g_lb": [-3.0],
-        "g_ub": [3.0]
+        "g_lb": [
+            -3.0
+        ],
+        "g_ub": [
+            3.0
+        ]
     },
     "controller": {
         "num_hidden_layers": 0,
@@ -22,11 +28,17 @@
     "env": {
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.0,
-        "domain_params": [0.0008],
-        "domain_params_high": [0.004],
-        "domain_params_low": [0.0],
+        "domain_params": [
+            0.0012
+        ],
+        "domain_params_high": [
+            0.004
+        ],
+        "domain_params_low": [
+            0.0
+        ],
         "domain_params_input": false,
-        "normalise_state": true,
+        "normalise_state": false,
         "seed": 108
     },
     "ie": {
@@ -40,10 +52,10 @@
         "batch_size": 1000,
         "optimiser": {
             "name": "adam",
-            "g_lr": 2e-4,
-            "d_lr": 5e-4
+            "g_lr": 0.0002,
+            "d_lr": 0.0005
         },
-        "training_data_dir": "scp_train_data_norm",
+        "training_data_dir": "scp_train_data",
         "dump_model_dir": "models",
         "num_trains": 5
     },
@@ -54,6 +66,8 @@
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
-        "save_winners_only": false
+        "save_winners_only": false,
+        "exp_dir_name": "exp_1",
+        "config_file_path": "configs/default.json"
     }
 }

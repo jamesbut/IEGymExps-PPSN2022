@@ -92,7 +92,7 @@ class GAN():
 
     def test_decoder(self):
 
-        code_range = code_in_range(self._generator.num_inputs, -3., 3., step_size=0.01)
+        code_range = code_in_range(self._generator.num_inputs, -3., 3., step_size=0.05)
         output = self._generator(code_range)
         return output.detach().numpy()
 

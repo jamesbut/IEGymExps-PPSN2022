@@ -185,7 +185,8 @@ def main(argv, config):
                      train_data_path,
                      config['logging']['winner_file_name'],
                      plot_axis_lb=plot_axis_lb,
-                     plot_axis_ub=plot_axis_ub)
+                     plot_axis_ub=plot_axis_ub,
+                     colour_params=True if '-colour_params' in argv else False)
 
     # Evolutionary run
     elif '-evo_run' in argv:

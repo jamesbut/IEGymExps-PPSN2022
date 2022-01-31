@@ -4,7 +4,8 @@ from plotter import read_and_plot_phenos
 
 
 def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_path,
-                 winner_file_name, plot_axis_lb=None, plot_axis_ub=None):
+                 winner_file_name, plot_axis_lb=None, plot_axis_ub=None,
+                 colour_params=False):
 
     # Read decoder
     decoder_file_path = dump_model_dir + '/' + gen_model_type + '_' \
@@ -25,7 +26,8 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
     # Plot decoder output and training data
     read_and_plot_phenos(train_data_path, test_data=decoder_output,
                          winner_file_name=winner_file_name,
-                         plot_axis_lb=plot_axis_lb, plot_axis_ub=plot_axis_ub)
+                         plot_axis_lb=plot_axis_lb, plot_axis_ub=plot_axis_ub,
+                         colour_params=colour_params)
 
 
 def build_decoder(gen_model_type, decoder_file_path):
