@@ -1,7 +1,7 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": [0.5],
+            "centroid": [0.0],
             "init_sigma": 1.0,
             "lambda": 100
         },
@@ -9,8 +9,8 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "g_lb": [0.0],
-        "g_ub": [1.0]
+        "g_lb": [-3.0],
+        "g_ub": [3.0]
     },
     "controller": {
         "num_hidden_layers": 0,
@@ -30,7 +30,7 @@
         "seed": 108
     },
     "ie": {
-        "name": "ae",
+        "name": "vae",
         "use_decoder": true,
         "decoder_file_num": 0,
         "code_size": 2,
@@ -44,7 +44,7 @@
         },
         "training_data_dir": "scp_train_data_non_norm",
         "dump_model_dir": "models",
-        "num_trains": 3
+        "num_trains": 4
     },
     "execution": {
         "num_runs": 5

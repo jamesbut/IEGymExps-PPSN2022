@@ -115,14 +115,16 @@ class VAE(torch.nn.Module):
 
         return reconstruction_loss + kl_loss
 
-    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
-        code_range = code_in_range(self._decoder.num_inputs, -4., 4., step_size=0.01)
+    def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None,
+                     train_g_lb=None, train_g_ub=None):
+        code_range = code_in_range(self._decoder.num_inputs, -3., 3., step_size=0.05)
         output = self._decoder(code_range)
         print(output)
 
         if plot:
             read_and_plot_phenos(train_data_exp_path, test_data=output.detach().numpy(),
-                                 winner_file_name=winner_file_name)
+                                 winner_file_name=winner_file_name,
+                                 train_g_lb=train_g_lb, train_g_ub=train_g_ub)
 
     def test(self):
         self(self.training_data, verbosity=True)

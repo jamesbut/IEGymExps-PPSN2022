@@ -71,3 +71,17 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
         # If centroid is number, return number as vector
         else:
             return centroid_json * num_genes
+
+
+# Expand gene bounds if gene bound list is only of length 1
+def expand_gene_bounds(config):
+
+    g_lb = config['optimiser'].get('g_lb', None)
+    if g_lb is not None and len(g_lb) == 1:
+        g_lb *= config['ie']['code_size']
+
+    g_ub = config['optimiser'].get('g_ub', None)
+    if g_ub is not None and len(g_ub) == 1:
+        g_ub *= config['ie']['code_size']
+
+    return g_lb, g_ub

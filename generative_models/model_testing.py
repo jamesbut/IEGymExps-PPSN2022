@@ -3,7 +3,7 @@ import torch
 
 
 def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_path,
-                 winner_file_name):
+                 winner_file_name, train_g_lb=None, train_g_ub=None):
 
     # Read decoder
     decoder_file_path = dump_model_dir + '/' + gen_model_type + '_' \
@@ -19,7 +19,8 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
 
     # Test decoder
     gen_model.test_decoder(plot=True, train_data_exp_path=train_data_path,
-                           winner_file_name=winner_file_name)
+                           winner_file_name=winner_file_name,
+                           train_g_lb=train_g_lb, train_g_ub=train_g_ub)
 
 
 def build_decoder(gen_model_type, decoder_file_path):

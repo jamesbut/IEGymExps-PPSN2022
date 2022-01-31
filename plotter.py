@@ -7,7 +7,8 @@ from data import read_agent_data, read_evo_data, read_configs, get_sub_folders
 np.set_printoptions(suppress=True)
 
 
-def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotypes=None):
+def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotypes=None,
+                         train_g_lb=None, train_g_ub=None):
 
     if train_phenotypes is not None:
         if colour_vals is not None:
@@ -18,7 +19,13 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotype
             plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1])
 
     if test_phenotypes is not None:
-        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1])
+        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=0.1)
+
+    # Set axis limit if given
+    if train_g_lb:
+        plt.xlim([train_g_lb[0], train_g_ub[0]])
+    if train_g_ub:
+        plt.ylim([train_g_lb[1], train_g_ub[1]])
 
     plt.show()
 
@@ -106,7 +113,7 @@ def calculate_best_fitnesses_so_far(best_fitnesses):
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
                          group=False, colour_params=False, full_print=False,
-                         print_train_data=True):
+                         print_train_data=True, train_g_lb=None, train_g_ub=None):
 
     # Get all experiments from group
     if group:
@@ -145,7 +152,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         colour_vals = fitnesses
         if colour_params:
             colour_vals = params
-        _plot_phenos_scatter(phenos, colour_vals, test_data)
+        _plot_phenos_scatter(phenos, colour_vals, test_data, train_g_lb, train_g_ub)
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
@@ -214,7 +221,11 @@ if __name__ == '__main__':
                              group=True if '-group' in sys.argv else False,
                              colour_params=True if '-colour_params' in sys.argv
                                                 else False,
-                             full_print=True if '-full_print' in sys.argv else False)
+                             full_print=True if '-full_print' in sys.argv else False,
+                             g_lb=config['optimiser'].get('g_lb', None)
+                                  if '-fixed_axis' in sys.argv else None,
+                             g_ub=config['optimiser'].get('g_ub', None)
+                                  if '-fixed_axis' in sys.argv else None)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:

@@ -75,7 +75,7 @@ class Autoencoder(torch.nn.Module):
 
     def test_decoder(self, plot=False, train_data_exp_path=None, winner_file_name=None):
 
-        code_range = code_in_range(self._decoder.num_inputs, 0., 1., step_size=0.002)
+        code_range = code_in_range(self._decoder.num_inputs, 0., 1., step_size=0.005)
         output = self._decoder(code_range)
         print(output)
 

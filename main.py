@@ -5,7 +5,7 @@ import uuid
 import sys
 from agent import Agent
 from data import dump_list, dump_json, read_configs
-from evo_utils import get_cmaes_centroid
+from evo_utils import get_cmaes_centroid, expand_gene_bounds
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
@@ -68,13 +68,8 @@ def evo_run(config, exp_dir_path):
                                   dir_path=config['logging']['data_dir_path'],
                                   file_name=config['logging']['winner_file_name'])
 
-    # Expand gene bounds if gene bound list is only of length 1
-    g_lb = config['optimiser'].get('g_lb', None)
-    if g_lb is not None and len(g_lb) == 1:
-        g_lb *= num_genes
-    g_ub = config['optimiser'].get('g_ub', None)
-    if g_ub is not None and len(g_ub) == 1:
-        g_ub *= num_genes
+    # Expand gene bounds from config
+    g_lb, g_ub = expand_gene_bounds(config)
 
     strategy = cma.Strategy(centroid=centroid,
                             sigma=config['optimiser']['cmaes']['init_sigma'],
@@ -163,12 +158,17 @@ def main(argv, config):
         train_data_path = config['logging']['data_dir_path'] \
                           + config['ie']['training_data_dir']
 
+        # Expand gene bounds from config
+        g_lb, g_ub = expand_gene_bounds(config)
+
         # Test decoder
         test_decoder(config['ie']['dump_model_dir'],
                      config['ie']['name'],
                      config['ie']['decoder_file_num'],
                      train_data_path,
-                     config['logging']['winner_file_name'])
+                     config['logging']['winner_file_name'],
+                     train_g_lb=g_lb if '-fixed_axis' in argv else None,
+                     train_g_ub=g_ub if '-fixed_axis' in argv else None)
 
     # Evolutionary run
     elif '-evo_run' in argv:
