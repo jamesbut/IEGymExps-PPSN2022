@@ -9,6 +9,7 @@ from evo_utils import get_cmaes_centroid, expand_gene_bounds
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
+from command_line import parse_axis_limits, parse_test_decoder
 
 # Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -160,23 +161,12 @@ def main(argv, config):
 
         # Get decoder from command line
         try:
-            decoder_type = argv[2]
-            decoder_num = argv[3]
+            decoder_type, decoder_num = parse_test_decoder(argv)
         except IndexError:
-            print('argv:', argv)
-            print('Example call: python main.py -test_decoder *decoder_type* '
-                  '*decoder_num*')
             return
 
         # Get axis limits from command line
-        plot_axis_lb = None
-        plot_axis_ub = None
-        if '-fixed_axis' in argv:
-            try:
-                plot_axis_lb = float(argv[5])
-                plot_axis_ub = float(argv[6])
-            except IndexError:
-                pass
+        plot_axis_lb, plot_axis_ub = parse_axis_limits(argv)
 
         # Test decoder
         test_decoder(config['ie']['dump_model_dir'],

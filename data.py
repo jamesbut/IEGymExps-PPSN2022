@@ -76,7 +76,8 @@ def read_data(folder_paths):
 
 
 def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=False,
-                    final_sub_dirs_only=False, num_top_dirs_removed=0):
+                    final_sub_dirs_only=False, num_top_dirs_removed=0,
+                    sort_by_suffix_num=False):
 
     if os.path.isdir(dir_path):
         # Walk directory
@@ -94,6 +95,8 @@ def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=F
 
         # Sort results
         folder_names = sorted(folder_names)
+        if sort_by_suffix_num:
+            folder_names = _sort_by_suffix_num(folder_names)
 
         # Remove top directories
         folder_names = [remove_dirs_from_path(x, num_top_dirs_removed)
@@ -108,6 +111,16 @@ def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=F
         raise NotADirectoryError("{} is not a directory".format(dir_path))
 
     return folder_names
+
+
+# Sort directories by the number at the end of the file
+def _sort_by_suffix_num(directories):
+
+    def parse_suffix(directory):
+        return int(directory.split('_')[-1])
+
+    directories.sort(key=parse_suffix)
+    return directories
 
 
 # Dump list into a file and check for directory existence

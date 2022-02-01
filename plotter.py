@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 from data import read_agent_data, read_evo_data, read_configs, get_sub_folders
+from command_line import parse_axis_limits
 
 np.set_printoptions(suppress=True)
 
@@ -116,7 +117,8 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
 
     # Get all experiments from group
     if group:
-        exp_data_paths = get_sub_folders(exp_data_path, recursive=False)
+        exp_data_paths = get_sub_folders(exp_data_path, recursive=False,
+                                         sort_by_suffix_num=True)
     # Otherwise just process given experiment
     else:
         exp_data_paths = [exp_data_path]
@@ -215,16 +217,17 @@ if __name__ == '__main__':
         else:
             exp_dir = sys.argv[2]
 
+        # Get axis limits from command line
+        plot_axis_lb, plot_axis_ub = parse_axis_limits(sys.argv)
+
         read_and_plot_phenos(config['logging']['data_dir_path'] + exp_dir,
                              config['logging']['winner_file_name'],
                              group=True if '-group' in sys.argv else False,
                              colour_params=True if '-colour_params' in sys.argv
                                                 else False,
                              full_print=True if '-full_print' in sys.argv else False,
-                             train_g_lb=config['optimiser'].get('g_lb', None)
-                                  if '-fixed_axis' in sys.argv else None,
-                             train_g_ub=config['optimiser'].get('g_ub', None)
-                                  if '-fixed_axis' in sys.argv else None)
+                             plot_axis_lb=plot_axis_lb,
+                             plot_axis_ub=plot_axis_ub)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
