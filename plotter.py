@@ -52,11 +52,13 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_mean
     line_styles = ['--', '-']
     line_widths = [1., 1.]
     if plot_q_bests:
-        plot_data = np.concatenate((plot_data, np.array([plot_lq_bests, plot_uq_bests])))
+        plot_data = np.concatenate((plot_data,
+                                    np.array([plot_lq_bests, plot_uq_bests])))
         line_styles += ['--', '--']
         line_widths += [0.25, 0.25]
     if plot_q_means:
-        plot_data = np.concatenate((plot_data, np.array([plot_lq_means, plot_uq_means])))
+        plot_data = np.concatenate((plot_data,
+                                    np.array([plot_lq_means, plot_uq_means])))
         line_styles += ['--', '--']
         line_widths += [0.25, 0.25]
 
@@ -73,7 +75,7 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_mean
         plt.fill_between(gens, lq_bests, uq_bests, color=colour, alpha=0.1)
 
 
-def _fitness_analysis(fitnesses, folder_paths):
+def _fitness_analysis(fitnesses, folder_paths) -> float:
 
     max_arg = np.argmax(fitnesses)
     max_fitness = fitnesses[max_arg]
@@ -93,6 +95,8 @@ def _fitness_analysis(fitnesses, folder_paths):
 
     print("Min fitness: {}              File: {}".format(min_fitness, min_file))
 
+    return max_fitness
+
 
 # Calculate best fitnesses so far from the best fitnesses for each generation
 def calculate_best_fitnesses_so_far(best_fitnesses):
@@ -111,9 +115,41 @@ def calculate_best_fitnesses_so_far(best_fitnesses):
     return np.apply_along_axis(create_best_fitnesses_so_far, 1, best_fitnesses)
 
 
+# Read and plot experiment and returns max fitness of experiment
+def read_and_plot_exp(exp_data_path, winner_file_name, print_train_data,
+                      colour_params, test_data, plot_axis_lb, plot_axis_ub) -> float:
+
+    # Read agent data
+    if exp_data_path is not None:
+        fitnesses, genos, phenos, params, folder_paths = \
+            read_agent_data(exp_data_path, winner_file_name)
+
+    if print_train_data:
+        print("Fitnesses:\n", fitnesses)
+        print("Genotypes:\n", genos)
+        print("Phenotypes:\n", phenos)
+        print("Params:\n", params[0])
+
+    # Flatten params for now - this might not work when training has been on
+    # more than one param
+    params = params.flatten()
+
+    # Provide fitness analysis
+    max_fitness = _fitness_analysis(fitnesses, folder_paths)
+
+    # Plot training and/or test data
+    colour_vals = fitnesses
+    if colour_params:
+        colour_vals = params
+    _plot_phenos_scatter(phenos, colour_vals, test_data, plot_axis_lb, plot_axis_ub)
+
+    return max_fitness
+
+
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
                          group=False, colour_params=False, full_print=False,
-                         print_train_data=True, plot_axis_lb=None, plot_axis_ub=None):
+                         print_train_data=True, plot_axis_lb=None, plot_axis_ub=None,
+                         cluster_size=None):
 
     # Get all experiments from group
     if group:
@@ -127,33 +163,38 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     if full_print:
         np.set_printoptions(threshold=sys.maxsize)
 
+    max_exp_fitnesses = []
+
     # For all experiments, show pheno data
-    for exp_data_path in exp_data_paths:
+    for i, exp_data_path in enumerate(exp_data_paths):
         print(exp_data_path)
 
-        # Read agent data
-        if exp_data_path is not None:
-            fitnesses, genos, phenos, params, folder_paths = \
-                read_agent_data(exp_data_path, winner_file_name)
+        max_exp_fitness = read_and_plot_exp(exp_data_path, winner_file_name,
+                                            print_train_data, colour_params,
+                                            test_data, plot_axis_lb, plot_axis_ub)
+        max_exp_fitnesses.append(max_exp_fitness)
 
-        if print_train_data:
-            print("Fitnesses:\n", fitnesses)
-            print("Genotypes:\n", genos)
-            print("Phenotypes:\n", phenos)
-            print("Params:\n", params[0])
+        # Find the experiment with the maximum fitness of the cluster and run again
+        if cluster_size:
+            if (i + 1) % cluster_size == 0:
 
-        # Flatten params for now - this might not work when training has been on
-        # more than one param
-        params = params.flatten()
+                print('**********************************************')
+                print('*   Experiment with max fitness in cluster   *')
+                print('**********************************************')
 
-        # Provide fitness analysis
-        _fitness_analysis(fitnesses, folder_paths)
+                # Calculate exp with max fitness in cluster
+                cluster_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
+                max_fitness_cluster_index = i - cluster_size + 1 + \
+                                            cluster_max_exp_fitness_arg
 
-        # Plot training and/or test data
-        colour_vals = fitnesses
-        if colour_params:
-            colour_vals = params
-        _plot_phenos_scatter(phenos, colour_vals, test_data, plot_axis_lb, plot_axis_ub)
+                read_and_plot_exp(exp_data_paths[max_fitness_cluster_index],
+                                  winner_file_name, print_train_data, colour_params,
+                                  test_data, plot_axis_lb, plot_axis_ub)
+
+                # Reset for next cluster
+                max_exp_fitnesses.clear()
+
+                print('**********************************************')
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
@@ -210,9 +251,16 @@ if __name__ == '__main__':
     # Plot phenotype data
     if '-pheno' in sys.argv:
 
-        # Can pass in entire experiment group
+        # Can pass in entire experiment group and specify cluster size
         if '-group' in sys.argv:
             exp_dir = sys.argv[3]
+            if len(sys.argv) == 5:
+                cluster_size = int(sys.argv[4])
+            else:
+                cluster_size = None
+
+            print('Cluster size:', cluster_size)
+
         # Or just single experiment
         else:
             exp_dir = sys.argv[2]
@@ -227,7 +275,8 @@ if __name__ == '__main__':
                                                 else False,
                              full_print=True if '-full_print' in sys.argv else False,
                              plot_axis_lb=plot_axis_lb,
-                             plot_axis_ub=plot_axis_ub)
+                             plot_axis_ub=plot_axis_ub,
+                             cluster_size=cluster_size)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
