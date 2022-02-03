@@ -184,6 +184,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
 
                 # Calculate exp with max fitness in cluster
                 cluster_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
+                # Calculate the index of the required experiment
                 max_fitness_cluster_index = i - cluster_size + 1 + \
                                             cluster_max_exp_fitness_arg
 

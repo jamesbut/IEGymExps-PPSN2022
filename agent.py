@@ -74,6 +74,10 @@ class Agent():
     def fitness(self, fitness):
         self._fitness = fitness
 
+    @property
+    def weights(self):
+        return self._network.weights
+
     # Return bool for success or fail
     def save(self, dir_path, file_name, trained_env_wrapper=None,
              save_if_bounds_exceeded=False):

@@ -2,7 +2,7 @@
     "optimiser": {
         "cmaes": {
             "centroid": [
-                0.0
+                0.5
             ],
             "init_sigma": 1.0,
             "lambda": 100
@@ -12,10 +12,16 @@
         "render": false,
         "quit_domain_when_complete": false,
         "g_lb": [
-            -3.0
+            0.0
         ],
         "g_ub": [
-            3.0
+            1.0
+        ],
+        "p_lb": [
+            -100.0
+        ],
+        "p_ub": [
+            100.0
         ]
     },
     "controller": {
@@ -60,7 +66,7 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",

@@ -69,8 +69,8 @@ def main():
     base_config = read_configs(None)[0]
 
     # Get centroid directories for universal controllers
-    centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
-                                   num_top_dirs_removed=1)
+    # centroid_dirs = get_sub_folders('data/g6', final_sub_dirs_only=True,
+    #                                num_top_dirs_removed=1)
 
     hyper_params = [
         (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),

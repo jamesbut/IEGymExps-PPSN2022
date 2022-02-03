@@ -5,7 +5,7 @@ import uuid
 import sys
 from agent import Agent
 from data import dump_list, dump_json, read_configs
-from evo_utils import get_cmaes_centroid, expand_gene_bounds
+from evo_utils import get_cmaes_centroid, expand_bound
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
@@ -69,8 +69,9 @@ def evo_run(config, exp_dir_path):
                                   dir_path=config['logging']['data_dir_path'],
                                   file_name=config['logging']['winner_file_name'])
 
-    # Expand gene bounds from config
-    g_lb, g_ub = expand_gene_bounds(config)
+    # Expand gene bounds
+    g_lb = expand_bound(config['optimiser'].get('g_lb', None), num_genes)
+    g_ub = expand_bound(config['optimiser'].get('g_ub', None), num_genes)
 
     strategy = cma.Strategy(centroid=centroid,
                             sigma=config['optimiser']['cmaes']['init_sigma'],
@@ -94,11 +95,18 @@ def evo_run(config, exp_dir_path):
     stats.register("min", np.min)
     stats.register("max", np.max)
 
+    # Expand pheno bounds
+    num_weights = len(agent.weights)
+    p_lb = expand_bound(config['optimiser'].get('p_lb', None), num_weights)
+    p_ub = expand_bound(config['optimiser'].get('p_ub', None), num_weights)
+
     # Run evolutionary algorithm
     population, logbook, complete = evo_utils.eaGenerateUpdate(
         toolbox, ngen=config['optimiser']['num_gens'], stats=stats,
         halloffame=hof, completion_fitness=env_wrapper.completion_fitness,
-        quit_domain_when_complete=config['optimiser']['quit_domain_when_complete'])
+        quit_domain_when_complete=config['optimiser']['quit_domain_when_complete'],
+        decoder=decoder, pop_size=config['optimiser']['cmaes']['lambda'],
+        p_lb=p_lb, p_ub=p_ub)
 
     # Write results to file
     run_path = exp_dir_path + str(uuid.uuid4()) + '/'
