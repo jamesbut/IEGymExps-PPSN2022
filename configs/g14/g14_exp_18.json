@@ -11,12 +11,6 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "g_lb": [
-            0.0
-        ],
-        "g_ub": [
-            1.0
-        ],
         "p_lb": [
             -100.0
         ],
