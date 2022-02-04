@@ -2,7 +2,7 @@
     "optimiser": {
         "cmaes": {
             "centroid": [
-                0.5
+                0.0
             ],
             "init_sigma": 1.0,
             "lambda": 100
@@ -65,7 +65,7 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 1
+        "num_runs": 5
     },
     "logging": {
         "data_dir_path": "data/",
