@@ -149,13 +149,8 @@ def _read_exp(exp_data_path, winner_file_name, verbosity, colour_params):
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
-                         group=False, colour_params=False, full_print=False,
-                         verbosity=True, plot_axis_lb=None, plot_axis_ub=None,
-                         cluster_size=None):
-
-    # Turn off verbosity if cluster size is given
-    if not cluster_size:
-        verbosity = False
+                         group=False, colour_params=False, print_numpy_arrays=False,
+                         verbosity=True, plot_axis_lb=None, plot_axis_ub=None):
 
     # Get all experiments from group
     if group:
@@ -166,53 +161,43 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         exp_data_paths = [exp_data_path]
 
     # Print full numpy arrays
-    if full_print:
+    if print_numpy_arrays:
         np.set_printoptions(threshold=sys.maxsize)
 
     max_exp_fitnesses = []
 
-    # For all experiments, show pheno data
+    # For all experiments, collect pheno data
     for i, exp_data_path in enumerate(exp_data_paths):
         print(exp_data_path)
 
         # Read pheno data
-        verbosity = False if cluster_size else True
         max_fitness, phenos, colour_vals = _read_exp(exp_data_path, winner_file_name,
                                                      verbosity, colour_params)
         # Plot pheno data
-        if not cluster_size:
+        if verbosity:
             _plot_phenos_scatter(phenos, colour_vals, test_data,
                                  plot_axis_lb, plot_axis_ub)
 
         # Keep track of max fitness
         max_exp_fitnesses.append(max_fitness)
 
-        # Find the experiment with the maximum fitness of the cluster and run again
-        if cluster_size:
-            if (i + 1) % cluster_size == 0:
+    # Find the experiment with the maximum fitness of the group and run again
+    print('**********************************************')
+    print('*   Experiment with max fitness in group     *')
+    print('**********************************************')
 
-                print('**********************************************')
-                print('*   Experiment with max fitness in cluster   *')
-                print('**********************************************')
+    # Calculate exp with max fitness in group
+    group_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
 
-                # Calculate exp with max fitness in cluster
-                cluster_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
-                # Calculate the index of the required experiment
-                max_fitness_cluster_index = i - cluster_size + 1 + \
-                                            cluster_max_exp_fitness_arg
+    # Read and plot
+    _, phenos, colour_vals = _read_exp(
+        exp_data_paths[group_max_exp_fitness_arg], winner_file_name,
+        True, colour_params
+    )
+    _plot_phenos_scatter(phenos, colour_vals, test_data,
+                         plot_axis_lb, plot_axis_ub)
 
-                # Read and plot
-                _, phenos, colour_vals = _read_exp(
-                    exp_data_paths[max_fitness_cluster_index], winner_file_name,
-                    True, colour_params
-                )
-                _plot_phenos_scatter(phenos, colour_vals, test_data,
-                                     plot_axis_lb, plot_axis_ub)
-
-                # Reset for next cluster
-                max_exp_fitnesses.clear()
-
-                print('**********************************************')
+    print('**********************************************')
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
@@ -272,13 +257,6 @@ if __name__ == '__main__':
         # Can pass in entire experiment group and specify cluster size
         if '-group' in sys.argv:
             exp_dir = sys.argv[3]
-            if len(sys.argv) == 5:
-                cluster_size = int(sys.argv[4])
-            else:
-                cluster_size = None
-
-            print('Cluster size:', cluster_size)
-
         # Or just single experiment
         else:
             exp_dir = sys.argv[2]
@@ -291,10 +269,11 @@ if __name__ == '__main__':
                              group=True if '-group' in sys.argv else False,
                              colour_params=True if '-colour_params' in sys.argv
                                                 else False,
-                             full_print=True if '-full_print' in sys.argv else False,
+                             print_numpy_arrays=True
+                                if '-print_numpy_arrays' in sys.argv else False,
+                             verbosity=True if '-verbosity' in sys.argv else False,
                              plot_axis_lb=plot_axis_lb,
-                             plot_axis_ub=plot_axis_ub,
-                             cluster_size=cluster_size)
+                             plot_axis_ub=plot_axis_ub)
 
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
