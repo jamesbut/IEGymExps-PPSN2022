@@ -75,25 +75,29 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_mean
         plt.fill_between(gens, lq_bests, uq_bests, color=colour, alpha=0.1)
 
 
-def _fitness_analysis(fitnesses, folder_paths) -> float:
+def _fitness_analysis(fitnesses, folder_paths, verbosity) -> float:
 
     max_arg = np.argmax(fitnesses)
     max_fitness = fitnesses[max_arg]
     max_file = folder_paths[max_arg]
 
-    print("Max fitness: {}              File: {}".format(max_fitness, max_file))
+    if verbosity:
+        print("Max fitness: {}              File: {}".format(max_fitness, max_file))
 
     mean_fitness = np.mean(fitnesses)
-    print("Mean fitness:", mean_fitness)
+    if verbosity:
+        print("Mean fitness:", mean_fitness)
 
     median_fitness = np.median(fitnesses)
-    print("Median fitness:", median_fitness)
+    if verbosity:
+        print("Median fitness:", median_fitness)
 
     min_arg = np.argmin(fitnesses)
     min_fitness = fitnesses[min_arg]
     min_file = folder_paths[min_arg]
 
-    print("Min fitness: {}              File: {}".format(min_fitness, min_file))
+    if verbosity:
+        print("Min fitness: {}              File: {}".format(min_fitness, min_file))
 
     return max_fitness
 
@@ -115,16 +119,15 @@ def calculate_best_fitnesses_so_far(best_fitnesses):
     return np.apply_along_axis(create_best_fitnesses_so_far, 1, best_fitnesses)
 
 
-# Read and plot experiment and returns max fitness of experiment
-def read_and_plot_exp(exp_data_path, winner_file_name, print_train_data,
-                      colour_params, test_data, plot_axis_lb, plot_axis_ub) -> float:
+# Read pheno data of experiment
+def _read_exp(exp_data_path, winner_file_name, verbosity, colour_params):
 
     # Read agent data
     if exp_data_path is not None:
         fitnesses, genos, phenos, params, folder_paths = \
             read_agent_data(exp_data_path, winner_file_name)
 
-    if print_train_data:
+    if verbosity:
         print("Fitnesses:\n", fitnesses)
         print("Genotypes:\n", genos)
         print("Phenotypes:\n", phenos)
@@ -135,21 +138,24 @@ def read_and_plot_exp(exp_data_path, winner_file_name, print_train_data,
     params = params.flatten()
 
     # Provide fitness analysis
-    max_fitness = _fitness_analysis(fitnesses, folder_paths)
+    max_fitness = _fitness_analysis(fitnesses, folder_paths, verbosity)
 
-    # Plot training and/or test data
+    # Determine colour values for plotting
     colour_vals = fitnesses
     if colour_params:
         colour_vals = params
-    _plot_phenos_scatter(phenos, colour_vals, test_data, plot_axis_lb, plot_axis_ub)
 
-    return max_fitness
+    return max_fitness, phenos, colour_vals
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
                          group=False, colour_params=False, full_print=False,
-                         print_train_data=True, plot_axis_lb=None, plot_axis_ub=None,
+                         verbosity=True, plot_axis_lb=None, plot_axis_ub=None,
                          cluster_size=None):
+
+    # Turn off verbosity if cluster size is given
+    if not cluster_size:
+        verbosity = False
 
     # Get all experiments from group
     if group:
@@ -169,10 +175,17 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     for i, exp_data_path in enumerate(exp_data_paths):
         print(exp_data_path)
 
-        max_exp_fitness = read_and_plot_exp(exp_data_path, winner_file_name,
-                                            print_train_data, colour_params,
-                                            test_data, plot_axis_lb, plot_axis_ub)
-        max_exp_fitnesses.append(max_exp_fitness)
+        # Read pheno data
+        verbosity = False if cluster_size else True
+        max_fitness, phenos, colour_vals = _read_exp(exp_data_path, winner_file_name,
+                                                     verbosity, colour_params)
+        # Plot pheno data
+        if not cluster_size:
+            _plot_phenos_scatter(phenos, colour_vals, test_data,
+                                 plot_axis_lb, plot_axis_ub)
+
+        # Keep track of max fitness
+        max_exp_fitnesses.append(max_fitness)
 
         # Find the experiment with the maximum fitness of the cluster and run again
         if cluster_size:
@@ -188,9 +201,13 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
                 max_fitness_cluster_index = i - cluster_size + 1 + \
                                             cluster_max_exp_fitness_arg
 
-                read_and_plot_exp(exp_data_paths[max_fitness_cluster_index],
-                                  winner_file_name, print_train_data, colour_params,
-                                  test_data, plot_axis_lb, plot_axis_ub)
+                # Read and plot
+                _, phenos, colour_vals = _read_exp(
+                    exp_data_paths[max_fitness_cluster_index], winner_file_name,
+                    True, colour_params
+                )
+                _plot_phenos_scatter(phenos, colour_vals, test_data,
+                                     plot_axis_lb, plot_axis_ub)
 
                 # Reset for next cluster
                 max_exp_fitnesses.clear()
