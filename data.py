@@ -221,8 +221,12 @@ def read_configs(argv):
         config_index = argv.index('-configs')
         config_dir = argv[config_index + 1]
 
-        # Get all config files in directory
-        config_files = glob('configs/' + config_dir + '/*.json')
+        # Recursively get all config files in directory
+        config_files = []
+        for config_walk in os.walk('configs/' + config_dir):
+            if config_walk[2]:
+                config_files += [config_walk[0] + '/' + config_file_name
+                                 for config_file_name in config_walk[2]]
 
     else:
         # Use default config file
