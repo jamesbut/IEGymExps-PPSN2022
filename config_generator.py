@@ -8,6 +8,8 @@ import itertools
 import copy
 import os
 import re
+from boltons import iterutils
+from typing import Tuple
 
 
 # Generate new config file using a base config and setting modifications
@@ -38,8 +40,7 @@ def create_settings(hyper_params):
     return settings
 
 
-# Dump configs into directory
-def dump_configs(configs):
+def _calculate_new_group_path(configs) -> Tuple[str, str]:
 
     # Get all directories in configs dir
     config_dirs = get_sub_folders('configs', recursive=False, append_dir_path=False)
@@ -55,14 +56,42 @@ def dump_configs(configs):
     new_group_name = 'g' + str(new_group_num)
     new_group_path = 'configs/' + new_group_name
 
+    return new_group_path, new_group_name
+
+
+# Dump configs into directory
+def dump_configs(configs):
+
+    new_group_path, new_group_name = _calculate_new_group_path(configs)
+
     # Create group directory
     os.mkdir(new_group_path)
 
     # Dump configs
     for i, config in enumerate(configs):
-        config_file_path = new_group_path + '/' + new_group_name + '_exp_' \
+        config_file_path = new_group_path + '/'
+
+        # If sub groups are used
+        if isinstance(configs[0], list):
+
+            # Create subgroup directories
+            sub_group_dir_path = new_group_path + '/sg' + str(i + 1)
+            os.mkdir(sub_group_dir_path)
+
+            # Build config names
+            for j, c in enumerate(config):
+                config_file_name = new_group_name + '_exp_' + \
+                    str((i * len(config)) + j) + '.json'
+                config_file_path = sub_group_dir_path + '/' + config_file_name
+
+                dump_json(config_file_path, c)
+
+        # Otherwise just dump configs in group directory
+        else:
+
+            config_file_path = new_group_path + '/' + new_group_name + '_exp_' \
                            + str(i) + '.json'
-        dump_json(config_file_path, config)
+            dump_json(config_file_path, config)
 
 
 def main():
@@ -76,13 +105,20 @@ def main():
         (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),
         # (["env" "domain_params"], [[0.0008, 0.0012, 0.0016]])
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [5, 6, 7, 8, 9])
-        # (["ie", "decoder_file_num"], [0, 1, 2, 3, 4])
+        # (["ie", "decoder_file_num"], [5, 6, 7, 8, 9])
+        (["ie", "decoder_file_num"], [0, 1, 2, 3, 4])
     ]
+
+    if len(hyper_params) > 2:
+        raise ValueError('Sub group code does not account for hyper_params length > 2')
 
     # Generate settings and then configs from those settings
     settings = create_settings(hyper_params)
     configs = [generate_new_config(base_config, s) for s in settings]
+
+    # Sort configs into subgroups
+    if len(hyper_params) == 2:
+        configs = iterutils.chunked(configs, len(hyper_params[1][1]))
 
     # Print configs
     for c in configs:
