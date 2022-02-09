@@ -70,10 +70,8 @@ def parse_train_dirs(argv, data_dir_path):
         group_paths = map(lambda gd: data_dir_path + gd, group_dirs)
 
         # Get experiment directories
-        exp_dirs = [get_sub_folders(group_path, recursive=False, append_dir_path=False,
-                                    append_dir=True)
+        exp_dirs = [get_sub_folders(group_path, recursive=False)
                     for group_path in group_paths]
-        # Concatenate list of lists
         exp_dirs = chain.from_iterable(exp_dirs)
 
     else:
@@ -92,9 +90,7 @@ def train_test_table(argv, test_params, data_dir_path, winner_file_name):
     # Either read in the trained models
     if len(argv) >= 2:
         # Parse command line for train directories
-        train_exp_dirs = list(parse_train_dirs(argv, data_dir_path))
-        # Append data directory path as prefix
-        train_exp_paths = list(map(lambda ed: data_dir_path + ed, train_exp_dirs))
+        train_exp_paths = list(parse_train_dirs(argv, data_dir_path))
 
         # Find trained solutions
         train_paths, train_params = find_trained_solutions(train_exp_paths,
@@ -135,6 +131,10 @@ def train_test_table(argv, test_params, data_dir_path, winner_file_name):
     # Convert lists to strings
     test_params_str += list(map(list_to_string, filtered_test_params))
     train_params_str = list(map(list_to_string, train_params))
+
+    # Remove data directory path from data directory paths
+    train_exp_dirs = list(map(lambda ep: ep.removeprefix(data_dir_path),
+                              train_exp_paths))
     # Append trains dirs to train params string
     train_params_str = list(map(lambda td, tp: td + ':' + tp,
                                 train_exp_dirs, train_params_str))

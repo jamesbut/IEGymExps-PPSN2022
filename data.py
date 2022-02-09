@@ -75,9 +75,13 @@ def read_data(folder_paths):
            np.array(domain_params)
 
 
-def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=False,
-                    final_sub_dirs_only=False, num_top_dirs_removed=0,
-                    sort_by_suffix_num=False):
+def get_sub_folders(dir_path, recursive=True, append_dir_path=True,
+                    num_top_dirs_appended=0, final_sub_dirs_only=False,
+                    num_top_dirs_removed=0, sort_by_suffix_num=False):
+
+    # If appended top directories is given, auto turn off append full directory path
+    if num_top_dirs_appended:
+        append_dir_path = False
 
     if os.path.isdir(dir_path):
         # Walk directory
@@ -102,10 +106,10 @@ def get_sub_folders(dir_path, recursive=True, append_dir_path=True, append_dir=F
         folder_names = [remove_dirs_from_path(x, num_top_dirs_removed)
                         for x in folder_names]
 
-        # Append top directory
-        if append_dir:
-            top_dir = dir_path.split('/')[-1]
-            folder_names = [top_dir + '/' + fn for fn in folder_names]
+        # Append top directories
+        if num_top_dirs_appended > 0:
+            top_dirs = '/'.join(dir_path.split('/')[-num_top_dirs_appended:])
+            folder_names = [top_dirs + '/' + fn for fn in folder_names]
 
     else:
         raise NotADirectoryError("{} is not a directory".format(dir_path))
