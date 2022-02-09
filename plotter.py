@@ -201,42 +201,43 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         print('**********************************************')
 
 
-def _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path, winner_file_name, group):
+def _prepare_evo_exp_data_paths(data_dirs, data_dir_path, winner_file_name, verbosity):
 
-    # Append data dir path to experiment directories
-    exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
+    exp_data_paths = []
 
-    # If group is given, choose experiment with largest max fitness
-    if group:
+    for data_dir in data_dirs:
 
-        # Exp data directories will now be group paths
-        group_paths = exp_data_paths.copy()
-        exp_data_paths.clear()
+        # Check string for experiment or group
+        if 'exp' in data_dir:
+            exp_data_paths.append(data_dir_path + data_dir)
 
-        for gp in group_paths:
+        # Group of experiments
+        else:
+
             # Get sub group paths
-            group_exp_data_paths = get_sub_folders(gp, recursive=False,
+            group_exp_data_paths = get_sub_folders(data_dir_path + data_dir,
+                                                   recursive=False,
                                                    sort_by_suffix_num=True)
 
-            # Calculate max fitness of the experiments
+            # Calculate max fitness of the experiments in the group
             max_fitnesses = []
             for edp in group_exp_data_paths:
-                max_fitness, _, _ = _read_exp(edp, winner_file_name, False, False)
+                max_fitness, _, _ = _read_exp(edp, winner_file_name, verbosity, False)
                 max_fitnesses.append(max_fitness)
+
             exp_data_paths.append(group_exp_data_paths[np.argmax(max_fitnesses)])
 
     return exp_data_paths
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
-                           plot_q_means=True, plot_q_bests=True,
-                           group=False):
+                           plot_q_means=True, plot_q_bests=True, verbosity=False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
     legend_items = []
 
     exp_data_paths = _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path,
-                                                 winner_file_name, group)
+                                                 winner_file_name, verbosity)
     print(exp_data_paths)
 
     for i, exp_data_path in enumerate(exp_data_paths):
@@ -319,4 +320,4 @@ if __name__ == '__main__':
                                # Turns off the plotting of the inter-quartile ranges
                                False if '-q_means_off' in sys.argv else True,
                                False if '-q_bests_off' in sys.argv else True,
-                               True if '-group' in sys.argv else False)
+                               True if '-verbosity' in sys.argv else False)
