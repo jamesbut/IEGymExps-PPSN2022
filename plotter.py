@@ -181,23 +181,24 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         # Keep track of max fitness
         max_exp_fitnesses.append(max_fitness)
 
-    # Find the experiment with the maximum fitness of the group and run again
-    print('**********************************************')
-    print('*   Experiment with max fitness in group     *')
-    print('**********************************************')
+    if group:
+        # Find the experiment with the maximum fitness of the group and run again
+        print('**********************************************')
+        print('*   Experiment with max fitness in group     *')
+        print('**********************************************')
 
-    # Calculate exp with max fitness in group
-    group_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
+        # Calculate exp with max fitness in group
+        group_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
 
-    # Read and plot
-    _, phenos, colour_vals = _read_exp(
-        exp_data_paths[group_max_exp_fitness_arg], winner_file_name,
-        True, colour_params
-    )
-    _plot_phenos_scatter(phenos, colour_vals, test_data,
-                         plot_axis_lb, plot_axis_ub)
+        # Read and plot
+        _, phenos, colour_vals = _read_exp(
+            exp_data_paths[group_max_exp_fitness_arg], winner_file_name,
+            True, colour_params
+        )
+        _plot_phenos_scatter(phenos, colour_vals, test_data,
+                             plot_axis_lb, plot_axis_ub)
 
-    print('**********************************************')
+        print('**********************************************')
 
 
 def _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path, winner_file_name, group):
