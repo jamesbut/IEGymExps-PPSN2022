@@ -200,14 +200,43 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     print('**********************************************')
 
 
-def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
-                           plot_q_means=True, plot_q_bests=True):
+def _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path, winner_file_name, group):
+
+    # Append data dir path to experiment directories
+    exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
+
+    # If group is given, choose experiment with largest max fitness
+    if group:
+
+        # Exp data directories will now be group paths
+        group_paths = exp_data_paths.copy()
+        exp_data_paths.clear()
+
+        for gp in group_paths:
+            # Get sub group paths
+            group_exp_data_paths = get_sub_folders(gp, recursive=False,
+                                                   sort_by_suffix_num=True)
+
+            # Calculate max fitness of the experiments
+            max_fitnesses = []
+            for edp in group_exp_data_paths:
+                max_fitness, _, _ = _read_exp(edp, winner_file_name, False, False)
+                max_fitnesses.append(max_fitness)
+            exp_data_paths.append(group_exp_data_paths[np.argmax(max_fitnesses)])
+
+    return exp_data_paths
+
+
+def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
+                           plot_q_means=True, plot_q_bests=True,
+                           group=False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
     legend_items = []
 
-    # Append data dir path to experiment directories
-    exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
+    exp_data_paths = _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path,
+                                                 winner_file_name, group)
+    print(exp_data_paths)
 
     for i, exp_data_path in enumerate(exp_data_paths):
 
@@ -236,8 +265,11 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path,
                            median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
                            exp_plot_colours[i], plot_q_means, plot_q_bests)
 
-        legend_items.append(mpatches.Patch(color=exp_plot_colours[i],
-                                           label=exp_data_dirs[i]))
+        # Set legend label
+        legend_label = exp_data_path.replace(data_dir_path, '')
+        legend_items.append(
+            mpatches.Patch(color=exp_plot_colours[i], label=legend_label)
+        )
 
     plt.legend(handles=legend_items)
 
@@ -251,15 +283,15 @@ if __name__ == '__main__':
 
     config = read_configs(sys.argv)[0]
 
+    # Can pass in entire experiment group
+    if '-group' in sys.argv:
+        exp_dir = sys.argv[3]
+    # Or just single experiment
+    else:
+        exp_dir = sys.argv[2]
+
     # Plot phenotype data
     if '-pheno' in sys.argv:
-
-        # Can pass in entire experiment group and specify cluster size
-        if '-group' in sys.argv:
-            exp_dir = sys.argv[3]
-        # Or just single experiment
-        else:
-            exp_dir = sys.argv[2]
 
         # Get axis limits from command line
         plot_axis_lb, plot_axis_ub = parse_axis_limits(sys.argv)
@@ -278,11 +310,12 @@ if __name__ == '__main__':
     # Plot evolutionary run data
     elif '-evo' in sys.argv:
 
-        exp_data_dirs = sys.argv[2]
         # Split comma separated experiment directories
-        exp_data_dirs = exp_data_dirs.split(',')
+        exp_data_dirs = exp_dir.split(',')
 
         read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'],
+                               config['logging']['winner_file_name'],
                                # Turns off the plotting of the inter-quartile ranges
                                False if '-q_means_off' in sys.argv else True,
-                               False if '-q_bests_off' in sys.argv else True)
+                               False if '-q_bests_off' in sys.argv else True,
+                               True if '-group' in sys.argv else False)
