@@ -3,6 +3,7 @@ import evo_utils
 import numpy as np
 import uuid
 import sys
+import copy
 from agent import Agent
 from data import dump_list, dump_json, read_configs
 from evo_utils import get_cmaes_centroid, expand_bound
@@ -196,7 +197,7 @@ def main(argv, config):
         # Run experiment
         for i in range(config['execution']['num_runs']):
             print("Evo run: ", i)
-            evo_run(config, exp_dir_path)
+            evo_run(copy.deepcopy(config), exp_dir_path)
 
         # Dump configs
         dump_json(exp_dir_path + 'experiment.json', config)
