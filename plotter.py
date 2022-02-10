@@ -159,6 +159,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
     # Otherwise just process given experiment
     else:
         exp_data_paths = [exp_data_path]
+        verbosity = True
 
     # Print full numpy arrays
     if print_numpy_arrays:

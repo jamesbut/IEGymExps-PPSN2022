@@ -65,18 +65,18 @@ def evo_run(config, exp_dir_path):
     num_genes = agent.genotype_size
 
     # Determine initial centroid of CMAES
-    centroid = get_cmaes_centroid(num_genes, config['optimiser']['cmaes'],
-                                  dir_path=config['logging']['data_dir_path'],
-                                  file_name=config['logging']['winner_file_name'])
+    config['optimiser']['cmaes']['centroid'] = \
+        get_cmaes_centroid(num_genes, config['optimiser']['cmaes'],
+                           dir_path=config['logging']['data_dir_path'],
+                           file_name=config['logging']['winner_file_name'])
 
     # Expand gene bounds
-    g_lb = expand_bound(config['optimiser'].get('g_lb', None), num_genes)
-    g_ub = expand_bound(config['optimiser'].get('g_ub', None), num_genes)
+    config['optimiser']['cmaes']['lb'] = \
+        expand_bound(config['optimiser'].get('g_lb', None), num_genes)
+    config['optimiser']['cmaes']['ub'] = \
+        expand_bound(config['optimiser'].get('g_ub', None), num_genes)
 
-    strategy = cma.Strategy(centroid=centroid,
-                            sigma=config['optimiser']['cmaes']['init_sigma'],
-                            lambda_=config['optimiser']['cmaes']['lambda'],
-                            lb_=g_lb, ub_=g_ub)
+    strategy = cma.Strategy(**config['optimiser']['cmaes'])
 
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)

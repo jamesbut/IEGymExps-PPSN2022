@@ -1,11 +1,14 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": [0.5],
-            "init_sigma": 1.0,
-            "lambda": 10
+            "centroid": [0.0],
+            "sigma": 1.0,
+            "lambda": 100,
+            "fix_C": true,
+            "fix_sigma": true,
+            "verbosity": true
         },
-        "num_gens": 5,
+        "num_gens": 100,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -31,7 +34,7 @@
     },
     "ie": {
         "name": "gan",
-        "use_decoder": true,
+        "use_decoder": false,
         "decoder_file_num": 0,
         "code_size": 2,
         "num_hidden_layers": 1,
@@ -48,7 +51,7 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 2
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",
