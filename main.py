@@ -190,14 +190,22 @@ def main(argv, config):
     # Evolutionary run
     elif '-evo_run' in argv:
 
+        import time
+
         # Create experiment path
         exp_dir_path = config['logging']['data_dir_path'] \
             + config['logging']['exp_dir_name'] + '/'
 
         # Run experiment
         for i in range(config['execution']['num_runs']):
+
             print("Evo run: ", i)
+
+            start = time.time()
             evo_run(copy.deepcopy(config), exp_dir_path)
+            end = time.time()
+
+            print('Time taken for evolution: {} seconds\n'.format(end - start))
 
         # Dump configs
         dump_json(exp_dir_path + 'experiment.json', config)

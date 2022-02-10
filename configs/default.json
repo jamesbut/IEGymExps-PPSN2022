@@ -51,7 +51,7 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 10
     },
     "logging": {
         "data_dir_path": "data/",
