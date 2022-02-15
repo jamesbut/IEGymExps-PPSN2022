@@ -128,13 +128,13 @@ def evo_run(config, exp_dir_path):
         pool.close()
 
 
-def indv_run(agent_path, domain_params, render=True):
+def indv_run(agent_path, domain_params, env_seed, render=True):
 
     agent = Agent(agent_path=agent_path)
     env_wrapper = EnvWrapper(env_path=agent_path, domain_params=domain_params)
 
     rewards = evaluate(agent=agent, env_wrapper=env_wrapper, render=render,
-                       verbosity=True)
+                       verbosity=True, env_seed=env_seed)
 
     print("Rewards: ", rewards)
     print("Mean reward:", sum(rewards) / len(rewards))
@@ -220,7 +220,8 @@ def main(argv, config):
         indv_path = config['logging']['data_dir_path'] + indv_dir + '/' \
                     + config['logging']['winner_file_name'] + '.json'
 
-        indv_run(indv_path, config['env']['domain_params'])
+        indv_run(indv_path, config['env']['domain_params'],
+                 config['env'].get('seed', None))
 
 
 # Some bug in DEAP means that I have to create individual before
