@@ -209,7 +209,7 @@ def _prepare_evo_exp_data_paths(data_dirs, data_dir_path, winner_file_name, verb
     for data_dir in data_dirs:
 
         # Check string for experiment or group
-        if 'exp' in data_dir:
+        if 'exp' in data_dir.split('/')[-1]:
             exp_data_paths.append(data_dir_path + data_dir)
 
         # Group of experiments
