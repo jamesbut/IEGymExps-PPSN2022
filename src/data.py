@@ -218,6 +218,8 @@ def create_exp_dir_name(config, config_file_name):
 
 def read_configs(argv):
 
+    working_dir_path = os.getcwd()
+
     # Read in group of config files
     if argv is not None and '-configs' in argv:
 
@@ -227,14 +229,14 @@ def read_configs(argv):
 
         # Recursively get all config files in directory
         config_files = []
-        for config_walk in os.walk('configs/' + config_dir):
+        for config_walk in os.walk(working_dir_path + '/configs/' + config_dir):
             if config_walk[2]:
                 config_files += [config_walk[0] + '/' + config_file_name
                                  for config_file_name in config_walk[2]]
 
     else:
         # Use default config file
-        config_files = ['configs/default.json']
+        config_files = [working_dir_path + '/configs/default.json']
 
     # Read config files
     configs = list(map(read_json, config_files))

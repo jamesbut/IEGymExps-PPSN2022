@@ -4,6 +4,7 @@ import numpy as np
 import uuid
 import sys
 import copy
+import os
 from agent import Agent
 from data import dump_list, dump_json, read_configs
 from evo_utils import get_cmaes_centroid, expand_bound
@@ -143,6 +144,10 @@ def indv_run(agent_path, domain_params, env_seed, render=True):
 
 
 def main(argv, config):
+
+    # Append working directory to data directory path
+    config['logging']['data_dir_path'] = os.getcwd() + '/' + \
+                                         config['logging']['data_dir_path']
 
     if '-train_decoder' in argv:
 
