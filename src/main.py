@@ -226,7 +226,8 @@ def main(argv, config):
                     + config['logging']['winner_file_name'] + '.json'
 
         indv_run(indv_path, config['env']['domain_params'],
-                 config['env'].get('seed', None))
+                 config['env'].get('seed', None),
+                 render=False if '-render-off' in argv else True)
 
 
 # Some bug in DEAP means that I have to create individual before
