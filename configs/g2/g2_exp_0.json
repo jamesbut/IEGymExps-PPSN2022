@@ -32,7 +32,9 @@
         "name": "BipedalWalker-v3",
         "completion_fitness": 200.0,
         "domain_params": [
-            2.0
+            2.0,
+            4.0,
+            6.0
         ],
         "domain_params_high": [
             10.0
@@ -40,8 +42,8 @@
         "domain_params_low": [
             1.0
         ],
-        "domain_params_input": false,
-        "normalise_state": true,
+        "domain_params_input": true,
+        "normalise_state": false,
         "seed": 108
     },
     "ie": {
