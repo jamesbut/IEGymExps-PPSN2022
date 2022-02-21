@@ -1,0 +1,12 @@
+services:
+  ie_gym_exps:
+    image: ie_gym_exps
+    build: .
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./configs:/app/configs
+      - /tmp/.X11-unix:/tmp/.X11-uni
+    environment:
+      - DISPLAY=$DISPLAY

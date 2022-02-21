@@ -1,3 +1,4 @@
 box2d
 box2d-kengz
+pyvirtualdisplay
 torch
