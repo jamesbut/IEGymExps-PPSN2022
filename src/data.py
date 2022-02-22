@@ -173,7 +173,7 @@ def create_exp_dir_name(config, config_file_name):
 
     # If the default config is used, search in the data directory for the next
     # exp_ directory number
-    if config_file_name == 'configs/default.json':
+    if config_file_name.endswith('configs/default.json'):
 
         exp_full_dirs = glob(config['logging']['data_dir_path'] + "/*")
 
