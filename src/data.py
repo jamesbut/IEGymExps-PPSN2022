@@ -206,12 +206,10 @@ def create_exp_dir_name(config, config_file_name):
     # modified config file name
     else:
 
-        # Remove configs/
-        config_file_name_split = config_file_name.split('/')[1:]
+        # Remove */configs/
+        config_file_name = config_file_name.split('configs/')[1]
         # Remove .json
-        config_file_name_split[-1] = config_file_name_split[-1].split('.')[0]
-        # Join back into full string
-        exp_dir_name = '/'.join(config_file_name_split)
+        exp_dir_name = config_file_name.removesuffix('.json')
 
     return exp_dir_name
 
