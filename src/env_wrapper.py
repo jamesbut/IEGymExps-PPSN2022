@@ -121,14 +121,30 @@ class EnvWrapper():
         return self._completion_fitness
 
     @property
+    def observation_space(self):
+        return self._env.observation_space
+
+    @property
     def action_space(self):
         return self._env.action_space
+
+    @property
+    def reward_range(self):
+        return self._env.reward_range
+
+    @property
+    def metadata(self):
+        return self._env.metadata
+
+    @property
+    def spec(self):
+        return self._env.spec
 
     def reset(self):
         return self._process_state(self._env.reset())
 
-    def render(self):
-        self._env.render()
+    def render(self, mode='human'):
+        self._env.render(mode=mode)
 
     def close(self):
         self._env.close()
