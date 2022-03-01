@@ -1,17 +1,32 @@
 from generative_models.autoencoder import Autoencoder
 from generative_models.vae import VAE
 from generative_models.gan import GAN
-from data import read_agent_data
+from data import read_agent_data, get_sub_folders
 from torch import Tensor
+import numpy as np
 
 
 def train_generative_model(gen_model_type, code_size, num_hidden_layers,
                            neurons_per_hidden_layer, num_epochs, batch_size,
-                           train_data_exp_path, dump_model_dir, winner_file_name,
-                           optimiser_json):
+                           train_data_path, exp_group, dump_model_dir,
+                           winner_file_name, optimiser_json):
 
-    # Read training data
-    _, _, phenotypes, _, _ = read_agent_data(train_data_exp_path, winner_file_name)
+    train_data_exp_dirs = [train_data_path]
+
+    # If the training data of a group of experiments is being parsed
+    if exp_group:
+        train_data_exp_dirs = get_sub_folders(train_data_path, recursive=False)
+
+    # Read training data from experiment directiories
+    train_data = None
+    for exp_dir in train_data_exp_dirs:
+        _, _, phenotypes, _, _ = read_agent_data(exp_dir, winner_file_name)
+        if train_data is None:
+            train_data = phenotypes
+        else:
+            np.concatenate((train_data, phenotypes))
+
+    # Convert numpy array to tensor
     train_data = Tensor(phenotypes)
 
     # Build model
@@ -25,7 +40,7 @@ def train_generative_model(gen_model_type, code_size, num_hidden_layers,
     # Dump model
     model_path = get_model_path(gen_model_type, dump_model_dir)
     gen_model.dump_decoder(model_path + '.pt')
-    gen_model.dump_config(model_path, train_data_exp_path)
+    gen_model.dump_config(model_path, train_data_exp_dirs)
 
     # Test model
     # gen_model.test(plot=True, train_data_path=train_data_exp_path)

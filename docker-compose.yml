@@ -7,3 +7,8 @@ services:
       - ./data:/app/data
       - ./models:/app/models
       - ./configs:/app/configs
+
+# Was trying to render through docker but I could not get it to work :(
+    #  - /tmp/.X11-unix:/tmp/.X11-uni
+    #environment:
+    #  - DISPLAY=192.168.1.100:0

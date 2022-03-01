@@ -162,6 +162,7 @@ def main(argv, config):
                 config['ie']['num_epochs'], config['ie']['batch_size'],
                 config['logging']['data_dir_path']
                 + config['ie']['training_data_dir'],
+                config['ie']['exp_group'],
                 config['ie']['dump_model_dir'],
                 config['logging']['winner_file_name'],
                 config['ie']['optimiser'])

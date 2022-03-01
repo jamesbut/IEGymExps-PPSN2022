@@ -81,23 +81,23 @@ class Autoencoder(torch.nn.Module):
     def test(self):
         self(self.training_data, verbosity=True)
 
-    def to_dict(self, train_data_exp_dir_path):
+    def to_dict(self, train_data_exp_dir_paths):
 
         return {
             'num_epochs': self._num_epochs,
             'batch_size': self._batch_size,
             'final_loss': self._final_loss,
-            'train_data_exp_dir_path': train_data_exp_dir_path,
+            'train_data_exp_dir_paths': train_data_exp_dir_paths,
             'encoder': self._encoder.to_dict(),
             'decoder': self._decoder.to_dict()
         }
 
-    def dump_config(self, config_path, train_data_exp_dir_path):
+    def dump_config(self, config_path, train_data_exp_dir_paths):
 
         import json
 
         with open(config_path + '.json', 'w') as f:
-            json.dump(self.to_dict(train_data_exp_dir_path), f, indent=4)
+            json.dump(self.to_dict(train_data_exp_dir_paths), f, indent=4)
 
     def dump_decoder(self, file_path):
         self._decoder.save(file_path)
