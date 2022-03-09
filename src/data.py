@@ -260,3 +260,37 @@ def create_synthetic_data(code_size, num_data_points=500):
                 means[i][j] = -10.
 
     return means + np.randn(500, 2)
+
+
+# Function to clean data according to some filter
+# (according to numerical bounds for now)
+def clean_data(exp_data_dir, config, l_gb, u_gb):
+
+    exp_data_path = config['logging']['data_dir_path'] + exp_data_dir
+    print('exp_data_path:', exp_data_path)
+
+    _, genos, _, _, folder_paths = \
+        read_agent_data(exp_data_path, config['logging']['winner_file_name'])
+    print(genos)
+
+    print('\nOut of bounds genos:')
+    num_out_of_bounds = 0
+    for geno in genos:
+        if any((g > u_gb or g < l_gb) for g in geno):
+            num_out_of_bounds += 1
+            print(geno)
+
+    print('Num genos out of bounds: {}/{}'.format(num_out_of_bounds, len(genos)))
+
+
+if __name__ == '__main__':
+
+    np.set_printoptions(suppress=True)
+    np.set_printoptions(threshold=sys.maxsize)
+
+    config = read_configs(None)[0]
+
+    L_GB = -100.
+    U_GB = 100.
+
+    clean_data(sys.argv[1], config, L_GB, U_GB)
