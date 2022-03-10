@@ -3,6 +3,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
+    apt-utils \
     python3.9 \
     python3.9-dev \
     python3-pip \
