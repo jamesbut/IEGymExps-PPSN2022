@@ -266,21 +266,46 @@ def create_synthetic_data(code_size, num_data_points=500):
 # (according to numerical bounds for now)
 def clean_data(exp_data_dir, config, l_gb, u_gb):
 
+    # Create experiment directory path
     exp_data_path = config['logging']['data_dir_path'] + exp_data_dir
     print('exp_data_path:', exp_data_path)
 
+    # Read genotypes
     _, genos, _, _, folder_paths = \
         read_agent_data(exp_data_path, config['logging']['winner_file_name'])
     print(genos)
 
+    # Calculate genotypes that are out of bounds
     print('\nOut of bounds genos:')
+
     num_out_of_bounds = 0
-    for geno in genos:
+    out_of_bound_geno_paths = []
+    for i, geno in enumerate(genos):
         if any((g > u_gb or g < l_gb) for g in geno):
             num_out_of_bounds += 1
+            out_of_bound_geno_paths.append(folder_paths[i])
             print(geno)
 
     print('Num genos out of bounds: {}/{}'.format(num_out_of_bounds, len(genos)))
+
+    # Get directories to delete and print them
+    print('Files to be deleted:')
+    out_of_bound_geno_paths = ['/'.join(p.split('/')[:-1])
+                               for p in out_of_bound_geno_paths]
+    for p in out_of_bound_geno_paths:
+        print(p)
+
+    # Ask for files to be deleted
+    delete_q = input('Do you want to delete these dirs (y/n)? ')
+    if delete_q != 'y':
+        return
+
+    # Delete directories of out of bounds genotypes
+    import shutil
+    for p in out_of_bound_geno_paths:
+        shutil.rmtree(p)
+
+    print('Files successfully deleted')
 
 
 if __name__ == '__main__':
