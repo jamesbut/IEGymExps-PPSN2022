@@ -27,7 +27,7 @@
     "env": {
         "name": "BipedalWalker-v3",
         "completion_fitness": 200.0,
-        "domain_params": [4.0],
+        "domain_params": [2.0],
         "domain_params_high": [10.0],
         "domain_params_low": [1.0],
         "domain_params_input": false,
@@ -36,7 +36,7 @@
     },
     "ie": {
         "name": "gan",
-        "use_decoder": true,
+        "use_decoder": false,
         "decoder_file_num": 0,
         "code_size": 1,
         "num_hidden_layers": 1,
