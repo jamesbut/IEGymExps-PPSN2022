@@ -165,6 +165,7 @@ def dump_json(file_path, json_dict):
             json.dump(json_dict, file, indent=4)
     # If directory is not created, do not do anything
     except FileNotFoundError:
+        print('Could not open: {}'.format(file_path))
         pass
 
 

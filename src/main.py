@@ -202,6 +202,10 @@ def main(argv, config):
         exp_dir_path = config['logging']['data_dir_path'] \
             + config['logging']['exp_dir_name'] + '/'
 
+        # Dump configs
+        os.makedirs(exp_dir_path, exist_ok=True)
+        dump_json(exp_dir_path + 'experiment.json', config)
+
         # Run experiment
         for i in range(config['execution']['num_runs']):
 
@@ -212,9 +216,6 @@ def main(argv, config):
             end = time.time()
 
             print('Time taken for evolution: {} seconds\n'.format(end - start))
-
-        # Dump configs
-        dump_json(exp_dir_path + 'experiment.json', config)
 
     # Individual run
     else:
