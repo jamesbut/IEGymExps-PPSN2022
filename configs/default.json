@@ -36,7 +36,7 @@
     },
     "ie": {
         "name": "gan",
-        "use_decoder": false,
+        "use_decoder": true,
         "decoder_file_num": 0,
         "code_size": 1,
         "num_hidden_layers": 1,
