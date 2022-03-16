@@ -149,7 +149,7 @@ def main(argv, config):
     config['logging']['data_dir_path'] = os.getcwd() + '/' + \
                                          config['logging']['data_dir_path']
 
-    if '-train_decoder' in argv:
+    if '--train-decoder' in argv:
 
         from generative_models.model_training import train_generative_model
 
@@ -167,7 +167,7 @@ def main(argv, config):
                 config['logging']['winner_file_name'],
                 config['ie']['optimiser'])
 
-    elif '-test_decoder' in argv:
+    elif '--test-decoder' in argv:
 
         from generative_models.model_testing import test_decoder
 
@@ -191,10 +191,10 @@ def main(argv, config):
                      config['logging']['winner_file_name'],
                      plot_axis_lb=plot_axis_lb,
                      plot_axis_ub=plot_axis_ub,
-                     colour_params=True if '-colour_params' in argv else False)
+                     colour_params=True if '--colour-params' in argv else False)
 
     # Evolutionary run
-    elif '-evo_run' in argv:
+    elif '--evo-run' in argv:
 
         import time
 
@@ -229,7 +229,7 @@ def main(argv, config):
 
         indv_run(indv_path, config['env']['domain_params'],
                  config['env'].get('seed', None),
-                 render=False if '-render-off' in argv else True)
+                 render=False if '--render--off' in argv else True)
 
 
 # Some bug in DEAP means that I have to create individual before

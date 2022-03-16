@@ -287,31 +287,31 @@ if __name__ == '__main__':
     config = read_configs(sys.argv)[0]
 
     # Can pass in entire experiment group
-    if '-group' in sys.argv:
+    if '--group' in sys.argv:
         exp_dir = sys.argv[3]
     # Or just single experiment
     else:
         exp_dir = sys.argv[2]
 
     # Plot phenotype data
-    if '-pheno' in sys.argv:
+    if '--pheno' in sys.argv:
 
         # Get axis limits from command line
         plot_axis_lb, plot_axis_ub = parse_axis_limits(sys.argv)
 
         read_and_plot_phenos(config['logging']['data_dir_path'] + exp_dir,
                              config['logging']['winner_file_name'],
-                             group=True if '-group' in sys.argv else False,
-                             colour_params=True if '-colour_params' in sys.argv
+                             group=True if '--group' in sys.argv else False,
+                             colour_params=True if '--colour-params' in sys.argv
                                                 else False,
                              print_numpy_arrays=True
-                                if '-print_numpy_arrays' in sys.argv else False,
-                             verbosity=True if '-verbosity' in sys.argv else False,
+                                if '--print-numpy-arrays' in sys.argv else False,
+                             verbosity=True if '--verbosity' in sys.argv else False,
                              plot_axis_lb=plot_axis_lb,
                              plot_axis_ub=plot_axis_ub)
 
     # Plot evolutionary run data
-    elif '-evo' in sys.argv:
+    elif '--evo' in sys.argv:
 
         # Split comma separated experiment directories
         exp_data_dirs = exp_dir.split(',')
@@ -319,6 +319,6 @@ if __name__ == '__main__':
         read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'],
                                config['logging']['winner_file_name'],
                                # Turns off the plotting of the inter-quartile ranges
-                               False if '-q_means_off' in sys.argv else True,
-                               False if '-q_bests_off' in sys.argv else True,
-                               True if '-verbosity' in sys.argv else False)
+                               False if '--q-means-off' in sys.argv else True,
+                               False if '--q-bests-off' in sys.argv else True,
+                               True if '--verbosity' in sys.argv else False)
