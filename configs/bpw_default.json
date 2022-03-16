@@ -25,8 +25,12 @@
         "final_layer_activ_func": "sigmoid"
     },
     "env": {
-        "name": "Acrobot-v1",
+        "name": "BipedalWalker-v3",
         "completion_fitness": 200.0,
+        "domain_params": [2.0],
+        "domain_params_high": [10.0],
+        "domain_params_low": [1.0],
+        "domain_params_input": false,
         "normalise_state": false,
         "seed": 108
     },

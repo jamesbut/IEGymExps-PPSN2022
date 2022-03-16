@@ -24,10 +24,10 @@ def evo_run(config, exp_dir_path):
                              config['env']['completion_fitness'],
                              config['env'].get('domain_param_distribution', None),
                              config['env'].get('domain_params', None),
-                             config['env']['domain_params_input'],
+                             config['env'].get('domain_params_input', False),
                              config['env']['normalise_state'],
-                             config['env']['domain_params_low'],
-                             config['env']['domain_params_high'])
+                             config['env'].get('domain_params_low', None),
+                             config['env'].get('domain_params_high', None))
 
     # Read decoder for evolution if specified
     decoder = None

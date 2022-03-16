@@ -22,6 +22,7 @@ class EnvWrapper():
         self._env_name = env_name
         self._completion_fitness = completion_fitness
         # This is distribution from which domain parameters are sampled
+        self._domain_param_distribution = None
         if domain_param_distribution is not None:
             self._domain_param_distribution = Distribution.read(domain_param_distribution)
         # This is a list of domain parameters to use for each trial
