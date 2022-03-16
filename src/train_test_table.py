@@ -33,7 +33,7 @@ def find_trained_solutions(train_exp_paths, winner_file_name):
     return train_paths, train_params
 
 
-def test_solutions(train_paths, train_params, test_params, render):
+def test_solutions(train_paths, train_params, test_params, env_seed, render):
 
     rewards = []
 
@@ -41,7 +41,7 @@ def test_solutions(train_paths, train_params, test_params, render):
     for train_info in zip(train_paths, train_params):
         print('Testing solution trained on:', train_info[1])
 
-        train_rewards = indv_run(train_info[0], test_params, render=False)
+        train_rewards = indv_run(train_info[0], test_params, env_seed, render=False)
         rewards.append(train_rewards)
 
     return np.array(rewards)
@@ -60,8 +60,8 @@ def add_train_to_test(test_params, train_params):
 def parse_train_dirs(argv, data_dir_path):
 
     # If -groups arg specified, groups of experiments have been declared
-    if '-groups' in argv:
-        groups_index = argv.index('-groups')
+    if '--groups' in argv:
+        groups_index = argv.index('--groups')
         # Read experiment group names
         group_dirs = argv[groups_index + 1]
         # Split csv group names
@@ -78,6 +78,8 @@ def parse_train_dirs(argv, data_dir_path):
         exp_dirs = argv[1]
         # Trained solution directories should be comma seperated
         exp_dirs = exp_dirs.split(',')
+        # Append data directory path
+        exp_dirs = map(lambda ed: data_dir_path + ed, exp_dirs)
 
     return exp_dirs
 
@@ -85,7 +87,7 @@ def parse_train_dirs(argv, data_dir_path):
 # Argument should be a comma separated list of either: a single solution
 # directory; an experiment directory of which the solution with the
 # highest fitness will be selected; or a group of experiments directory
-def train_test_table(argv, test_params, data_dir_path, winner_file_name):
+def train_test_table(argv, test_params, data_dir_path, winner_file_name, env_seed):
 
     # Either read in the trained models
     if len(argv) >= 2:
@@ -105,7 +107,8 @@ def train_test_table(argv, test_params, data_dir_path, winner_file_name):
     test_params = add_train_to_test(test_params, train_params)
 
     # Test solutions
-    rewards = test_solutions(train_paths, train_params, test_params, render=False)
+    rewards = test_solutions(train_paths, train_params, test_params,
+                             env_seed, render=False)
 
     # Get power set of test params so that we can calculate all appropriate means
     pow_set_bools = product([True, False], repeat=len(test_params))
@@ -150,9 +153,9 @@ if __name__ == "__main__":
 
     config = read_configs(sys.argv)[0]
 
-    test_parameters = [0.0008, 0.0010, 0.0012, 0.0014, 0.0016]
-    #test_parameters = [0.0010, 0.0014]
+    test_parameters = [2.0, 3.0, 4.0, 5.0, 6.0]
 
     train_test_table(sys.argv, test_parameters,
                      config['logging']['data_dir_path'],
-                     config['logging']['winner_file_name'])
+                     config['logging']['winner_file_name'],
+                     config['env'].get('seed', None))
