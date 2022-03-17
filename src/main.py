@@ -229,7 +229,7 @@ def main(argv, config):
 
         indv_run(indv_path, config['env'].get('domain_params', None),
                  config['env'].get('seed', None),
-                 render=False if '--render--off' in argv else True)
+                 render=False if '--render-off' in argv else True)
 
 
 # Some bug in DEAP means that I have to create individual before

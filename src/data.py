@@ -220,10 +220,10 @@ def read_configs(argv):
     working_dir_path = os.getcwd()
 
     # Read in group of config files
-    if argv is not None and '-configs' in argv:
+    if argv is not None and '--configs' in argv:
 
         # Get config group directory from command line
-        config_index = argv.index('-configs')
+        config_index = argv.index('--configs')
         config_dir = argv[config_index + 1]
 
         # Recursively get all config files in directory
