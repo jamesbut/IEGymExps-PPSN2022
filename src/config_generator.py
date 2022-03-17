@@ -102,10 +102,9 @@ def main():
     #                                 num_top_dirs_removed=1)
 
     hyper_params = [
-        (["env", "domain_params"], [[2.0], [3.0], [4.0], [5.0], [6.0]]),
-        # (["env", "domain_params"], [[2.0, 4.0, 6.0]]),
+        (["env", "domain_params"], [[20.0], [25.0], [30.0], [35.0], [40.0]]),
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [0, 1, 2, 3, 4])
+        # (["ie", "decoder_file_num"], [0, 1, 2, 3, 4])
     ]
 
     if len(hyper_params) > 2:

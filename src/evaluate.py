@@ -65,7 +65,7 @@ def evaluate(genome=None, agent=None, env_wrapper=None,
     # Run trials
     for trial_num in range(num_trials):
 
-        if verbosity:
+        if verbosity and env_wrapper.domain_params:
             print("Domain parameters:", env_wrapper.domain_params[trial_num])
 
         env_wrapper.make_env(trial_num, env_seed)

@@ -1,4 +1,5 @@
 box2d
+box2d-py
 box2d-kengz
 matplotlib
 pyvirtualdisplay

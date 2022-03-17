@@ -91,11 +91,13 @@ def _filter_genos_by_pheno_bounds(genotypes, phenotypes, p_lb, p_ub):
 
     # Check length are correct
     if len(phenotypes[0]) != len(p_lb):
-        raise ValueError('Length of phenotype {' + len(phenotypes[0]) + '} and length '
-                         'of phenotype lower bounds {' + len(p_lb) + '} are not equal')
+        raise ValueError('Length of phenotype {' + str(len(phenotypes[0]))
+                         + '} and length of phenotype lower bounds {' + str(len(p_lb))
+                         + '} are not equal')
     if len(phenotypes[0]) != len(p_ub):
-        raise ValueError('Length of phenotype {' + len(phenotypes[0]) + '} and length '
-                         'of phenotype upper bounds {' + len(p_ub) + '} are not equal')
+        raise ValueError('Length of phenotype {' + str(len(phenotypes[0]))
+                         + '} and length of phenotype upper bounds {' + str(len(p_ub))
+                         + '} are not equal')
 
     # Check bounds and remove if phenotype is not within bounds
     bounded_pheno_genos = []

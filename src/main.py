@@ -227,7 +227,7 @@ def main(argv, config):
         indv_path = config['logging']['data_dir_path'] + indv_dir + '/' \
                     + config['logging']['winner_file_name'] + '.json'
 
-        indv_run(indv_path, config['env']['domain_params'],
+        indv_run(indv_path, config['env'].get('domain_params', None),
                  config['env'].get('seed', None),
                  render=False if '--render--off' in argv else True)
 

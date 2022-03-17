@@ -10,7 +10,7 @@
             "fix_sigma": false,
             "verbosity": false
         },
-        "num_gens": 50,
+        "num_gens": 500,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -35,11 +35,18 @@
         "final_layer_activ_func": "sigmoid"
     },
     "env": {
-        "name": "LunarLanderContinuous-v2",
+        "name": "BipedalWalker-v3",
         "completion_fitness": 200.0,
         "domain_params": [
-            40.0
+            6.0
         ],
+        "domain_params_high": [
+            10.0
+        ],
+        "domain_params_low": [
+            1.0
+        ],
+        "domain_params_input": false,
         "normalise_state": false,
         "seed": 108
     },
@@ -63,14 +70,14 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 10
+        "num_runs": 5
     },
     "logging": {
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
         "save_winners_only": false,
-        "exp_dir_name": "exp_4",
+        "exp_dir_name": "exp_1",
         "config_file_path": "/Users/james/Documents/phd/projects/indirect_encodings/IEGymExps/configs/default.json"
     }
 }

@@ -59,3 +59,5 @@ def _get_param_string(env_name):
         return 'speed_knee'
     elif env_name == 'MountainCarContinuous-v0':
         return 'power'
+    elif env_name == 'LunarLanderContinuous-v2':
+        return 'scale'
