@@ -8,6 +8,7 @@ import itertools
 import copy
 import os
 import re
+import sys
 from boltons import iterutils
 from typing import Tuple
 
@@ -40,10 +41,16 @@ def create_settings(hyper_params):
     return settings
 
 
-def _calculate_new_group_path(configs) -> Tuple[str, str]:
+def _calculate_new_group_path(configs, exp_dir) -> Tuple[str, str]:
+
+    # Build config path
+    config_path = 'configs'
+    if exp_dir != '':
+        config_path += '/' + exp_dir
 
     # Get all directories in configs dir
-    config_dirs = get_sub_folders('configs', recursive=False, append_dir_path=False)
+    config_dirs = get_sub_folders(config_path, recursive=False,
+                                  append_dir_path=False)
     # Filter to just get group directories
     prev_group_dirs = [cd for cd in config_dirs if re.search("^g[0-9]+", cd) is not None]
 
@@ -54,15 +61,15 @@ def _calculate_new_group_path(configs) -> Tuple[str, str]:
         new_group_num = max(prev_group_nums) + 1
 
     new_group_name = 'g' + str(new_group_num)
-    new_group_path = 'configs/' + new_group_name
+    new_group_path = config_path + '/' + new_group_name
 
     return new_group_path, new_group_name
 
 
 # Dump configs into directory
-def dump_configs(configs):
+def dump_configs(configs, exp_dir):
 
-    new_group_path, new_group_name = _calculate_new_group_path(configs)
+    new_group_path, new_group_name = _calculate_new_group_path(configs, exp_dir)
 
     # Create group directory
     os.mkdir(new_group_path)
@@ -102,7 +109,7 @@ def main():
     #                                 num_top_dirs_removed=1)
 
     hyper_params = [
-        (["env", "domain_params"], [[20.0], [25.0], [30.0], [35.0], [40.0]]),
+        (["env", "domain_params"], [[25.0], [30.0], [35.0], [40.0], [45.0]]),
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
         # (["ie", "decoder_file_num"], [0, 1, 2, 3, 4])
     ]
@@ -122,7 +129,12 @@ def main():
     for c in configs:
         print_dict(c)
 
-    dump_configs(configs)
+    # Optional to give experiment config directory to dump configs in rather than
+    # straight into the 'configs' directory
+    exp_dir = ''
+    if len(sys.argv) == 2:
+        exp_dir = sys.argv[1]
+    dump_configs(configs, exp_dir)
 
 
 if __name__ == '__main__':

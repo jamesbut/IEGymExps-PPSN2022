@@ -38,7 +38,7 @@
         "name": "LunarLanderContinuous-v2",
         "completion_fitness": 200.0,
         "domain_params": [
-            25.0
+            35.0
         ],
         "normalise_state": false,
         "seed": 108
@@ -70,7 +70,7 @@
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
         "save_winners_only": false,
-        "exp_dir_name": "exp_4",
+        "exp_dir_name": "exp_1",
         "config_file_path": "/Users/james/Documents/phd/projects/indirect_encodings/IEGymExps/configs/default.json"
     }
 }
