@@ -5,6 +5,7 @@ import uuid
 import sys
 import copy
 import os
+import shutil
 from agent import Agent
 from data import dump_list, dump_json, read_configs
 from evo_utils import get_cmaes_centroid, expand_bound
@@ -17,7 +18,25 @@ from command_line import parse_axis_limits, parse_test_decoder
 np.set_printoptions(suppress=True)
 
 
-def evo_run(config, exp_dir_path):
+# Reads decoder to be used in evolutionary run
+def _read_decoder(config):
+
+    decoder, decoder_file_path = None
+
+    if config['ie']['use_decoder']:
+        try:
+            # Read .pt decoder file
+            decoder_file_path = config['ie']['dump_model_dir'] + '/' + \
+                                config['ie']['name'] + '_' + \
+                                str(config['ie']['decoder_file_num'])
+            decoder = NeuralNetwork(file_path=decoder_file_path + '.pt')
+        except IOError:
+            print("Could not find requested decoder for evolution:", decoder_file_path)
+
+    return decoder, decoder_file_path
+
+
+def evo_run(config, exp_dir_path, decoder):
 
     # Environment
     env_wrapper = EnvWrapper(config['env']['name'],
@@ -28,17 +47,6 @@ def evo_run(config, exp_dir_path):
                              config['env']['normalise_state'],
                              config['env'].get('domain_params_low', None),
                              config['env'].get('domain_params_high', None))
-
-    # Read decoder for evolution if specified
-    decoder = None
-    if config['ie']['use_decoder']:
-        try:
-            decoder_file_path = config['ie']['dump_model_dir'] + '/' + \
-                                config['ie']['name'] + '_' + \
-                                str(config['ie']['decoder_file_num']) + '.pt'
-            decoder = NeuralNetwork(file_path=decoder_file_path)
-        except IOError:
-            print("Could not find requested decoder for evolution:", decoder_file_path)
 
     # Create agent
     env_wrapper.make_env()
@@ -206,13 +214,19 @@ def main(argv, config):
         os.makedirs(exp_dir_path, exist_ok=True)
         dump_json(exp_dir_path + 'experiment.json', config)
 
+        # Read decoder
+        decoder, decoder_file_path = _read_decoder(config)
+        # Copy json file of model from which decoder came from into experiment dir
+        if decoder_file_path:
+            shutil.copyfile(decoder_file_path + '.json', exp_dir_path)
+
         # Run experiment
         for i in range(config['execution']['num_runs']):
 
             print("Evo run: ", i)
 
             start = time.time()
-            evo_run(copy.deepcopy(config), exp_dir_path)
+            evo_run(copy.deepcopy(config), exp_dir_path, copy.deepcopy(decoder))
             end = time.time()
 
             print('Time taken for evolution: {} seconds\n'.format(end - start))
