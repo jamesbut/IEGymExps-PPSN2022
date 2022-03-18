@@ -234,7 +234,7 @@ def _prepare_evo_exp_data_paths(data_dirs, data_dir_path, winner_file_name, verb
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            plot_q_means=True, plot_q_bests=True, verbosity=False):
 
-    exp_plot_colours = ['b', 'r', 'g', 'm', 'y']
+    exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
     legend_items = []
 
     exp_data_paths = _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path,

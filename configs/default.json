@@ -27,7 +27,7 @@
     "env": {
         "name": "LunarLanderContinuous-v2",
         "completion_fitness": 200.0,
-        "domain_params": [30.0],
+        "domain_params": [35.0],
         "normalise_state": false,
         "seed": 108
     },

@@ -39,7 +39,7 @@ def test_solutions(train_paths, train_params, test_params, env_seed, render):
 
     # Do individual runs on test parameters
     for train_info in zip(train_paths, train_params):
-        print('Testing solution trained on:', train_info[1])
+        print('Testing solution {} trained on {}'.format(train_info[0], train_info[1]))
 
         train_rewards = indv_run(train_info[0], test_params, env_seed, render=False)
         rewards.append(train_rewards)
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     config = read_configs(sys.argv)[0]
 
-    test_parameters = [2.0, 3.0, 4.0, 5.0, 6.0]
+    test_parameters = [20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
 
     train_test_table(sys.argv, test_parameters,
                      config['logging']['data_dir_path'],
