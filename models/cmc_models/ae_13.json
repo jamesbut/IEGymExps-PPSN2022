@@ -1,0 +1,42 @@
+{
+    "num_epochs": 20000,
+    "batch_size": 1000,
+    "final_loss": 0.9933520555496216,
+    "train_data_exp_dir_paths": [
+        "/app/data/cmc_configs/cmc_train_data"
+    ],
+    "encoder": {
+        "num_inputs": 2,
+        "num_outputs": 2,
+        "num_hidden_layers": 0,
+        "neurons_per_hidden_layer": 0,
+        "hidden_layer_activation_function": "relu",
+        "final_layer_activation_function": null,
+        "bias": true,
+        "weights": [
+            0.29591551423072815,
+            0.027740737423300743,
+            -0.009222573600709438,
+            0.08708084374666214,
+            -0.6954934000968933,
+            -6.525030612945557
+        ]
+    },
+    "decoder": {
+        "num_inputs": 2,
+        "num_outputs": 2,
+        "num_hidden_layers": 0,
+        "neurons_per_hidden_layer": 0,
+        "hidden_layer_activation_function": "relu",
+        "final_layer_activation_function": null,
+        "bias": true,
+        "weights": [
+            17.9468994140625,
+            -3.6716861724853516,
+            1.9111889600753784,
+            52.69315719604492,
+            -11.84106731414795,
+            47.26215362548828
+        ]
+    }
+}
