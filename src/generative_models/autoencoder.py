@@ -27,6 +27,7 @@ class Autoencoder(torch.nn.Module):
                 final_activ_func=None)
 
         self._optimiser = torch.optim.Adam(self.parameters(), lr=lr)
+        self._lr = lr
 
     def train(self, train_data, num_epochs, batch_size):
 
@@ -87,6 +88,7 @@ class Autoencoder(torch.nn.Module):
             'num_epochs': self._num_epochs,
             'batch_size': self._batch_size,
             'final_loss': self._final_loss,
+            'learning_rate': self.lr,
             'train_data_exp_dir_paths': train_data_exp_dir_paths,
             'encoder': self._encoder.to_dict(),
             'decoder': self._decoder.to_dict()

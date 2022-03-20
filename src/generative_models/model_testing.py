@@ -5,7 +5,7 @@ from plotter import read_and_plot_phenos
 
 def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_path,
                  winner_file_name, plot_axis_lb=None, plot_axis_ub=None,
-                 colour_params=False):
+                 colour_params=False, print_numpy_arrays=False):
 
     # Read decoder
     decoder_file_path = dump_model_dir + '/' + gen_model_type + '_' \
@@ -21,6 +21,9 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
 
     # Test decoder
     decoder_output = gen_model.test_decoder()
+    if print_numpy_arrays:
+        import sys
+        np.set_printoptions(threshold=sys.maxsize)
     print(decoder_output)
 
     # Plot decoder output and training data

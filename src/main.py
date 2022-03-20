@@ -199,7 +199,9 @@ def main(argv, config):
                      config['logging']['winner_file_name'],
                      plot_axis_lb=plot_axis_lb,
                      plot_axis_ub=plot_axis_ub,
-                     colour_params=True if '--colour-params' in argv else False)
+                     colour_params=True if '--colour-params' in argv else False,
+                     print_numpy_arrays=True
+                        if '--print-numpy-arrays' in argv else False)
 
     # Evolutionary run
     elif '--evo-run' in argv:

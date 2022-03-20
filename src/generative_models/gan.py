@@ -31,6 +31,8 @@ class GAN():
                                                     lr=g_lr)
             self._d_optimiser = torch.optim.RMSprop(self._discriminator.parameters(),
                                                     lr=d_lr)
+            self._g_lr = g_lr
+            self._d_lr = d_lr
 
     def train(self, train_data, num_epochs, batch_size):
 
@@ -103,6 +105,8 @@ class GAN():
             'batch_size': self._batch_size,
             'final_g_loss': self._final_g_avg_loss,
             'final_d_loss': self._final_d_avg_loss,
+            'generator_learning_rate': self._g_lr,
+            'discriminator_learning_rate': self._d_lr,
             'train_data_exp_dir_path': train_data_exp_dir_path,
             'generator': self._generator.to_dict(),
             'discriminator': self._discriminator.to_dict()
