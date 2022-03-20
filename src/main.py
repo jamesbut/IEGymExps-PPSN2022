@@ -21,7 +21,8 @@ np.set_printoptions(suppress=True)
 # Reads decoder to be used in evolutionary run
 def _read_decoder(config):
 
-    decoder, decoder_file_path = None
+    decoder = None
+    decoder_file_path = None
 
     if config['ie']['use_decoder']:
         try:
@@ -220,7 +221,7 @@ def main(argv, config):
         decoder, decoder_file_path = _read_decoder(config)
         # Copy json file of model from which decoder came from into experiment dir
         if decoder_file_path:
-            shutil.copyfile(decoder_file_path + '.json', exp_dir_path)
+            shutil.copy(decoder_file_path + '.json', exp_dir_path)
 
         # Run experiment
         for i in range(config['execution']['num_runs']):

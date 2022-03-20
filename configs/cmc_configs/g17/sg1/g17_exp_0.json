@@ -2,7 +2,7 @@
     "optimiser": {
         "cmaes": {
             "centroid": [
-                0.5
+                0.0
             ],
             "sigma": 1.0,
             "lambda": 100,
@@ -14,12 +14,6 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "g_lb": [
-            0.0
-        ],
-        "g_ub": [
-            1.0
-        ],
         "p_lb": [
             -100.0
         ],
@@ -38,15 +32,15 @@
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.0,
         "domain_params": [
-            0.0016
+            0.0008
         ],
         "normalise_state": false,
         "seed": 108
     },
     "ie": {
-        "name": "ae",
+        "name": "gan",
         "use_decoder": true,
-        "decoder_file_num": 11,
+        "decoder_file_num": 10,
         "code_size": 2,
         "num_hidden_layers": 0,
         "neurons_per_hidden_layer": 0,

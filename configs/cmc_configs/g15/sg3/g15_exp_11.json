@@ -2,7 +2,7 @@
     "optimiser": {
         "cmaes": {
             "centroid": [
-                0.0
+                0.5
             ],
             "sigma": 1.0,
             "lambda": 100,
@@ -32,15 +32,15 @@
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.0,
         "domain_params": [
-            0.0008
+            0.0012
         ],
         "normalise_state": false,
         "seed": 108
     },
     "ie": {
-        "name": "gan",
+        "name": "ae",
         "use_decoder": true,
-        "decoder_file_num": 10,
+        "decoder_file_num": 11,
         "code_size": 2,
         "num_hidden_layers": 0,
         "neurons_per_hidden_layer": 0,

@@ -14,12 +14,6 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "g_lb": [
-            0.0
-        ],
-        "g_ub": [
-            1.0
-        ],
         "p_lb": [
             -100.0
         ],
@@ -38,7 +32,7 @@
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 2.0,
         "domain_params": [
-            0.0014
+            0.0008
         ],
         "normalise_state": false,
         "seed": 108
@@ -46,7 +40,7 @@
     "ie": {
         "name": "ae",
         "use_decoder": true,
-        "decoder_file_num": 10,
+        "decoder_file_num": 12,
         "code_size": 2,
         "num_hidden_layers": 0,
         "neurons_per_hidden_layer": 0,
