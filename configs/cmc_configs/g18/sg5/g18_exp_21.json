@@ -1,7 +1,9 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": [0.0],
+            "centroid": [
+                0.5
+            ],
             "sigma": 1.0,
             "lambda": 100,
             "fix_C": false,
@@ -12,8 +14,12 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "p_lb": [-100.0],
-        "p_ub": [100.0]
+        "p_lb": [
+            -100.0
+        ],
+        "p_ub": [
+            100.0
+        ]
     },
     "controller": {
         "num_hidden_layers": 0,
@@ -25,23 +31,24 @@
     "env": {
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 200.0,
-        "domain_params": [0.0008],
+        "domain_params": [
+            0.0016
+        ],
         "normalise_state": false,
         "seed": 108
     },
     "ie": {
-        "name": "gan",
+        "name": "ae",
         "use_decoder": true,
-        "decoder_file_num": 10,
+        "decoder_file_num": 16,
         "code_size": 1,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
-        "num_epochs": 10000,
+        "num_epochs": 20000,
         "batch_size": 256,
         "optimiser": {
             "name": "adam",
-            "g_lr": 2e-4,
-            "d_lr": 5e-4
+            "lr": 0.001
         },
         "training_data_dir": "cmc_configs/cmc_train_data",
         "exp_group": false,
@@ -55,6 +62,8 @@
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
-        "save_winners_only": false
+        "save_winners_only": false,
+        "exp_dir_name": "exp_1",
+        "config_file_path": "/Users/james/Documents/phd/projects/indirect_encodings/IEGymExps/configs/default.json"
     }
 }
