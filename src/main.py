@@ -53,8 +53,20 @@ def evo_run(config, exp_dir_path, decoder):
     env_wrapper.make_env()
     state = env_wrapper.reset()
 
-    num_inputs = len(state)
-    num_outputs = len(env_wrapper.action_space.high)
+    # Retrieve number of inputs and outputs for controller network
+    # If state is an array of values
+    if isinstance(state, np.ndarray):
+        num_inputs = len(state)
+    # If state is a discrete value
+    else:
+        num_inputs = 1
+
+    # If action space is discrete
+    if env_wrapper.discrete_action_space:
+        num_outputs = env_wrapper.action_space.n
+    # If action space is continuous
+    else:
+        num_outputs = len(env_wrapper.action_space.high)
 
     agent = Agent(num_inputs, num_outputs,
                   config['controller']['num_hidden_layers'],
@@ -69,7 +81,9 @@ def evo_run(config, exp_dir_path, decoder):
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", evaluate, agent=agent, env_wrapper=env_wrapper,
-                     render=config['optimiser']['render'], avg_fitnesses=True,
+                     render=config['optimiser']['render'],
+                     verbosity=config['env'].get('verbosity', 0),
+                     avg_fitnesses=True,
                      env_seed=config['env'].get('seed', None))
 
     # Define evolutionary algorithm

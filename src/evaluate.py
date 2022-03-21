@@ -3,9 +3,10 @@
 ####################################################################
 
 import copy
+import numpy as np
 
 
-def run(agent, env, render=False):
+def run(agent, env, render=False, verbosity=0):
 
     reward = 0
     done = False
@@ -21,21 +22,25 @@ def run(agent, env, render=False):
 
         net_out = agent.forward(state)
 
-        # Normalise output between action space bounds
-        action_vals = net_out * (env.action_space.high - env.action_space.low) + \
-                                 env.action_space.low
+        # If action space is discrete choose arg max of network output
+        if env.discrete_action_space:
+            action_vals = np.argmax(net_out)
+        # If action space is an array of floats
+        else:
+            # Normalise output between action space bounds
+            action_vals = net_out * (env.action_space.high - env.action_space.low) + \
+                                     env.action_space.low
 
         state, r, done, info = env.step(action_vals)
 
         reward += r
 
-        '''
-        print("Net out: ", net_out)
-        print("Action vals: ", action_vals)
-        print("State: ", state)
-        print("Reward: ", r)
-        print("Total reward: ", reward)
-        '''
+        if verbosity > 1:
+            print("Net out: ", net_out)
+            print("Action vals: ", action_vals)
+            print("State: ", state)
+            print("Reward: ", r)
+            print("Total reward: ", reward)
 
     env.close()
 
@@ -45,7 +50,7 @@ def run(agent, env, render=False):
 # Either pass in a genome and an agent with the required architecture OR
 # an agent with the network weights already set
 def evaluate(genome=None, agent=None, env_wrapper=None,
-             render=False, verbosity=False, avg_fitnesses=False,
+             render=False, verbosity=0, avg_fitnesses=False,
              env_seed=None):
 
     env_wrapper = copy.deepcopy(env_wrapper)
@@ -65,14 +70,14 @@ def evaluate(genome=None, agent=None, env_wrapper=None,
     # Run trials
     for trial_num in range(num_trials):
 
-        if verbosity and env_wrapper.domain_params:
+        if verbosity > 0 and env_wrapper.domain_params:
             print("Domain parameters:", env_wrapper.domain_params[trial_num])
 
         env_wrapper.make_env(trial_num, env_seed)
-        r = run(agent, env_wrapper, render)
+        r = run(agent, env_wrapper, render, verbosity)
         rewards.append(r)
 
-        if verbosity:
+        if verbosity > 0:
             print("Reward: ", r)
 
     if avg_fitnesses:

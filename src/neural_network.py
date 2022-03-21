@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import sys
 import copy
+from pandas.api.types import is_list_like
 
 
 class NeuralNetwork(torch.nn.Module):
@@ -73,10 +74,13 @@ class NeuralNetwork(torch.nn.Module):
 
         return torch.nn.Sequential(*layers)
 
-    # Takes a list, numpy array or torch Tensor, passes it through the network and
-    # returns a torch Tensor
+    # Takes an int, float, list, numpy array or torch Tensor,
+    # passes it through the network and returns a torch Tensor
     def forward(self, x):
-        # Convert list or numpy array to torch tensor
+        # Convert to list
+        if not is_list_like(x):
+            x = [x]
+        # Convert to torch float array
         if not isinstance(x, torch.FloatTensor):
             x = torch.as_tensor(x, dtype=torch.float32)
         net_out = self._nn.forward(x)

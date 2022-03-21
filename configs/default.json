@@ -8,7 +8,7 @@
             "fix_sigma": false,
             "verbosity": false
         },
-        "num_gens": 50,
+        "num_gens": 500,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -18,20 +18,20 @@
     "controller": {
         "num_hidden_layers": 0,
         "neurons_per_hidden_layer": 0,
-        "bias": false,
+        "bias": true,
         "hidden_layer_activ_func": "relu",
         "final_layer_activ_func": "sigmoid"
     },
     "env": {
         "name": "MountainCarContinuous-v0",
         "completion_fitness": 200.0,
-        "domain_params": [0.0008],
         "normalise_state": false,
-        "seed": 108
+        "seed": 108,
+        "verbosity": 0
     },
     "ie": {
-        "name": "gan",
-        "use_decoder": true,
+        "name": "ae",
+        "use_decoder": false,
         "decoder_file_num": 10,
         "code_size": 1,
         "num_hidden_layers": 1,
@@ -40,8 +40,7 @@
         "batch_size": 256,
         "optimiser": {
             "name": "adam",
-            "g_lr": 2e-4,
-            "d_lr": 5e-4
+            "lr": 1e-3
         },
         "training_data_dir": "cmc_configs/cmc_train_data",
         "exp_group": false,
@@ -49,7 +48,7 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",

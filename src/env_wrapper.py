@@ -57,6 +57,12 @@ class EnvWrapper():
         if seed is not None:
             self._env.seed(seed)
 
+        # Check to see whether action space is discrete or continuous
+        if hasattr(self._env.action_space, 'high'):
+            self._discrete_action_space = False
+        else:
+            self._discrete_action_space = True
+
     def step(self, actions):
         state, r, done, info = self._env.step(actions)
         state = self._process_state(state)
@@ -140,6 +146,11 @@ class EnvWrapper():
     @property
     def spec(self):
         return self._env.spec
+
+    # A boolean recording whether the action space is discrete or not
+    @property
+    def discrete_action_space(self):
+        return self._discrete_action_space
 
     def reset(self):
         return self._process_state(self._env.reset())
