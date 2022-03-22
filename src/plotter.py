@@ -33,7 +33,7 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotype
 def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
                        median_means, lq_means, uq_means, colour,
                        plot_q_means=True, plot_q_bests=True, plot_b_bests=True,
-                       plot_med_means: bool = True):
+                       plot_med_means: bool = True, plot_med_bests: bool = True):
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
@@ -50,9 +50,13 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
     plot_lq_means = np.column_stack((gens, lq_means))
 
     # Select data to plot
-    plot_data = np.array([plot_median_bests])
-    line_styles = ['-']
-    line_widths = [1.]
+    plot_data = np.empty([0, plot_median_bests.shape[0], plot_median_bests.shape[1]])
+    line_styles = []
+    line_widths = []
+    if plot_med_bests:
+        plot_data = np.concatenate((plot_data, np.array([plot_median_bests])))
+        line_styles += ['-']
+        line_widths += [1.]
     if plot_med_means:
         plot_data = np.concatenate((plot_data, np.array([plot_median_means])))
         line_styles += ['--']
@@ -258,7 +262,7 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            gen_one_max: bool = False, plot_q_means: bool = True,
                            plot_q_bests: bool = True, plot_b_bests: bool = True,
-                           plot_med_means: bool = True,
+                           plot_med_means: bool = True, plot_med_bests: bool = True,
                            verbosity: bool = False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
@@ -299,13 +303,15 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            lq_best_fitnesses, uq_best_fitnesses, best_best_fitnesses,
                            median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
                            exp_plot_colours[i], plot_q_means, plot_q_bests,
-                           plot_b_bests, plot_med_means)
+                           plot_b_bests, plot_med_means, plot_med_bests)
 
         # Set legend label
         legend_label = exp_data_path.replace(data_dir_path, '')
         legend_items.append(
             mpatches.Patch(color=exp_plot_colours[i], label=legend_label)
         )
+
+        print('-' * 50)
 
     plt.legend(handles=legend_items)
 
@@ -358,4 +364,5 @@ if __name__ == '__main__':
             plot_q_bests=False if '--q-bests-off' in sys.argv else True,
             plot_b_bests=False if '--b-bests-off' in sys.argv else True,
             plot_med_means=False if '--m-means-off' in sys.argv else True,
+            plot_med_bests=False if '--m-bests-off' in sys.argv else True,
             verbosity=True if '--verbosity' in sys.argv else False)
