@@ -360,8 +360,8 @@ if __name__ == '__main__':
             config['logging']['winner_file_name'],
             True if '--gen-one-max' in sys.argv else False,
             # Turns off the plotting of the inter-quartile ranges
-            plot_q_means=False if '--q-means-off' in sys.argv else True,
-            plot_q_bests=False if '--q-bests-off' in sys.argv else True,
+            plot_q_means=True if '--q-means-on' in sys.argv else False,
+            plot_q_bests=True if '--q-bests-on' in sys.argv else False,
             plot_b_bests=False if '--b-bests-off' in sys.argv else True,
             plot_med_means=False if '--m-means-off' in sys.argv else True,
             plot_med_bests=False if '--m-bests-off' in sys.argv else True,
