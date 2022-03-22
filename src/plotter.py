@@ -32,7 +32,8 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotype
 
 def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
                        median_means, lq_means, uq_means, colour,
-                       plot_q_means=True, plot_q_bests=True, plot_b_bests=True):
+                       plot_q_means=True, plot_q_bests=True, plot_b_bests=True,
+                       plot_med_means: bool = True):
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
@@ -49,9 +50,13 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
     plot_lq_means = np.column_stack((gens, lq_means))
 
     # Select data to plot
-    plot_data = np.array([plot_median_bests, plot_median_means])
-    line_styles = ['--', '-']
-    line_widths = [1., 1.]
+    plot_data = np.array([plot_median_bests])
+    line_styles = ['-']
+    line_widths = [1.]
+    if plot_med_means:
+        plot_data = np.concatenate((plot_data, np.array([plot_median_means])))
+        line_styles += ['--']
+        line_widths += [1.]
     if plot_q_bests:
         plot_data = np.concatenate((plot_data,
                                     np.array([plot_lq_bests, plot_uq_bests])))
@@ -244,12 +249,16 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
                 max_fitness, _, _ = _read_exp(edp, winner_file_name, verbosity, False)
                 max_fitnesses.append(max_fitness)
 
+        if verbosity:
+            print('Max fitnesses:', max_fitnesses)
+
         return group_exp_data_paths[np.argmax(max_fitnesses)]
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            gen_one_max: bool = False, plot_q_means: bool = True,
                            plot_q_bests: bool = True, plot_b_bests: bool = True,
+                           plot_med_means: bool = True,
                            verbosity: bool = False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
@@ -263,6 +272,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         # Determine which experiment to plot
         exp_data_path = _determine_experiment_to_plot(exp_data_path, winner_file_name,
                                                       gen_one_max, verbosity)
+        print('Experiment data path:', exp_data_path)
 
         # Read experiment data
         mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
@@ -289,7 +299,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            lq_best_fitnesses, uq_best_fitnesses, best_best_fitnesses,
                            median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
                            exp_plot_colours[i], plot_q_means, plot_q_bests,
-                           plot_b_bests)
+                           plot_b_bests, plot_med_means)
 
         # Set legend label
         legend_label = exp_data_path.replace(data_dir_path, '')
@@ -339,11 +349,13 @@ if __name__ == '__main__':
         # Split comma separated experiment directories
         exp_data_dirs = exp_dir.split(',')
 
-        read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'],
-                               config['logging']['winner_file_name'],
-                               True if '--gen-one-max' in sys.argv else False,
-                               # Turns off the plotting of the inter-quartile ranges
-                               False if '--q-means-off' in sys.argv else True,
-                               False if '--q-bests-off' in sys.argv else True,
-                               False if '--b-bests-off' in sys.argv else True,
-                               True if '--verbosity' in sys.argv else False)
+        read_and_plot_evo_data(
+            exp_data_dirs, config['logging']['data_dir_path'],
+            config['logging']['winner_file_name'],
+            True if '--gen-one-max' in sys.argv else False,
+            # Turns off the plotting of the inter-quartile ranges
+            plot_q_means=False if '--q-means-off' in sys.argv else True,
+            plot_q_bests=False if '--q-bests-off' in sys.argv else True,
+            plot_b_bests=False if '--b-bests-off' in sys.argv else True,
+            plot_med_means=False if '--m-means-off' in sys.argv else True,
+            verbosity=True if '--verbosity' in sys.argv else False)
