@@ -7,21 +7,24 @@ import numpy as np
 import time
 
 
+def render_fn(env, render: bool, fps: float):
+    if render:
+        if fps is not None:
+            time.sleep(1. / float(fps))
+        env.render()
+
+
 def run(agent, env, render=False, fps: float = None, verbosity=0):
 
     reward = 0
     done = False
 
-    if render:
-        env.render()
+    render_fn(env, render, fps)
     state = env.reset()
 
     while not done:
 
-        if render:
-            if fps is not None:
-                time.sleep(1. / float(fps))
-            env.render()
+        render_fn(env, render, fps)
 
         net_out = agent.forward(state)
 
@@ -44,6 +47,9 @@ def run(agent, env, render=False, fps: float = None, verbosity=0):
             print("State: ", state)
             print("Reward: ", r)
             print("Total reward: ", reward)
+
+    # Render final frame
+    render_fn(env, render, fps)
 
     env.close()
 
