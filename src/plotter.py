@@ -30,9 +30,9 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotype
     plt.show()
 
 
-def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_means,
-                       lq_means, uq_means, colour,
-                       plot_q_means=True, plot_q_bests=True):
+def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
+                       median_means, lq_means, uq_means, colour,
+                       plot_q_means=True, plot_q_bests=True, plot_b_bests=True):
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
@@ -42,6 +42,7 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_mean
     plot_median_bests = np.column_stack((gens, median_bests))
     plot_lq_bests = np.column_stack((gens, lq_bests))
     plot_uq_bests = np.column_stack((gens, uq_bests))
+    plot_best_bests = np.column_stack((gens, best_bests))
 
     plot_median_means = np.column_stack((gens, median_means))
     plot_uq_means = np.column_stack((gens, uq_means))
@@ -61,6 +62,10 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, median_mean
                                     np.array([plot_lq_means, plot_uq_means])))
         line_styles += ['--', '--']
         line_widths += [0.25, 0.25]
+    if plot_b_bests:
+        plot_data = np.concatenate((plot_data, np.array([plot_best_bests])))
+        line_styles += [':']
+        line_widths += [1.0]
 
     # Plot data
     for i in range(plot_data.shape[0]):
@@ -244,7 +249,8 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            gen_one_max: bool = False, plot_q_means: bool = True,
-                           plot_q_bests: bool = True, verbosity: bool = False):
+                           plot_q_bests: bool = True, plot_b_bests: bool = True,
+                           verbosity: bool = False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
     legend_items = []
@@ -272,6 +278,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         median_best_fitnesses = np.median(best_fitnesses_so_far, axis=0)
         lq_best_fitnesses = np.quantile(best_fitnesses_so_far, 0.25, axis=0)
         uq_best_fitnesses = np.quantile(best_fitnesses_so_far, 0.75, axis=0)
+        best_best_fitnesses = np.max(best_fitnesses_so_far, axis=0)
 
         median_mean_fitnesses = np.median(mean_fitnesses, axis=0)
         lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
@@ -279,9 +286,10 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
 
         # Plot experiment data
         _plot_exp_evo_data(mean_best_fitnesses, median_best_fitnesses,
-                           lq_best_fitnesses, uq_best_fitnesses,
+                           lq_best_fitnesses, uq_best_fitnesses, best_best_fitnesses,
                            median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
-                           exp_plot_colours[i], plot_q_means, plot_q_bests)
+                           exp_plot_colours[i], plot_q_means, plot_q_bests,
+                           plot_b_bests)
 
         # Set legend label
         legend_label = exp_data_path.replace(data_dir_path, '')
@@ -337,4 +345,5 @@ if __name__ == '__main__':
                                # Turns off the plotting of the inter-quartile ranges
                                False if '--q-means-off' in sys.argv else True,
                                False if '--q-bests-off' in sys.argv else True,
+                               False if '--b-bests-off' in sys.argv else True,
                                True if '--verbosity' in sys.argv else False)
