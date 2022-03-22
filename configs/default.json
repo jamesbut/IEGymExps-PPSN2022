@@ -23,7 +23,10 @@
         "final_layer_activ_func": "sigmoid"
     },
     "env": {
-        "name": "MountainCarContinuous-v0",
+        "name": "FrozenLake-v0",
+        "env_kwargs": {
+            "is_slippery": false
+        },
         "completion_fitness": 200.0,
         "normalise_state": false,
         "seed": 108,

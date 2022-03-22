@@ -13,13 +13,14 @@ from domain_params import get_env_kwargs
 
 class EnvWrapper():
 
-    def __init__(self, env_name=None, completion_fitness=None,
+    def __init__(self, env_name=None, env_kwargs=None, completion_fitness=None,
                  domain_param_distribution=None, domain_params=None,
                  domain_params_input=False, normalise_state=False,
                  domain_params_low=None, domain_params_high=None,
                  env_path=None):
 
         self._env_name = env_name
+        self._env_kwargs = env_kwargs
         self._completion_fitness = completion_fitness
         # This is distribution from which domain parameters are sampled
         self._domain_param_distribution = None
@@ -41,7 +42,7 @@ class EnvWrapper():
     def make_env(self, trial_num=0, seed=None):
 
         if (self._domain_params is None) and (self._domain_param_distribution is None):
-            self._env = gym.make(self._env_name)
+            self._env = gym.make(self._env_name, **self._env_kwargs)
         else:
             if self._domain_params is not None:
                 # Determine correct domain parameter from trial number
