@@ -25,7 +25,8 @@ class EnvWrapper():
         # This is distribution from which domain parameters are sampled
         self._domain_param_distribution = None
         if domain_param_distribution is not None:
-            self._domain_param_distribution = Distribution.read(domain_param_distribution)
+            self._domain_param_distribution = \
+                Distribution.read(domain_param_distribution)
         # This is a list of domain parameters to use for each trial
         self._domain_params = domain_params
         self._domain_params_input = domain_params_input
@@ -97,6 +98,7 @@ class EnvWrapper():
         env_data = data['env']
 
         self._env_name = env_data['env_name']
+        self._env_kwargs = env_data['env_kwargs']
         self._domain_params_input = env_data['domain_params_input']
         self._normalise_state = env_data['normalise_state']
         self._domain_params_low = env_data['domain_params_low']
@@ -106,6 +108,7 @@ class EnvWrapper():
 
         env_dict = {
             'env_name': self._env_name,
+            'env_kwargs': self._env_kwargs,
             'completion_fitness': self._completion_fitness,
             'domain_params': self._domain_params,
             'domain_params_input': self._domain_params_input,

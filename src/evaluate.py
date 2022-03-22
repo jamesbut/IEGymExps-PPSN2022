@@ -4,9 +4,10 @@
 
 import copy
 import numpy as np
+import time
 
 
-def run(agent, env, render=False, verbosity=0):
+def run(agent, env, render=False, fps: float = None, verbosity=0):
 
     reward = 0
     done = False
@@ -18,6 +19,8 @@ def run(agent, env, render=False, verbosity=0):
     while not done:
 
         if render:
+            if fps is not None:
+                time.sleep(1. / float(fps))
             env.render()
 
         net_out = agent.forward(state)
@@ -50,7 +53,7 @@ def run(agent, env, render=False, verbosity=0):
 # Either pass in a genome and an agent with the required architecture OR
 # an agent with the network weights already set
 def evaluate(genome=None, agent=None, env_wrapper=None,
-             render=False, verbosity=0, avg_fitnesses=False,
+             render=False, fps: float = None, verbosity=0, avg_fitnesses=False,
              env_seed=None):
 
     env_wrapper = copy.deepcopy(env_wrapper)
@@ -74,7 +77,7 @@ def evaluate(genome=None, agent=None, env_wrapper=None,
             print("Domain parameters:", env_wrapper.domain_params[trial_num])
 
         env_wrapper.make_env(trial_num, env_seed)
-        r = run(agent, env_wrapper, render, verbosity)
+        r = run(agent, env_wrapper, render, fps, verbosity)
         rewards.append(r)
 
         if verbosity > 0:
