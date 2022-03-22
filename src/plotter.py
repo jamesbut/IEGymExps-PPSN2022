@@ -202,46 +202,61 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         print('**********************************************')
 
 
-def _prepare_evo_exp_data_paths(data_dirs, data_dir_path, winner_file_name, verbosity):
+# Determines which experiment to plot when a sub group of experiments is given
 
-    exp_data_paths = []
+# gen_one_max is a boolean which determines which experiment in the sub group to use.
+# If gen_one_max is false, the experiment with the best winner so far with the highest
+# fitness is chosen, otherwise the experiment with the highest best winner so far
+# fitness at generation 1 is chosen
+def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
+                                  gen_one_max: bool, verbosity: bool) -> str:
 
-    for data_dir in data_dirs:
+    # Check whether exp_data_path is an experiment directory or subgroup directory
+    if 'exp' in exp_data_path.split('/')[-1]:
+        return exp_data_path
 
-        # Check string for experiment or group
-        if 'exp' in data_dir.split('/')[-1]:
-            exp_data_paths.append(data_dir_path + data_dir)
+    # A subgroup directory
+    else:
 
-        # Group of experiments
-        else:
+        # Get subgroup experiment paths
+        group_exp_data_paths = get_sub_folders(exp_data_path,
+                                               recursive=False,
+                                               sort_by_suffix_num=True)
 
-            # Get sub group paths
-            group_exp_data_paths = get_sub_folders(data_dir_path + data_dir,
-                                                   recursive=False,
-                                                   sort_by_suffix_num=True)
+        max_fitnesses = []
+        for edp in group_exp_data_paths:
 
-            # Calculate max fitness of the experiments in the group
-            max_fitnesses = []
-            for edp in group_exp_data_paths:
+            # Calculate run with greatest best fitness so far at generation 1
+            if gen_one_max:
+
+                _, best_fitnesses = read_evo_data(edp)
+                max_fitnesses.append(np.max(best_fitnesses[:, 0]))
+
+            # Calculate max fitness of best winners so far for the experiments
+            # in the group
+            else:
+
                 max_fitness, _, _ = _read_exp(edp, winner_file_name, verbosity, False)
                 max_fitnesses.append(max_fitness)
 
-            exp_data_paths.append(group_exp_data_paths[np.argmax(max_fitnesses)])
-
-    return exp_data_paths
+        return group_exp_data_paths[np.argmax(max_fitnesses)]
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
-                           plot_q_means=True, plot_q_bests=True, verbosity=False):
+                           gen_one_max: bool = False, plot_q_means: bool = True,
+                           plot_q_bests: bool = True, verbosity: bool = False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
     legend_items = []
 
-    exp_data_paths = _prepare_evo_exp_data_paths(exp_data_dirs, data_dir_path,
-                                                 winner_file_name, verbosity)
-    print(exp_data_paths)
+    # Prefix exp data directory with data path
+    exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
 
     for i, exp_data_path in enumerate(exp_data_paths):
+
+        # Determine which experiment to plot
+        exp_data_path = _determine_experiment_to_plot(exp_data_path, winner_file_name,
+                                                      gen_one_max, verbosity)
 
         # Read experiment data
         mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
@@ -318,6 +333,7 @@ if __name__ == '__main__':
 
         read_and_plot_evo_data(exp_data_dirs, config['logging']['data_dir_path'],
                                config['logging']['winner_file_name'],
+                               True if '--gen-one-max' in sys.argv else False,
                                # Turns off the plotting of the inter-quartile ranges
                                False if '--q-means-off' in sys.argv else True,
                                False if '--q-bests-off' in sys.argv else True,
