@@ -9,10 +9,10 @@
             "fix_centroid": true,
             "verbosity": 0
         },
-        "num_gens": 20,
+        "num_gens": 10000,
         "parallelise": true,
         "render": false,
-        "quit_domain_when_complete": false,
+        "quit_domain_when_complete": true,
         "p_lb": [-100.0],
         "p_ub": [100.0]
     },
@@ -28,13 +28,15 @@
         "env_kwargs": {
             "is_slippery": false,
             "reward_fnc": "manhattan",
-            "goal_pos": {
-                "x": 3,
-                "y": 3
-            }
+            "desc": [
+                "SFFF",
+                "FHFH",
+                "HFFF",
+                "HFFG"
+            ]
         },
         "completion_fitness": 0.0,
-        "domain_params": [{"x": 2, "y": 1}],
+        "domain_params": [{"x": 3, "y": 0}],
         "normalise_state": false,
         "seed": 108,
         "verbosity": 0
@@ -58,12 +60,12 @@
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 1
+        "num_runs": 333
     },
     "logging": {
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
-        "save_winners_only": false
+        "save_winners_only": true
     }
 }
