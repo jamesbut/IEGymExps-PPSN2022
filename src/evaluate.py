@@ -58,9 +58,8 @@ def run(agent, env, render=False, fps: float = None, verbosity=0):
 
 # Either pass in a genome and an agent with the required architecture OR
 # an agent with the network weights already set
-def evaluate(genome=None, agent=None, env_wrapper=None,
-             render=False, fps: float = None, verbosity=0, avg_fitnesses=False,
-             env_seed=None):
+def evaluate(genome=None, agent=None, env_wrapper=None, render: bool = False,
+             fps: float = None, verbosity: int = 0, avg_fitnesses=False, env_seed=None):
 
     env_wrapper = copy.deepcopy(env_wrapper)
 

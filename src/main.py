@@ -154,13 +154,14 @@ def evo_run(config, exp_dir_path, decoder):
 
 
 # FPS is used for domains that do not have this as part of their rendering system
-def indv_run(agent_path, domain_params, env_seed, render=True, fps: float = None):
+def indv_run(agent_path, domain_params, env_seed, render=True, fps: float = None,
+             verbosity: int = 0):
 
     agent = Agent(agent_path=agent_path)
     env_wrapper = EnvWrapper(env_path=agent_path, domain_params=domain_params)
 
     rewards = evaluate(agent=agent, env_wrapper=env_wrapper, render=render,
-                       fps=fps, verbosity=True, env_seed=env_seed)
+                       fps=fps, verbosity=verbosity, env_seed=env_seed)
 
     print("Rewards: ", rewards)
     print("Mean reward:", sum(rewards) / len(rewards))
@@ -260,10 +261,13 @@ def main(argv, config):
         indv_path = config['logging']['data_dir_path'] + indv_dir + '/' \
                     + config['logging']['winner_file_name'] + '.json'
 
-        indv_run(indv_path, config['env'].get('domain_params', None),
-                 config['env'].get('seed', None),
-                 render=False if '--render-off' in argv else True,
-                 fps=None if '--fps' not in argv else argv[argv.index('--fps') + 1])
+        indv_run(
+            indv_path, config['env'].get('domain_params', None),
+            config['env'].get('seed', None),
+            render=False if '--render-off' in argv else True,
+            fps=None if '--fps' not in argv else argv[argv.index('--fps') + 1],
+            verbosity=0 if '--verbosity' not in argv
+                        else int(argv[argv.index('--verbosity') + 1]))
 
 
 # Some bug in DEAP means that I have to create individual before
