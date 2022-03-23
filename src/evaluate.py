@@ -26,6 +26,9 @@ def run(agent, env, render=False, fps: float = None, verbosity=0):
 
         render_fn(env, render, fps)
 
+        if verbosity > 1:
+            print("State: ", state)
+
         net_out = agent.forward(state)
 
         # If action space is discrete choose arg max of network output
@@ -44,7 +47,6 @@ def run(agent, env, render=False, fps: float = None, verbosity=0):
         if verbosity > 1:
             print("Net out: ", net_out)
             print("Action vals: ", action_vals)
-            print("State: ", state)
             print("Reward: ", r)
             print("Total reward: ", reward)
 

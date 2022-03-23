@@ -42,19 +42,23 @@ class EnvWrapper():
     # The trial number determines which of the domain parameters to use
     def make_env(self, trial_num=0, seed=None):
 
-        if (self._domain_params is None) and (self._domain_param_distribution is None):
-            self._env = gym.make(self._env_name, **self._env_kwargs)
-        else:
-            if self._domain_params is not None:
+        # If domain parameters are given, append env_kwargs with them
+        if self._domain_params or self._domain_param_distribution:
+
+            if self._domain_params:
                 # Determine correct domain parameter from trial number
                 self._domain_param = self._domain_params[trial_num]
 
-            elif self._domain_param_distribution is not None:
+            elif self._domain_param_distribution:
                 # Sample domain param from distribution
                 self._domain_param = self._domain_param_distribution.next()
 
-            env_kwargs = get_env_kwargs(self._env_name, self._domain_param)
-            self._env = gym.make(self._env_name, **env_kwargs)
+            # Append env_kwargs with domain params
+            domain_param_kwargs = get_env_kwargs(self._env_name, self._domain_param)
+            self._env_kwargs.update(domain_param_kwargs)
+
+        # Make env
+        self._env = gym.make(self._env_name, **self._env_kwargs)
 
         if seed is not None:
             self._env.seed(seed)

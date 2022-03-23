@@ -61,3 +61,5 @@ def _get_param_string(env_name):
         return 'power'
     elif env_name == 'LunarLanderContinuous-v2':
         return 'scale'
+    elif env_name == 'FrozenLake-v0':
+        return 'goal_pos'

@@ -4,11 +4,12 @@
             "centroid": [0.0],
             "sigma": 1.0,
             "lambda": 100,
-            "fix_C": false,
-            "fix_sigma": false,
-            "verbosity": false
+            "fix_C": true,
+            "fix_sigma": true,
+            "fix_centroid": true,
+            "verbosity": 0
         },
-        "num_gens": 100,
+        "num_gens": 20,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -16,8 +17,8 @@
         "p_ub": [100.0]
     },
     "controller": {
-        "num_hidden_layers": 0,
-        "neurons_per_hidden_layer": 0,
+        "num_hidden_layers": 1,
+        "neurons_per_hidden_layer": 4,
         "bias": true,
         "hidden_layer_activ_func": "relu",
         "final_layer_activ_func": "sigmoid"
@@ -26,9 +27,14 @@
         "name": "FrozenLake-v0",
         "env_kwargs": {
             "is_slippery": false,
-            "reward_fnc": "manhattan"
+            "reward_fnc": "manhattan",
+            "goal_pos": {
+                "x": 3,
+                "y": 3
+            }
         },
-        "completion_fitness": 200.0,
+        "completion_fitness": 0.0,
+        "domain_params": [{"x": 2, "y": 1}],
         "normalise_state": false,
         "seed": 108,
         "verbosity": 0
