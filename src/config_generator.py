@@ -105,15 +105,15 @@ def main():
     base_config = read_configs(None)[0]
 
     # Get centroid directories for universal controllers
-    centroid_dirs = get_sub_folders('data/ll_configs/g2', final_sub_dirs_only=True,
-                                    num_top_dirs_removed=1)
+    # centroid_dirs = get_sub_folders('data/ll_configs/g2', final_sub_dirs_only=True,
+    #                                 num_top_dirs_removed=1)
 
     hyper_params = [
-        # (["env", "domain_params"], [[25.0], [30.0], [35.0], [40.0], [45.0]]),
-        # (["env", "domain_params"], [[25.0, 35.0, 45.0]]),
-        (["env", "domain_params"], [[0.0008], [0.0010], [0.0012], [0.0014], [0.0016]]),
+        (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
+                                    [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
+                                    [{"x": 3, "y": 0}]])
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [15, 16, 17, 18, 19])
+        # (["ie", "decoder_file_num"], [15, 16, 17, 18, 19])
     ]
 
     if len(hyper_params) > 2:
