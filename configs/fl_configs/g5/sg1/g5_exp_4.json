@@ -1,0 +1,82 @@
+{
+    "optimiser": {
+        "cmaes": {
+            "centroid": "fl_configs/g3/g3_exp_0/f2d9c588-b317-4a35-9369-17da04603c9d",
+            "sigma": 1.0,
+            "lambda": 100,
+            "fix_C": false,
+            "fix_sigma": false,
+            "fix_centroid": false,
+            "verbosity": 0
+        },
+        "num_gens": 500,
+        "parallelise": true,
+        "render": false,
+        "quit_domain_when_complete": false,
+        "p_lb": [
+            -100.0
+        ],
+        "p_ub": [
+            100.0
+        ]
+    },
+    "controller": {
+        "num_hidden_layers": 1,
+        "neurons_per_hidden_layer": 4,
+        "bias": true,
+        "hidden_layer_activ_func": "relu",
+        "final_layer_activ_func": "sigmoid"
+    },
+    "env": {
+        "name": "FrozenLake-v0",
+        "env_kwargs": {
+            "is_slippery": false,
+            "reward_fnc": "manhattan",
+            "desc": [
+                "SFFF",
+                "FHFH",
+                "HFFF",
+                "HFFG"
+            ]
+        },
+        "completion_fitness": 0.0,
+        "domain_params": [
+            {
+                "x": 1,
+                "y": 2
+            }
+        ],
+        "normalise_state": false,
+        "seed": 108,
+        "verbosity": 0
+    },
+    "ie": {
+        "name": "ae",
+        "use_decoder": false,
+        "decoder_file_num": 1,
+        "code_size": 1,
+        "num_hidden_layers": 1,
+        "neurons_per_hidden_layer": 64,
+        "num_epochs": 5000,
+        "batch_size": 64,
+        "optimiser": {
+            "name": "adam",
+            "lr": 0.001
+        },
+        "training_data_dir": "fl_configs/fl_train_data",
+        "exp_group": true,
+        "dump_model_dir": "models",
+        "num_trains": 1
+    },
+    "execution": {
+        "num_runs": 5
+    },
+    "logging": {
+        "data_dir_path": "data/",
+        "winner_file_name": "best_winner_so_far",
+        "save_if_wb_exceeded": true,
+        "save_winners_only": false,
+        "exp_dir_name": "exp_1",
+        "config_file_path": "/Users/james/Documents/phd/projects/indirect_encodings/IEGymExps/configs/default.json"
+    }
+}
