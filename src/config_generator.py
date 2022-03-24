@@ -109,9 +109,11 @@ def main():
     #                                 num_top_dirs_removed=1)
 
     hyper_params = [
-        (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
-                                    [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
-                                    [{"x": 3, "y": 0}]])
+        # (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
+        #                             [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
+        #                             [{"x": 3, "y": 0}]])
+        (["env", "domain_params"], [[{"x": 1, "y": 2}, {"x": 3, "y": 2},
+                                    {"x": 3, "y": 3}]])
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
         # (["ie", "decoder_file_num"], [15, 16, 17, 18, 19])
     ]
