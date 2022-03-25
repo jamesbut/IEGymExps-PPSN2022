@@ -111,11 +111,11 @@ def main():
     hyper_params = [
         (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
                                     [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
-                                    [{"x": 3, "y": 0}]]),
+                                    [{"x": 3, "y": 0}], [{"x": 0, "y": 1}]]),
         # (["env", "domain_params"], [[{"x": 1, "y": 2}, {"x": 3, "y": 2},
         #                             {"x": 3, "y": 3}]])
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [0, 1, 2, 3, 4])
+        (["ie", "decoder_file_num"], [5, 6, 7, 8, 9])
     ]
 
     if len(hyper_params) > 2:

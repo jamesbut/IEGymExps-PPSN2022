@@ -1,7 +1,9 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": [0.0],
+            "centroid": [
+                0.0
+            ],
             "sigma": 1.0,
             "lambda": 100,
             "fix_C": true,
@@ -13,8 +15,12 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "p_lb": [-100.0],
-        "p_ub": [100.0]
+        "p_lb": [
+            -100.0
+        ],
+        "p_ub": [
+            100.0
+        ]
     },
     "controller": {
         "num_hidden_layers": 1,
@@ -36,7 +42,12 @@
             ]
         },
         "completion_fitness": 0.0,
-        "domain_params": [{"x": 1, "y": 2}],
+        "domain_params": [
+            {
+                "x": 3,
+                "y": 0
+            }
+        ],
         "normalise_state": false,
         "seed": 108,
         "verbosity": 0
@@ -44,7 +55,7 @@
     "ie": {
         "name": "gan",
         "use_decoder": true,
-        "decoder_file_num": 0,
+        "decoder_file_num": 9,
         "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
@@ -52,8 +63,8 @@
         "batch_size": 64,
         "optimiser": {
             "name": "adam",
-            "g_lr": 2e-4,
-            "d_lr": 5e-4
+            "g_lr": 0.0002,
+            "d_lr": 0.0005
         },
         "training_data_dir": "fl_configs/fl_train_data",
         "exp_group": true,
@@ -67,6 +78,8 @@
         "data_dir_path": "data/",
         "winner_file_name": "best_winner_so_far",
         "save_if_wb_exceeded": true,
-        "save_winners_only": false
+        "save_winners_only": false,
+        "exp_dir_name": "exp_1",
+        "config_file_path": "/Users/james/Documents/phd/projects/indirect_encodings/IEGymExps/configs/default.json"
     }
 }
