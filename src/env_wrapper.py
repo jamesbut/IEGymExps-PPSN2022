@@ -20,7 +20,7 @@ class EnvWrapper():
                  env_path=None):
 
         self._env_name = env_name
-        self._env_kwargs = env_kwargs
+        self._env_kwargs = {}
         self._completion_fitness = completion_fitness
         # This is distribution from which domain parameters are sampled
         self._domain_param_distribution = None

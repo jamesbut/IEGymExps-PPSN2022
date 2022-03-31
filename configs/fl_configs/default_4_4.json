@@ -1,7 +1,7 @@
 {
     "optimiser": {
         "cmaes": {
-            "centroid": [0.0],
+            "centroid": [0.5],
             "sigma": 1.0,
             "lambda": 100,
             "fix_C": false,
@@ -9,7 +9,7 @@
             "fix_centroid": false,
             "verbosity": 0
         },
-        "num_gens": 50,
+        "num_gens": 250,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -31,24 +31,21 @@
             "is_slippery": false,
             "reward_fnc": "manhattan",
             "desc": [
-                "SFFFFFFF",
-                "FHFHFFFF",
-                "HFFFFFFF",
-                "HFFFFHFF",
-                "FFFHFFFF",
-                "FHHFFFHH",
-                "FHFFHFHF",
-                "FFFHFFFG"
+                "SFFF",
+                "FHFH",
+                "HFFF",
+                "HFFG"
             ]
         },
         "completion_fitness": 0.0,
+        "domain_params": [{"x": 1, "y": 2}],
         "normalise_state": false,
         "seed": 108,
         "verbosity": 0
     },
     "ie": {
         "name": "gan",
-        "use_decoder": false,
+        "use_decoder": true,
         "decoder_file_num": 0,
         "code_size": 3,
         "num_hidden_layers": 1,
@@ -63,7 +60,7 @@
         "training_data_dir": "fl_configs/fl_train_data",
         "exp_group": true,
         "dump_model_dir": "models/fl_models",
-        "num_trains": 1
+        "num_trains": 5
     },
     "execution": {
         "num_runs": 5

@@ -233,6 +233,12 @@ def read_configs(argv):
                 config_files += [config_walk[0] + '/' + config_file_name
                                  for config_file_name in config_walk[2]]
 
+    # Read in single config file
+    elif '--config' in argv:
+
+        config_dir = argv[argv.index('--config') + 1]
+        config_files = [working_dir_path + '/configs/' + config_dir]
+
     else:
         # Use default config file
         config_files = [working_dir_path + '/configs/default.json']

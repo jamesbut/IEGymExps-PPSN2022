@@ -166,6 +166,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
                          group=False, colour_params=False, print_numpy_arrays=False,
                          verbosity=True, plot_axis_lb=None, plot_axis_ub=None):
 
+    print('exp_data_path:', exp_data_path)
     # Get all experiments from group
     if group:
         exp_data_paths = get_sub_folders(exp_data_path, recursive=False,
@@ -280,6 +281,8 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
 
         # Read experiment data
         mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
+        if verbosity:
+            print('Best fitnesses of run:\n', best_fitnesses)
 
         # Calculate best fitnesses so far
         best_fitnesses_so_far = calculate_best_fitnesses_so_far(best_fitnesses)

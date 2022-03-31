@@ -12,6 +12,8 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
+        "g_lb": [-100.0],
+        "g_ub": [100.0],
         "p_lb": [-100.0],
         "p_ub": [100.0]
     },
@@ -33,9 +35,9 @@
         "seed": 108
     },
     "ie": {
-        "name": "gan",
+        "name": "ae",
         "use_decoder": false,
-        "decoder_file_num": 0,
+        "decoder_file_num": 19,
         "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
@@ -46,12 +48,13 @@
             "g_lr": 2e-4,
             "d_lr": 5e-4
         },
-        "training_data_dir": "scp_train_data",
-        "dump_model_dir": "models",
+        "training_data_dir": "cmc_configs/cmc_train_data",
+        "dump_model_dir": "models/cmc_models",
+        "exp_group": false,
         "num_trains": 5
     },
     "execution": {
-        "num_runs": 10
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",

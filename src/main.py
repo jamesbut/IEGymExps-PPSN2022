@@ -219,7 +219,8 @@ def main(argv, config):
                      plot_axis_ub=plot_axis_ub,
                      colour_params=True if '--colour-params' in argv else False,
                      print_numpy_arrays=True
-                        if '--print-numpy-arrays' in argv else False)
+                        if '--print-numpy-arrays' in argv else False,
+                     train_data_exp_group=config['ie']['exp_group'])
 
     # Evolutionary run
     elif '--evo-run' in argv:
