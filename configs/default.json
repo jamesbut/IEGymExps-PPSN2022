@@ -9,7 +9,7 @@
             "fix_centroid": false,
             "verbosity": 0
         },
-        "num_gens": 50,
+        "num_gens": 10,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -36,7 +36,7 @@
                 "HFFFFFFF",
                 "HFFFFHFF",
                 "FFFHFFFF",
-                "FHHFFFHH",
+                "FHHFFFHF",
                 "FHFFHFHF",
                 "FFFHFFFG"
             ]
@@ -66,7 +66,7 @@
         "num_trains": 1
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",

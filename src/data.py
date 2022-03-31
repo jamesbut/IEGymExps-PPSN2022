@@ -4,6 +4,7 @@ from glob import glob
 import numpy as np
 import json
 from helper import remove_dirs_from_path
+from typing import Optional
 
 
 # Read useful data about winning agents from experiment
@@ -169,6 +170,36 @@ def dump_json(file_path, json_dict):
         pass
 
 
+# Retrieve current experiment directory number
+def retrieve_curr_exp_dir_num(data_dir_path: str) -> Optional[int]:
+
+    exp_dirs = glob(data_dir_path + "/*")
+
+    if len(exp_dirs) == 0:
+        return None
+    else:
+        max_exp_num = None
+
+        for ed in exp_dirs:
+
+            # Get exp numbers in directory
+            split_path = ed.split("/")
+            exp_string = split_path[-1]
+            try:
+                exp_num = int(exp_string.split("_")[-1])
+            except ValueError:
+                continue
+
+            # Find largest exp number
+            if max_exp_num is None:
+                max_exp_num = exp_num
+            else:
+                if exp_num > max_exp_num:
+                    max_exp_num = exp_num
+
+        return max_exp_num
+
+
 # Calculates the name of the directory to store exp data in
 def create_exp_dir_name(config, config_file_name):
 
@@ -176,32 +207,18 @@ def create_exp_dir_name(config, config_file_name):
     # exp_ directory number
     if config_file_name.endswith('configs/default.json'):
 
-        exp_full_dirs = glob(config['logging']['data_dir_path'] + "/*")
+        # Get current exp directory number
+        curr_exp_dir_num = retrieve_curr_exp_dir_num(config['logging']['data_dir_path'])
 
-        max_exp_num = 0
-
-        if len(exp_full_dirs) == 0:
-            max_exp_num = 0
-
+        # Calculate new directory number
+        if curr_exp_dir_num:
+            # Increment exp dir number
+            new_exp_dir_num = str(curr_exp_dir_num + 1)
         else:
-            for ed in exp_full_dirs:
+            # Start at 0
+            new_exp_dir_num = str(0)
 
-                # Get exp numbers in directory
-                split_path = ed.split("/")
-                exp_string = split_path[-1]
-                try:
-                    exp_num = int(exp_string.split("_")[-1])
-                except ValueError:
-                    continue
-
-                # Find largest exp number
-                if max_exp_num is None:
-                    max_exp_num = exp_num
-                else:
-                    if exp_num > max_exp_num:
-                        max_exp_num = exp_num
-
-        exp_dir_name = 'exp_' + str(max_exp_num + 1)
+        exp_dir_name = 'exp_' + new_exp_dir_num
 
     # If the default config is not used, set the experiment directory name as a
     # modified config file name
@@ -213,45 +230,6 @@ def create_exp_dir_name(config, config_file_name):
         exp_dir_name = config_file_name.removesuffix('.json')
 
     return exp_dir_name
-
-
-def read_configs(argv):
-
-    working_dir_path = os.getcwd()
-
-    # Read in group of config files
-    if argv is not None and '--configs' in argv:
-
-        # Get config group directory from command line
-        config_index = argv.index('--configs')
-        config_dir = argv[config_index + 1]
-
-        # Recursively get all config files in directory
-        config_files = []
-        for config_walk in os.walk(working_dir_path + '/configs/' + config_dir):
-            if config_walk[2]:
-                config_files += [config_walk[0] + '/' + config_file_name
-                                 for config_file_name in config_walk[2]]
-
-    # Read in single config file
-    elif '--config' in argv:
-
-        config_dir = argv[argv.index('--config') + 1]
-        config_files = [working_dir_path + '/configs/' + config_dir]
-
-    else:
-        # Use default config file
-        config_files = [working_dir_path + '/configs/default.json']
-
-    # Read config files
-    configs = list(map(read_json, config_files))
-
-    # Add experiment directory path to configs
-    for conf in zip(configs, config_files):
-        conf[0]['logging']['exp_dir_name'] = create_exp_dir_name(conf[0], conf[1])
-        conf[0]['logging']['config_file_path'] = conf[1]
-
-    return configs
 
 
 def create_synthetic_data(code_size, num_data_points=500):
@@ -316,6 +294,8 @@ def clean_data(exp_data_dir, config, l_gb, u_gb):
 
 
 if __name__ == '__main__':
+
+    from command_line import read_configs
 
     np.set_printoptions(suppress=True)
     np.set_printoptions(threshold=sys.maxsize)

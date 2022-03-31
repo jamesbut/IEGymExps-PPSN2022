@@ -7,12 +7,12 @@ import copy
 import os
 import shutil
 from agent import Agent
-from data import dump_list, dump_json, read_configs
+from data import dump_list, dump_json, retrieve_curr_exp_dir_num
 from evo_utils import get_cmaes_centroid, expand_bound
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
-from command_line import parse_axis_limits, parse_test_decoder
+from command_line import parse_axis_limits, parse_test_decoder, read_configs
 
 # Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -56,11 +56,7 @@ def evo_run(config, exp_dir_path, decoder):
 
     # Retrieve number of inputs and outputs for controller network
     # If state is an array of values
-    if isinstance(state, np.ndarray):
-        num_inputs = len(state)
-    # If state is a discrete value
-    else:
-        num_inputs = 1
+    num_inputs = len(state) if isinstance(state, np.darray) else 1
 
     # If action space is discrete
     if env_wrapper.discrete_action_space:
@@ -253,14 +249,27 @@ def main(argv, config):
             print('Time taken for evolution: {} seconds\n'.format(end - start))
 
     # Individual run
-    else:
+    elif '--indv-run' in argv:
 
         print("Individual run")
 
-        # Agent directory comes from the command line
-        indv_dir = argv[1]
-        indv_path = config['logging']['data_dir_path'] + indv_dir + '/' \
+        data_path = config['logging']['data_dir_path']
+
+        if len(argv) == 3:
+            # Agent directory comes from the command line
+            indv_dir = argv[2]
+        else:
+            # Most recent exp directory is used
+            exp_num = retrieve_curr_exp_dir_num(data_path)
+            exp_dir = 'exp_' + str(exp_num)
+            # Choose random run from experiment
+            run_dir = next(os.walk(data_path + exp_dir))[1][0]
+            indv_dir = exp_dir + '/' + run_dir
+
+        indv_path = data_path + indv_dir + '/' \
                     + config['logging']['winner_file_name'] + '.json'
+
+        print('Individual path:', indv_path)
 
         indv_run(
             indv_path, config['env'].get('domain_params', None),
@@ -269,6 +278,9 @@ def main(argv, config):
             fps=None if '--fps' not in argv else argv[argv.index('--fps') + 1],
             verbosity=0 if '--verbosity' not in argv
                         else int(argv[argv.index('--verbosity') + 1]))
+
+    else:
+        print('Please provide command line arguments')
 
 
 # Some bug in DEAP means that I have to create individual before
