@@ -1,4 +1,9 @@
 from deap import tools
+from agent import Agent
+from env_wrapper import EnvWrapper
+from data import dump_list
+from typing import Optional
+import uuid
 
 
 # This function is just a copy of the function in DEAP but it returns if some
@@ -6,11 +11,15 @@ from deap import tools
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                      verbose=__debug__, completion_fitness=None,
                      quit_domain_when_complete=True, decoder=None,
-                     pop_size=None, p_lb=None, p_ub=None):
+                     pop_size=None, p_lb=None, p_ub=None, agent=None,
+                     exp_dir_path=None, log_config=None, env_wrapper=None,
+                     dump_every=None):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    complete = False
+    # Use UUID for run name
+    run_path = exp_dir_path + str(uuid.uuid4()) + '/'
+    winner_found = False
 
     for gen in range(ngen):
         # Generate a new population
@@ -32,17 +41,25 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         if verbose:
             print(logbook.stream)
 
-        # Check whether domain is complete
+        # Check whether winner has been found
         if completion_fitness is not None:
             if halloffame[0].fitness.values[0] >= completion_fitness:
-                complete = True
-                # End if domain is complete
-                if quit_domain_when_complete:
-                    print("WINNER FOUND!")
-                    return population, logbook, True
+                winner_found = True
 
-    print("WINNER FOUND!") if complete else print("No winner found :(")
-    return population, logbook, complete
+        # Write evolutionary data to file
+        write_evo_data(run_path, log_config, agent, halloffame, logbook, env_wrapper,
+                       gen, dump_every, winner_found, complete=False)
+
+        # End if domain is complete
+        if quit_domain_when_complete and winner_found:
+            break
+
+    # Write evolutionary data to file
+    write_evo_data(run_path, log_config, agent, halloffame, logbook, env_wrapper,
+                   gen, dump_every, winner_found, complete=True)
+
+    print("WINNER FOUND!") if winner_found else print("No winner found :(")
+    return population, logbook, winner_found
 
 
 # Generates new population using evolutionary algorithm
@@ -154,3 +171,33 @@ def get_cmaes_centroid(num_genes, json, dir_path=None, file_name=None):
         # If centroid is number, return number as vector
         else:
             return centroid_json * num_genes
+
+
+# Write evolutionary run data to file
+def write_evo_data(run_path: str, log_config: dict, agent: Agent, hof, logbook,
+                   env_wrapper: EnvWrapper, curr_gen: int, dump_every: Optional[int],
+                   winner_found: bool, complete: bool):
+
+    # Check whether to dump
+    dump: bool = complete
+    if dump_every is not None:
+        if curr_gen % dump_every == 0:
+            dump = True
+
+    if dump:
+
+        # Save if winners and losers are saved OR
+        # if only winners are saved and there has been a winner
+        if ((log_config['save_winners_only'] is False)
+             or (log_config['save_winners_only'] is True and winner_found)):
+
+            # Set dummy agent up to dump
+            agent.genotype = hof[0]
+            agent.fitness = hof[0].fitness.values[0]
+            g_saved = agent.save(run_path, log_config['winner_file_name'],
+                                 env_wrapper, log_config['save_if_wb_exceeded'])
+
+            # Save population statistics
+            if g_saved:
+                dump_list(logbook.select('avg'), run_path, 'mean_fitnesses')
+                dump_list(logbook.select('max'), run_path, 'best_fitnesses')

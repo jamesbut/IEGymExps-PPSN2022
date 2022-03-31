@@ -1,13 +1,12 @@
 from deap import creator, base, cma, tools
 import evo_utils
 import numpy as np
-import uuid
 import sys
 import copy
 import os
 import shutil
 from agent import Agent
-from data import dump_list, dump_json, retrieve_curr_exp_dir_num
+from data import dump_json, retrieve_curr_exp_dir_num
 from evo_utils import get_cmaes_centroid, expand_bound
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
@@ -56,15 +55,9 @@ def evo_run(config, exp_dir_path, decoder):
     state = env_wrapper.reset()
 
     # Retrieve number of inputs and outputs for controller network
-    # If state is an array of values
     num_inputs = len(state) if isinstance(state, np.ndarray) else 1
-
-    # If action space is discrete
-    if env_wrapper.discrete_action_space:
-        num_outputs = env_wrapper.action_space.n
-    # If action space is continuous
-    else:
-        num_outputs = len(env_wrapper.action_space.high)
+    num_outputs = env_wrapper.action_space.n if env_wrapper.discrete_action_space \
+                  else len(env_wrapper.action_space.high)
 
     agent = Agent(num_inputs, num_outputs,
                   config['controller']['num_hidden_layers'],
@@ -124,27 +117,14 @@ def evo_run(config, exp_dir_path, decoder):
     p_ub = expand_bound(config['optimiser'].get('p_ub', None), num_weights)
 
     # Run evolutionary algorithm
-    population, logbook, complete = evo_utils.eaGenerateUpdate(
+    population, logbook, winner_found = evo_utils.eaGenerateUpdate(
         toolbox, ngen=config['optimiser']['num_gens'], stats=stats,
         halloffame=hof, completion_fitness=env_wrapper.completion_fitness,
         quit_domain_when_complete=config['optimiser']['quit_domain_when_complete'],
         decoder=decoder, pop_size=config['optimiser']['cmaes']['lambda'],
-        p_lb=p_lb, p_ub=p_ub)
-
-    # Write results to file
-    run_path = exp_dir_path + str(uuid.uuid4()) + '/'
-
-    if ((config['logging']['save_winners_only'] is False)
-         or (config['logging']['save_winners_only'] is True and complete)):
-        agent.genotype = hof[0]
-        agent.fitness = hof[0].fitness.values[0]
-        g_saved = agent.save(run_path, config['logging']['winner_file_name'],
-                             env_wrapper, config['logging']['save_if_wb_exceeded'])
-
-        # Save population statistics
-        if g_saved:
-            dump_list(logbook.select('avg'), run_path, 'mean_fitnesses')
-            dump_list(logbook.select('max'), run_path, 'best_fitnesses')
+        p_lb=p_lb, p_ub=p_ub, agent=agent, exp_dir_path=exp_dir_path,
+        log_config=config['logging'], env_wrapper=env_wrapper,
+        dump_every=config['optimiser'].get('dump_every', None))
 
     if config['optimiser']['parallelise']:
         pool.close()

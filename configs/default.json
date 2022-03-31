@@ -13,6 +13,7 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
+        "dump_every": 20,
         "g_lb": [-100.0],
         "g_ub": [100.0],
         "p_lb": [-100.0],
