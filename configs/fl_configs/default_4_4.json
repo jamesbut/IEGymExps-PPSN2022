@@ -9,7 +9,7 @@
             "fix_centroid": false,
             "verbosity": 0
         },
-        "num_gens": 250,
+        "num_gens": 50,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -60,7 +60,7 @@
         "training_data_dir": "fl_configs/fl_train_data",
         "exp_group": true,
         "dump_model_dir": "models/fl_models",
-        "num_trains": 5
+        "num_trains": 1
     },
     "execution": {
         "num_runs": 5

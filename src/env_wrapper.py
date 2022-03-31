@@ -13,14 +13,14 @@ from domain_params import get_env_kwargs
 
 class EnvWrapper():
 
-    def __init__(self, env_name=None, env_kwargs=None, completion_fitness=None,
+    def __init__(self, env_name=None, env_kwargs={}, completion_fitness=None,
                  domain_param_distribution=None, domain_params=None,
                  domain_params_input=False, normalise_state=False,
                  domain_params_low=None, domain_params_high=None,
                  env_path=None):
 
         self._env_name = env_name
-        self._env_kwargs = {}
+        self._env_kwargs = env_kwargs
         self._completion_fitness = completion_fitness
         # This is distribution from which domain parameters are sampled
         self._domain_param_distribution = None
