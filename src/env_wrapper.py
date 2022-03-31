@@ -63,11 +63,11 @@ class EnvWrapper():
         if seed is not None:
             self._env.seed(seed)
 
-        # Check to see whether action space is discrete or continuous
-        if hasattr(self._env.action_space, 'high'):
-            self._discrete_action_space = False
-        else:
-            self._discrete_action_space = True
+        # Check to see whether spaces are discrete or continuous
+        self._discrete_action_space = \
+            False if hasattr(self._env.action_space, 'high') else True
+        self._discrete_obs_space = \
+            False if hasattr(self._env.observation_space, 'high') else True
 
     def step(self, actions):
         state, r, done, info = self._env.step(actions)
@@ -79,8 +79,11 @@ class EnvWrapper():
 
         if self._normalise_state:
             # Normalise state to [0, 1]
-            state = normalise(state, self._env.observation_space.high,
-                              self._env.observation_space.low)
+            if self._discrete_action_space:
+                state = normalise(state, float(self._env.observation_space.n), 0.)
+            else:
+                state = normalise(state, self._env.observation_space.high,
+                                  self._env.observation_space.low)
 
         # Add domain parameters to input
         if self._domain_params_input:
@@ -159,6 +162,10 @@ class EnvWrapper():
     @property
     def discrete_action_space(self):
         return self._discrete_action_space
+
+    @property
+    def discrete_obs_space(self):
+        return self._discrete_obs_space
 
     def reset(self):
         return self._process_state(self._env.reset())

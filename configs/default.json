@@ -9,7 +9,7 @@
             "fix_centroid": true,
             "verbosity": 0
         },
-        "num_gens": 500,
+        "num_gens": 10000,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -32,18 +32,15 @@
             "is_slippery": false,
             "reward_fnc": "manhattan",
             "desc": [
-                "SFFFFFFF",
-                "FHFHFFFF",
-                "HFFFFFFF",
-                "HFFFFHFF",
-                "FFFHFFFF",
-                "FHHFFFHH",
-                "FHFFHFHF",
-                "FFFHFFFG"
+                "SFFFF",
+                "FHFHF",
+                "HFFFH",
+                "HFFFF",
+                "HFFFG"
             ]
         },
         "completion_fitness": 0.0,
-        "normalise_state": false,
+        "normalise_state": true,
         "seed": 108,
         "verbosity": 0
     },
