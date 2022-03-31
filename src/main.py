@@ -56,7 +56,7 @@ def evo_run(config, exp_dir_path, decoder):
 
     # Retrieve number of inputs and outputs for controller network
     # If state is an array of values
-    num_inputs = len(state) if isinstance(state, np.darray) else 1
+    num_inputs = len(state) if isinstance(state, np.ndarray) else 1
 
     # If action space is discrete
     if env_wrapper.discrete_action_space:

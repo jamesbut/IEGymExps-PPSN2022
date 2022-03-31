@@ -9,7 +9,7 @@
             "fix_centroid": false,
             "verbosity": 0
         },
-        "num_gens": 10,
+        "num_gens": 500,
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
@@ -36,7 +36,7 @@
                 "HFFFFFFF",
                 "HFFFFHFF",
                 "FFFHFFFF",
-                "FHHFFFHF",
+                "FHHFFFHH",
                 "FHFFHFHF",
                 "FFFHFFFG"
             ]
