@@ -12,7 +12,8 @@ from evo_utils import get_cmaes_centroid, expand_bound
 from evaluate import evaluate
 from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
-from command_line import parse_axis_limits, parse_test_decoder, read_configs
+from command_line import parse_axis_limits, parse_test_decoder, read_configs, \
+                         retrieve_flag_args
 
 # Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -255,9 +256,9 @@ def main(argv, config):
 
         data_path = config['logging']['data_dir_path']
 
-        if len(argv) == 3:
+        if '--org' in argv:
             # Agent directory comes from the command line
-            indv_dir = argv[2]
+            indv_dir = retrieve_flag_args('--org', argv)[0]
         else:
             # Most recent exp directory is used
             exp_num = retrieve_curr_exp_dir_num(data_path)

@@ -211,7 +211,7 @@ def create_exp_dir_name(config, config_file_name):
         curr_exp_dir_num = retrieve_curr_exp_dir_num(config['logging']['data_dir_path'])
 
         # Calculate new directory number
-        if curr_exp_dir_num:
+        if curr_exp_dir_num is not None:
             # Increment exp dir number
             new_exp_dir_num = str(curr_exp_dir_num + 1)
         else:

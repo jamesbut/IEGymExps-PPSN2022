@@ -3,11 +3,22 @@ from typing import List, Tuple, Optional
 from data import create_exp_dir_name, read_json
 
 
+# Return flag arguments, where --flag *args*
+# Returns all arguments after flag
+def retrieve_flag_args(flag: str, argv: List[str]) -> Optional[List[str]]:
+
+    if flag not in argv:
+        return None
+
+    flag_pos: int = argv.index(flag)
+    return argv[flag_pos + 1:]
+
+
 # Read plot axis limits from command line
 def parse_axis_limits(argv: List[str]) -> Tuple[Optional[float], Optional[float]]:
 
-    if '-fixed_axis' in argv:
-        arg_pos = argv.index('-fixed_axis')
+    if '--fixed-axis' in argv:
+        arg_pos = argv.index('--fixed-axis')
 
         try:
             plot_axis_lb = float(argv[arg_pos + 1])

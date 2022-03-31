@@ -4,9 +4,9 @@
             "centroid": [0.0],
             "sigma": 1.0,
             "lambda": 100,
-            "fix_C": false,
-            "fix_sigma": false,
-            "fix_centroid": false,
+            "fix_C": true,
+            "fix_sigma": true,
+            "fix_centroid": true,
             "verbosity": 0
         },
         "num_gens": 500,
