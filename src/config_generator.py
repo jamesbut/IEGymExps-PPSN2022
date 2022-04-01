@@ -2,8 +2,9 @@
 # Can generate a number of configs #
 ####################################
 
-from data import read_configs, get_sub_folders, dump_json
+from data import get_sub_folders, dump_json
 from helper import modify_dict, print_dict
+from command_line import read_configs
 import itertools
 import copy
 import os
@@ -109,13 +110,12 @@ def main():
     #                                 num_top_dirs_removed=1)
 
     hyper_params = [
-        (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
-                                    [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
-                                    [{"x": 3, "y": 0}]]),
-        # (["env", "domain_params"], [[{"x": 1, "y": 2}, {"x": 3, "y": 2},
-        #                             {"x": 3, "y": 3}]])
+        # (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
+        #                            [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
+        #                            [{"x": 3, "y": 0}]]),
+        (["env", "domain_params"], [[2.0], [3.0], [4.0], [5.0], [6.0]]),
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [10, 11, 12, 13, 14])
+        (["ie", "decoder_file_num"], [5, 6, 7, 8, 9])
     ]
 
     if len(hyper_params) > 2:

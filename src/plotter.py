@@ -2,8 +2,8 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from data import read_agent_data, read_evo_data, read_configs, get_sub_folders
-from command_line import parse_axis_limits
+from data import read_agent_data, read_evo_data, get_sub_folders
+from command_line import parse_axis_limits, read_configs
 
 np.set_printoptions(suppress=True)
 
