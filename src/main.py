@@ -41,7 +41,7 @@ def evo_run(config, exp_dir_path, decoder):
 
     # Environment
     env_wrapper = EnvWrapper(config['env']['name'],
-                             config['env'].get('env_kwargs', None),
+                             config['env'].get('env_kwargs', {}),
                              config['env']['completion_fitness'],
                              config['env'].get('domain_param_distribution', None),
                              config['env'].get('domain_params', None),
