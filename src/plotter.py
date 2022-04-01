@@ -2,6 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+from typing import Tuple
 from data import read_agent_data, read_evo_data, get_sub_folders
 from command_line import parse_axis_limits, read_configs
 
@@ -31,56 +32,68 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotype
 
 
 def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
-                       median_means, lq_means, uq_means, colour,
-                       plot_q_means=True, plot_q_bests=True, plot_b_bests=True,
-                       plot_med_means: bool = True, plot_med_bests: bool = True):
+                       mean_means, median_means, lq_means, uq_means, colour,
+                       plot_mean_bests: bool = False, plot_median_bests: bool = True,
+                       plot_q_bests: bool = False, plot_best_bests: bool = True,
+                       plot_mean_means: bool = True, plot_median_means: bool = False,
+                       plot_q_means: bool = False):
+
+    # Inner class to build plot data
+    class PlotData:
+
+        def __init__(self, x_axis: list):
+
+            self.data = np.empty([0, len(x_axis), 2])
+            self.line_styles = []
+            self.line_widths = []
+            self.gens = x_axis
+
+        def add_data(self, data: np.ndarray, line_style: str, line_width: float):
+
+            # Prepare data for plotting
+            data_stacked = np.column_stack((self.gens, data))
+
+            # Concatenate with old data
+            self.data = np.concatenate((self.data, np.array([data_stacked])))
+
+            # Concatenate new line styles and widths with old
+            self.line_styles += [line_style]
+            self.line_widths += [line_width]
+
+        def plot(self):
+            # Plot data
+            for i in range(self.data.shape[0]):
+                plt.plot(self.data[i, :, 0], self.data[i, :, 1],
+                         color=colour, linestyle=self.line_styles[i],
+                         linewidth=self.line_widths[i])
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
 
-    # Prepare data for plotting
-    # plot_mean_bests = np.column_stack((gens, mean_bests))
-    plot_median_bests = np.column_stack((gens, median_bests))
-    plot_lq_bests = np.column_stack((gens, lq_bests))
-    plot_uq_bests = np.column_stack((gens, uq_bests))
-    plot_best_bests = np.column_stack((gens, best_bests))
+    data = PlotData(gens)
 
-    plot_median_means = np.column_stack((gens, median_means))
-    plot_uq_means = np.column_stack((gens, uq_means))
-    plot_lq_means = np.column_stack((gens, lq_means))
-
-    # Select data to plot
-    plot_data = np.empty([0, plot_median_bests.shape[0], plot_median_bests.shape[1]])
-    line_styles = []
-    line_widths = []
-    if plot_med_bests:
-        plot_data = np.concatenate((plot_data, np.array([plot_median_bests])))
-        line_styles += ['-']
-        line_widths += [1.]
-    if plot_med_means:
-        plot_data = np.concatenate((plot_data, np.array([plot_median_means])))
-        line_styles += ['--']
-        line_widths += [1.]
+    # Plot best winner so far data
+    if plot_mean_bests:
+        data.add_data(mean_bests, '-', 1.)
+    if plot_median_bests:
+        data.add_data(median_bests, '-', 1.)
     if plot_q_bests:
-        plot_data = np.concatenate((plot_data,
-                                    np.array([plot_lq_bests, plot_uq_bests])))
-        line_styles += ['--', '--']
-        line_widths += [0.25, 0.25]
+        data.add_data(lq_bests, '--', 0.25)
+        data.add_data(uq_bests, '--', 0.25)
+    if plot_best_bests:
+        data.add_data(best_bests, ':', 1.)
+
+    # Plot population average data
+    if plot_mean_means:
+        data.add_data(mean_means, '--', 1.)
+    if plot_median_means:
+        data.add_data(median_means, '--', 1.)
     if plot_q_means:
-        plot_data = np.concatenate((plot_data,
-                                    np.array([plot_lq_means, plot_uq_means])))
-        line_styles += ['--', '--']
-        line_widths += [0.25, 0.25]
-    if plot_b_bests:
-        plot_data = np.concatenate((plot_data, np.array([plot_best_bests])))
-        line_styles += [':']
-        line_widths += [1.0]
+        data.add_data(lq_means, '--', 0.25)
+        data.add_data(uq_means, '--', 0.25)
 
     # Plot data
-    for i in range(plot_data.shape[0]):
-        plt.plot(plot_data[i, :, 0], plot_data[i, :, 1],
-                 color=colour, linestyle=line_styles[i],
-                 linewidth=line_widths[i])
+    data.plot()
 
     # Fill between IQRs
     if plot_q_means:
@@ -261,9 +274,10 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
 
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
-                           gen_one_max: bool = False, plot_q_means: bool = True,
-                           plot_q_bests: bool = True, plot_b_bests: bool = True,
-                           plot_med_means: bool = True, plot_med_bests: bool = True,
+                           gen_one_max: bool = False, plot_mean_bests: bool = False,
+                           plot_median_bests: bool = True, plot_q_bests: bool = False,
+                           plot_best_bests: bool = True, plot_mean_means: bool = True,
+                           plot_median_means: bool = False, plot_q_means: bool = False,
                            verbosity: bool = False):
 
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
@@ -297,6 +311,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         uq_best_fitnesses = np.quantile(best_fitnesses_so_far, 0.75, axis=0)
         best_best_fitnesses = np.max(best_fitnesses_so_far, axis=0)
 
+        mean_mean_fitnesses = np.mean(mean_fitnesses, axis=0)
         median_mean_fitnesses = np.median(mean_fitnesses, axis=0)
         lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
         uq_mean_fitnesses = np.quantile(mean_fitnesses, 0.75, axis=0)
@@ -304,9 +319,11 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         # Plot experiment data
         _plot_exp_evo_data(mean_best_fitnesses, median_best_fitnesses,
                            lq_best_fitnesses, uq_best_fitnesses, best_best_fitnesses,
-                           median_mean_fitnesses, lq_mean_fitnesses, uq_mean_fitnesses,
-                           exp_plot_colours[i], plot_q_means, plot_q_bests,
-                           plot_b_bests, plot_med_means, plot_med_bests)
+                           mean_mean_fitnesses, median_mean_fitnesses,
+                           lq_mean_fitnesses, uq_mean_fitnesses,
+                           exp_plot_colours[i], plot_mean_bests, plot_median_bests,
+                           plot_q_bests, plot_best_bests, plot_mean_means,
+                           plot_median_means, plot_q_means)
 
         # Set legend label
         legend_label = exp_data_path.replace(data_dir_path, '')
@@ -355,17 +372,34 @@ if __name__ == '__main__':
     # Plot evolutionary run data
     elif '--evo' in sys.argv:
 
+        ######################
+        # Parse what to plot #
+        ######################
+
+        # Plot either mean or median of best winners so far
+        plot_mean_bests = True if '--mean-bests-on' in sys.argv else False
+        plot_median_bests = not plot_mean_bests
+        # Plot IQR of best winners so far
+        plot_q_bests = True if '--q-bests-on' in sys.argv else False
+        # Plot best run of best winners so far
+        plot_b_bests = False if '--best-bests-off' in sys.argv else True
+
+        # Plot either mean or median of average population fitness
+        plot_mean_means = False if '--mean-means-off' in sys.argv else True
+        plot_median_means = True if '--median-means-on' in sys.argv else False
+        # Plot IQR of average population fitness
+        plot_q_means = True if '--q-means-on' in sys.argv else False
+
+        # Plot run with maximum best so far fitness as generation 1
+        gen_one_max = True if '--gen-one-max' in sys.argv else False
+
+        verbosity = True if '--verbosity' in sys.argv else False
+
         # Split comma separated experiment directories
         exp_data_dirs = exp_dir.split(',')
 
         read_and_plot_evo_data(
             exp_data_dirs, config['logging']['data_dir_path'],
             config['logging']['winner_file_name'],
-            True if '--gen-one-max' in sys.argv else False,
-            # Turns off the plotting of the inter-quartile ranges
-            plot_q_means=True if '--q-means-on' in sys.argv else False,
-            plot_q_bests=True if '--q-bests-on' in sys.argv else False,
-            plot_b_bests=False if '--b-bests-off' in sys.argv else True,
-            plot_med_means=False if '--m-means-off' in sys.argv else True,
-            plot_med_bests=False if '--m-bests-off' in sys.argv else True,
-            verbosity=True if '--verbosity' in sys.argv else False)
+            gen_one_max, plot_mean_bests, plot_median_bests, plot_q_bests, plot_b_bests,
+            plot_mean_means, plot_median_means, plot_q_means, verbosity)
