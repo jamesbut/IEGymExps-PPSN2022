@@ -49,27 +49,25 @@ def read_configs(argv):
 
     working_dir_path = os.getcwd()
 
-    if argv is not None:
+    # Read in group of config files
+    if argv is not None and '--configs' in argv:
 
-        # Read in group of config files
-        if '--configs' in argv:
+        # Get config group directory from command line
+        config_index = argv.index('--configs')
+        config_dir = argv[config_index + 1]
 
-            # Get config group directory from command line
-            config_index = argv.index('--configs')
-            config_dir = argv[config_index + 1]
+        # Recursively get all config files in directory
+        config_files = []
+        for config_walk in os.walk(working_dir_path + '/configs/' + config_dir):
+            if config_walk[2]:
+                config_files += [config_walk[0] + '/' + config_file_name
+                                 for config_file_name in config_walk[2]]
 
-            # Recursively get all config files in directory
-            config_files = []
-            for config_walk in os.walk(working_dir_path + '/configs/' + config_dir):
-                if config_walk[2]:
-                    config_files += [config_walk[0] + '/' + config_file_name
-                                     for config_file_name in config_walk[2]]
+    # Read in single config file
+    elif argv is not None and '--config' in argv:
 
-        # Read in single config file
-        elif '--config' in argv:
-
-            config_dir = argv[argv.index('--config') + 1]
-            config_files = [working_dir_path + '/configs/' + config_dir]
+        config_dir = argv[argv.index('--config') + 1]
+        config_files = [working_dir_path + '/configs/' + config_dir]
 
     else:
         # Use default config file

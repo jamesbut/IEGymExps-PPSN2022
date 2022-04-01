@@ -12,8 +12,7 @@
         "parallelise": true,
         "render": false,
         "quit_domain_when_complete": false,
-        "g_lb": [-100.0],
-        "g_ub": [100.0],
+        "dump_every": 20,
         "p_lb": [-100.0],
         "p_ub": [100.0]
     },
@@ -38,19 +37,19 @@
         "name": "gan",
         "use_decoder": true,
         "decoder_file_num": 0,
-        "code_size": 1,
+        "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
         "num_epochs": 40000,
         "batch_size": 1000,
         "optimiser": {
             "name": "adam",
-            "g_lr": 8e-4,
-            "d_lr": 5e-5
+            "g_lr": 2e-4,
+            "d_lr": 5e-4
         },
-        "training_data_dir": "bpw_train_data",
+        "training_data_dir": "bpw_configs/bpw_train_data",
         "exp_group": true,
-        "dump_model_dir": "models",
+        "dump_model_dir": "models/bpw_models",
         "num_trains": 5
     },
     "execution": {
