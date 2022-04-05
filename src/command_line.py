@@ -4,7 +4,7 @@ from data import create_exp_dir_name, read_json
 
 
 # Return flag arguments, where --flag *args*
-# Returns all arguments after flag
+# Returns all arguments after flag or None if flag is not in args
 def retrieve_flag_args(flag: str, argv: List[str]) -> Optional[List[str]]:
 
     if flag not in argv:

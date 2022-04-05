@@ -4,7 +4,7 @@ import matplotlib.patches as mpatches
 import numpy as np
 from typing import Optional
 from data import read_agent_data, read_evo_data, get_sub_folders
-from command_line import parse_axis_limits, read_configs
+from command_line import parse_axis_limits, read_configs, retrieve_flag_args
 
 np.set_printoptions(suppress=True)
 
@@ -36,17 +36,18 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
                        plot_mean_bests: bool = False, plot_median_bests: bool = True,
                        plot_q_bests: bool = False, plot_best_bests: bool = True,
                        plot_mean_means: bool = True, plot_median_means: bool = False,
-                       plot_q_means: bool = False):
+                       plot_q_means: bool = False, x_axis_max: Optional[int] = None):
 
     # Inner class to build plot data
     class PlotData:
 
-        def __init__(self, x_axis: list):
+        def __init__(self, x_axis: list, x_axis_max: Optional[int]):
 
             self.data = np.empty([0, len(x_axis), 2])
             self.line_styles: list[str] = []
             self.line_widths: list[float] = []
             self.gens = x_axis
+            self.x_axis_max = x_axis_max
 
         def add_data(self, data: np.ndarray, line_style: str, line_width: float):
 
@@ -63,14 +64,15 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
         def plot(self):
             # Plot data
             for i in range(self.data.shape[0]):
-                plt.plot(self.data[i, :, 0], self.data[i, :, 1],
+                plt.plot(self.data[i, :self.x_axis_max, 0],
+                         self.data[i, :self.x_axis_max, 1],
                          color=colour, linestyle=self.line_styles[i],
                          linewidth=self.line_widths[i])
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
 
-    data = PlotData(gens)
+    data = PlotData(gens, x_axis_max)
 
     # Plot best winner so far data
     if plot_mean_bests:
@@ -290,7 +292,8 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            plot_median_bests: bool = True, plot_q_bests: bool = False,
                            plot_best_bests: bool = True, plot_mean_means: bool = True,
                            plot_median_means: bool = False, plot_q_means: bool = False,
-                           verbosity: bool = False, prompt_legend_labels: bool = False):
+                           verbosity: bool = False, prompt_legend_labels: bool = False,
+                           x_axis_max: Optional[int] = None):
 
     # Prefix exp data directory with data path
     exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
@@ -339,7 +342,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            lq_mean_fitnesses, uq_mean_fitnesses,
                            exp_plot_colours[i], plot_mean_bests, plot_median_bests,
                            plot_q_bests, plot_best_bests, plot_mean_means,
-                           plot_median_means, plot_q_means)
+                           plot_median_means, plot_q_means, x_axis_max)
 
         # Set legend label
         if legend_labels:
@@ -417,6 +420,12 @@ if __name__ == '__main__':
         # Prompot for legend labels
         prompt_legend_labels = True if '--legend-labels' in sys.argv else False
 
+        # x-axis max
+        x_axis_max: Optional[list[str]] = retrieve_flag_args('--x-axis-max', sys.argv)
+        # Convert to int
+        if x_axis_max is not None:
+            x_axis_max = int(x_axis_max[0])
+
         # Split comma separated experiment directories
         exp_data_dirs = exp_dir.split(',')
 
@@ -425,4 +434,4 @@ if __name__ == '__main__':
             config['logging']['winner_file_name'],
             gen_one_max, plot_mean_bests, plot_median_bests, plot_q_bests, plot_b_bests,
             plot_mean_means, plot_median_means, plot_q_means, verbosity,
-            prompt_legend_labels)
+            prompt_legend_labels, x_axis_max)
