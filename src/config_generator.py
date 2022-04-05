@@ -115,7 +115,7 @@ def main():
         #                            [{"x": 3, "y": 0}]]),
         (["env", "domain_params"], [[2.0], [3.0], [4.0], [5.0], [6.0]]),
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [5, 6, 7, 8, 9])
+        (["ie", "decoder_file_num"], [10, 11, 12, 13, 14])
     ]
 
     if len(hyper_params) > 2:
