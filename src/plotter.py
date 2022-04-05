@@ -2,9 +2,10 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from typing import Optional
+from typing import Optional, List
 from data import read_agent_data, read_evo_data, get_sub_folders
 from command_line import parse_axis_limits, read_configs, retrieve_flag_args
+from itertools import chain
 
 np.set_printoptions(suppress=True)
 
@@ -44,12 +45,16 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
         def __init__(self, x_axis: list, x_axis_max: Optional[int]):
 
             self.data = np.empty([0, len(x_axis), 2])
-            self.line_styles: list[str] = []
-            self.line_widths: list[float] = []
+            self.line_styles: List[str] = []
+            self.line_widths: List[float] = []
             self.gens = x_axis
             self.x_axis_max = x_axis_max
+            # I need a way to record the particular data that has been plotted
+            # in order to label the legend later
+            self.labels: List[Optional[str]] = []
 
-        def add_data(self, data: np.ndarray, line_style: str, line_width: float):
+        def add_data(self, data: np.ndarray, line_style: str, line_width: float,
+                     label: Optional[str]):
 
             # Prepare data for plotting
             data_stacked = np.column_stack((self.gens, data))
@@ -58,10 +63,13 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
             self.data = np.concatenate((self.data, np.array([data_stacked])))
 
             # Concatenate new line styles and widths with old
-            self.line_styles += [line_style]
-            self.line_widths += [line_width]
+            self.line_styles.append(line_style)
+            self.line_widths.append(line_width)
+
+            self.labels.append(label)
 
         def plot(self):
+
             # Plot data
             for i in range(self.data.shape[0]):
                 plt.plot(self.data[i, :self.x_axis_max, 0],
@@ -76,23 +84,23 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
 
     # Plot best winner so far data
     if plot_mean_bests:
-        data.add_data(mean_bests, '-', 1.)
+        data.add_data(mean_bests, '-', 1., 'best winner so far means')
     if plot_median_bests:
-        data.add_data(median_bests, '-', 1.)
+        data.add_data(median_bests, '-', 1., 'best winner so far medians')
     if plot_q_bests:
-        data.add_data(lq_bests, '--', 0.25)
-        data.add_data(uq_bests, '--', 0.25)
+        data.add_data(lq_bests, '--', 0.25, None)
+        data.add_data(uq_bests, '--', 0.25, None)
     if plot_best_bests:
-        data.add_data(best_bests, ':', 1.)
+        data.add_data(best_bests, ':', 1., 'best winner so far best run')
 
     # Plot population average data
     if plot_mean_means:
-        data.add_data(mean_means, '--', 1.)
+        data.add_data(mean_means, '--', 1., 'mean average population fitness')
     if plot_median_means:
-        data.add_data(median_means, '--', 1.)
+        data.add_data(median_means, '--', 1., 'median average population fitness')
     if plot_q_means:
-        data.add_data(lq_means, '--', 0.25)
-        data.add_data(uq_means, '--', 0.25)
+        data.add_data(lq_means, '--', 0.25, None)
+        data.add_data(uq_means, '--', 0.25, None)
 
     # Plot data
     data.plot()
@@ -102,6 +110,9 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
         plt.fill_between(gens, lq_means, uq_means, color=colour, alpha=0.1)
     if plot_q_bests:
         plt.fill_between(gens, lq_bests, uq_bests, color=colour, alpha=0.1)
+
+    # Return labels of plotted data
+    return data.labels
 
 
 def _fitness_analysis(fitnesses, folder_paths, verbosity) -> float:
@@ -287,6 +298,36 @@ def _prompt_legend_labels(exp_data_dirs) -> list[str]:
     return legend_labels
 
 
+# Plot legend
+def _plot_legend(prompt_legend_labels: bool, exp_data_dirs: List[str],
+                 plot_colours: List[str], plotted_labels: List[Optional[str]]):
+
+    # If legend labels are to be prompted
+    if prompt_legend_labels:
+
+        # Prompt experiment labels
+        exp_labels = _prompt_legend_labels(exp_data_dirs)
+
+        # Suffix with the plotted labels
+        legend_labels: List[str] = []
+        for i, el in enumerate(exp_labels):
+            for pl in plotted_labels[i]:
+                if pl is not None:
+                    legend_labels.append(el + ' ' + pl)
+
+        # Plot legend
+        plt.gca().legend(tuple(legend_labels))
+
+    else:
+
+        # Create legend that labels the colours as the experiment directory names
+        handles = [mpatches.Patch(color=exp_colour, label=exp_label)
+                   for exp_label, exp_colour in zip(exp_data_dirs, plot_colours)]
+
+        # Plot legend
+        plt.legend(handles=handles)
+
+
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            gen_one_max: bool = False, plot_mean_bests: bool = False,
                            plot_median_bests: bool = True, plot_q_bests: bool = False,
@@ -297,13 +338,9 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
 
     # Prefix exp data directory with data path
     exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
-
     exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
-    legend_items: list[str] = []
-    # Prompt for legend labels
-    legend_labels: Optional[list[str]] = None
-    if prompt_legend_labels:
-        legend_labels = _prompt_legend_labels(exp_data_dirs)
+    # Labels of plotted data
+    plotted_labels: List[Optional[str]] = []
 
     for i, exp_data_path in enumerate(exp_data_paths):
 
@@ -335,27 +372,21 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         lq_mean_fitnesses = np.quantile(mean_fitnesses, 0.25, axis=0)
         uq_mean_fitnesses = np.quantile(mean_fitnesses, 0.75, axis=0)
 
-        # Plot experiment data
-        _plot_exp_evo_data(mean_best_fitnesses, median_best_fitnesses,
-                           lq_best_fitnesses, uq_best_fitnesses, best_best_fitnesses,
-                           mean_mean_fitnesses, median_mean_fitnesses,
-                           lq_mean_fitnesses, uq_mean_fitnesses,
-                           exp_plot_colours[i], plot_mean_bests, plot_median_bests,
-                           plot_q_bests, plot_best_bests, plot_mean_means,
-                           plot_median_means, plot_q_means, x_axis_max)
+        # Plot experiment data and return labels of plotted data
+        labels = _plot_exp_evo_data(
+            mean_best_fitnesses, median_best_fitnesses,
+            lq_best_fitnesses, uq_best_fitnesses, best_best_fitnesses,
+            mean_mean_fitnesses, median_mean_fitnesses,
+            lq_mean_fitnesses, uq_mean_fitnesses,
+            exp_plot_colours[i], plot_mean_bests, plot_median_bests,
+            plot_q_bests, plot_best_bests, plot_mean_means,
+            plot_median_means, plot_q_means, x_axis_max)
 
-        # Set legend label
-        if legend_labels:
-            legend_label = legend_labels[i]
-        else:
-            legend_label = exp_data_path.replace(data_dir_path, '')
-        legend_items.append(
-            mpatches.Patch(color=exp_plot_colours[i], label=legend_label)
-        )
-
+        plotted_labels.append(labels)
         print('-' * 50)
 
-    plt.legend(handles=legend_items)
+    # Plot legend
+    _plot_legend(prompt_legend_labels, exp_data_dirs, exp_plot_colours, plotted_labels)
 
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
