@@ -2,7 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from typing import Tuple
+from typing import Optional
 from data import read_agent_data, read_evo_data, get_sub_folders
 from command_line import parse_axis_limits, read_configs
 
@@ -44,8 +44,8 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
         def __init__(self, x_axis: list):
 
             self.data = np.empty([0, len(x_axis), 2])
-            self.line_styles = []
-            self.line_widths = []
+            self.line_styles: list[str] = []
+            self.line_widths: list[float] = []
             self.gens = x_axis
 
         def add_data(self, data: np.ndarray, line_style: str, line_width: float):
@@ -273,18 +273,34 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
         return group_exp_data_paths[np.argmax(max_fitnesses)]
 
 
+# Prompt for legend lables
+def _prompt_legend_labels(exp_data_dirs) -> list[str]:
+
+    legend_labels: list[str] = []
+
+    for exp_data_dir in exp_data_dirs:
+        print(exp_data_dir)
+        legend_labels.append(input('Legend label? '))
+
+    return legend_labels
+
+
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            gen_one_max: bool = False, plot_mean_bests: bool = False,
                            plot_median_bests: bool = True, plot_q_bests: bool = False,
                            plot_best_bests: bool = True, plot_mean_means: bool = True,
                            plot_median_means: bool = False, plot_q_means: bool = False,
-                           verbosity: bool = False):
-
-    exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
-    legend_items = []
+                           verbosity: bool = False, prompt_legend_labels: bool = False):
 
     # Prefix exp data directory with data path
     exp_data_paths = [data_dir_path + edd for edd in exp_data_dirs]
+
+    exp_plot_colours = ['b', 'r', 'g', 'm', 'y', 'c']
+    legend_items: list[str] = []
+    # Prompt for legend labels
+    legend_labels: Optional[list[str]] = None
+    if prompt_legend_labels:
+        legend_labels = _prompt_legend_labels(exp_data_dirs)
 
     for i, exp_data_path in enumerate(exp_data_paths):
 
@@ -326,7 +342,10 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            plot_median_means, plot_q_means)
 
         # Set legend label
-        legend_label = exp_data_path.replace(data_dir_path, '')
+        if legend_labels:
+            legend_label = legend_labels[i]
+        else:
+            legend_label = exp_data_path.replace(data_dir_path, '')
         legend_items.append(
             mpatches.Patch(color=exp_plot_colours[i], label=legend_label)
         )
@@ -395,6 +414,9 @@ if __name__ == '__main__':
 
         verbosity = True if '--verbosity' in sys.argv else False
 
+        # Prompot for legend labels
+        prompt_legend_labels = True if '--legend-labels' in sys.argv else False
+
         # Split comma separated experiment directories
         exp_data_dirs = exp_dir.split(',')
 
@@ -402,4 +424,5 @@ if __name__ == '__main__':
             exp_data_dirs, config['logging']['data_dir_path'],
             config['logging']['winner_file_name'],
             gen_one_max, plot_mean_bests, plot_median_bests, plot_q_bests, plot_b_bests,
-            plot_mean_means, plot_median_means, plot_q_means, verbosity)
+            plot_mean_means, plot_median_means, plot_q_means, verbosity,
+            prompt_legend_labels)
