@@ -391,6 +391,9 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
 
+    # Save figure
+    plt.savefig('figures/figure.png', bbox_inches='tight', pad_inches=0.05, dpi=500)
+
     plt.show()
 
 
