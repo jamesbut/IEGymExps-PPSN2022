@@ -10,19 +10,68 @@ from itertools import chain
 np.set_printoptions(suppress=True)
 
 
-def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None, test_phenotypes=None,
+# Take data with a discrete third dimension and plot each discrete group separately
+def _plot_discrete_scatter(train_phenotypes, colour_vals):
+
+    train_phenotypes = np.concatenate((train_phenotypes, colour_vals[:, None]),
+                                      axis=1)
+    # Order by colour values (domain parameters)
+    train_phenotypes = train_phenotypes[train_phenotypes[:, 2].argsort()]
+
+    # Get unique discrete colour values
+    def get_unique_colour_vals():
+        unique_colour_vals = []
+        for colour in train_phenotypes[:, 2]:
+            if colour not in unique_colour_vals:
+                unique_colour_vals.append(colour)
+        return unique_colour_vals
+
+    unique_colour_vals = get_unique_colour_vals()
+
+    # Colours for each domain parameter
+    #param_colour = ['lightgrey', 'darkgrey', 'grey']
+    param_colour = ['yellow', 'gold', 'darkorange']
+
+    # Scatter plot for each different colour value
+    for i, colour in enumerate(unique_colour_vals):
+        plot_phenos = []
+        for pheno in train_phenotypes:
+            if pheno[2] == colour:
+                plot_phenos.append(pheno)
+        plot_phenos = np.array(plot_phenos)
+        plt.scatter(plot_phenos[:, 0], plot_phenos[:, 1], label=str(colour),
+                    c=param_colour[i])
+
+    plt.legend()
+
+
+def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None,
+                         discrete_colours: bool = False, test_phenotypes=None,
                          plot_axis_lb=None, plot_axis_ub=None):
 
+    # Plot training data
     if train_phenotypes is not None:
+
+        # If there are 3d values (which will typically be either fitnesses or
+        # domain params)
         if colour_vals is not None:
-            plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1],
-                        c=colour_vals, cmap='plasma')
-            plt.colorbar()
+
+            # If the third dimentional values are discrete
+            if discrete_colours:
+                _plot_discrete_scatter(train_phenotypes, colour_vals)
+
+            # If the third dimensional values are continous
+            else:
+                plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1],
+                            c=colour_vals, cmap='plasma', alpha=1.)
+                plt.colorbar()
+
         else:
             plt.scatter(train_phenotypes[:, 0], train_phenotypes[:, 1])
 
+    # Plot test data
     if test_phenotypes is not None:
-        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=0.1)
+        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=1.)
 
     # Set axis limit if given
     if plot_axis_lb and plot_axis_ub:
@@ -193,6 +242,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
                          verbosity=True, plot_axis_lb=None, plot_axis_ub=None):
 
     print('exp_data_path:', exp_data_path)
+
     # Get all experiments from group
     if group:
         exp_data_paths = get_sub_folders(exp_data_path, recursive=False,
@@ -213,11 +263,12 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         print(exp_data_path)
 
         # Read pheno data
-        max_fitness, phenos, colour_vals = _read_exp(exp_data_path, winner_file_name,
-                                                     verbosity, colour_params)
+        max_fitness, max_file, phenos, colour_vals = \
+            _read_exp(exp_data_path, winner_file_name, verbosity, colour_params)
+
         # Plot pheno data
         if verbosity:
-            _plot_phenos_scatter(phenos, colour_vals, test_data,
+            _plot_phenos_scatter(phenos, colour_vals, colour_params, test_data,
                                  plot_axis_lb, plot_axis_ub)
 
         # Keep track of max fitness
@@ -232,12 +283,14 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         # Calculate exp with max fitness in group
         group_max_exp_fitness_arg = np.argmax(max_exp_fitnesses)
 
-        # Read and plot
+        # Read experiment data
         _, phenos, colour_vals = _read_exp(
             exp_data_paths[group_max_exp_fitness_arg], winner_file_name,
             True, colour_params
         )
-        _plot_phenos_scatter(phenos, colour_vals, test_data,
+
+        # Scatter plot
+        _plot_phenos_scatter(phenos, colour_vals, colour_params, test_data,
                              plot_axis_lb, plot_axis_ub)
 
         print('**********************************************')
