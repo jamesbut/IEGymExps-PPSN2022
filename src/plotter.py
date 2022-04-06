@@ -115,7 +115,7 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
     return data.labels
 
 
-def _fitness_analysis(fitnesses, folder_paths, verbosity) -> float:
+def _fitness_analysis(fitnesses, folder_paths, verbosity: bool) -> float:
 
     max_arg = np.argmax(fitnesses)
     max_fitness = fitnesses[max_arg]
@@ -139,7 +139,7 @@ def _fitness_analysis(fitnesses, folder_paths, verbosity) -> float:
     if verbosity:
         print("Min fitness: {}              File: {}".format(min_fitness, min_file))
 
-    return max_fitness
+    return max_fitness, max_file
 
 
 # Calculate best fitnesses so far from the best fitnesses for each generation
@@ -178,14 +178,14 @@ def _read_exp(exp_data_path, winner_file_name, verbosity, colour_params):
     params = params.flatten()
 
     # Provide fitness analysis
-    max_fitness = _fitness_analysis(fitnesses, folder_paths, verbosity)
+    max_fitness, max_file = _fitness_analysis(fitnesses, folder_paths, verbosity)
 
     # Determine colour values for plotting
     colour_vals = fitnesses
     if colour_params:
         colour_vals = params
 
-    return max_fitness, phenos, colour_vals
+    return max_fitness, max_file, phenos, colour_vals
 
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
@@ -264,7 +264,8 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
                                                recursive=False,
                                                sort_by_suffix_num=True)
 
-        max_fitnesses = []
+        max_fitnesses: List[float] = []
+        max_fitness_files: List[str] = []
         for edp in group_exp_data_paths:
 
             # Calculate run with greatest best fitness so far at generation 1
@@ -277,13 +278,23 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
             # in the group
             else:
 
-                max_fitness, _, _ = _read_exp(edp, winner_file_name, verbosity, False)
+                max_fitness, max_file, _, _ = _read_exp(edp, winner_file_name,
+                                                        verbosity, False)
                 max_fitnesses.append(max_fitness)
+                max_fitness_files.append(max_file)
 
         if verbosity:
             print('Max fitnesses:', max_fitnesses)
 
-        return group_exp_data_paths[np.argmax(max_fitnesses)]
+        max_fitness_arg = np.argmax(max_fitnesses)
+
+        # Print run file with the max fitness
+        print('Max fitness run:',
+              max_fitness_files[max_fitness_arg]
+                .removesuffix('best_winner_so_far.json'))
+
+        # Choose experiment with the max fitness
+        return group_exp_data_paths[max_fitness_arg]
 
 
 # Prompt for legend lables
