@@ -29,8 +29,7 @@ def _plot_discrete_scatter(train_phenotypes, colour_vals):
     unique_colour_vals = get_unique_colour_vals()
 
     # Colours for each domain parameter
-    #param_colour = ['lightgrey', 'darkgrey', 'grey']
-    param_colour = ['yellow', 'gold', 'darkorange']
+    param_colour = ['thistle', 'gold', 'darkorange']
 
     # Scatter plot for each different colour value
     for i, colour in enumerate(unique_colour_vals):
@@ -47,7 +46,8 @@ def _plot_discrete_scatter(train_phenotypes, colour_vals):
 
 def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None,
                          discrete_colours: bool = False, test_phenotypes=None,
-                         plot_axis_lb=None, plot_axis_ub=None):
+                         plot_axis_lb=None, plot_axis_ub=None,
+                         plot_evo_starts: bool = False):
 
     # Plot training data
     if train_phenotypes is not None:
@@ -71,7 +71,21 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None,
 
     # Plot test data
     if test_phenotypes is not None:
-        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=1.)
+        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=1.0, c='black')
+
+    # Plot evo starts
+    if plot_evo_starts:
+
+        # DE start
+        starts = np.array([[0., 0.]])
+
+        # Plot initial sigma
+        init_sigma = plt.Circle((0., 0.), 1.0, fill=False, linestyle='--',
+                                edgecolor='red')
+        plt.gcf().gca().add_artist(init_sigma)
+
+        # Plot starts
+        plt.scatter(starts[:, 0], starts[:, 1], marker='x', c='red', s=[10.])
 
     # Set axis limit if given
     if plot_axis_lb and plot_axis_ub:
@@ -239,7 +253,8 @@ def _read_exp(exp_data_path, winner_file_name, verbosity, colour_params):
 
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
                          group=False, colour_params=False, print_numpy_arrays=False,
-                         verbosity=True, plot_axis_lb=None, plot_axis_ub=None):
+                         verbosity=True, plot_axis_lb=None, plot_axis_ub=None,
+                         plot_evo_starts: bool = False):
 
     print('exp_data_path:', exp_data_path)
 
@@ -269,7 +284,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
         # Plot pheno data
         if verbosity:
             _plot_phenos_scatter(phenos, colour_vals, colour_params, test_data,
-                                 plot_axis_lb, plot_axis_ub)
+                                 plot_axis_lb, plot_axis_ub, plot_evo_starts)
 
         # Keep track of max fitness
         max_exp_fitnesses.append(max_fitness)
@@ -291,7 +306,7 @@ def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=No
 
         # Scatter plot
         _plot_phenos_scatter(phenos, colour_vals, colour_params, test_data,
-                             plot_axis_lb, plot_axis_ub)
+                             plot_axis_lb, plot_axis_ub, plot_evo_starts)
 
         print('**********************************************')
 

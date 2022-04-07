@@ -205,7 +205,8 @@ def main(argv, config):
                      print_numpy_arrays=True
                         if '--print-numpy-arrays' in argv else False,
                      train_data_exp_group=config['ie']['exp_group'],
-                     data_lb=data_lb, data_ub=data_ub)
+                     data_lb=data_lb, data_ub=data_ub,
+                     plot_evo_starts=True if '--plot-evo-starts' in argv else False)
 
     # Evolutionary run
     elif '--evo-run' in argv:

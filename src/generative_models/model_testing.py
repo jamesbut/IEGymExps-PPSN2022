@@ -8,7 +8,8 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
                  winner_file_name, plot_axis_lb=None, plot_axis_ub=None,
                  colour_params=False, print_numpy_arrays=False,
                  train_data_exp_group: bool = False,
-                 data_lb: Optional[float] = None, data_ub: Optional[float] = None):
+                 data_lb: Optional[float] = None, data_ub: Optional[float] = None,
+                 plot_evo_starts: bool = False):
 
     # Read decoder
     decoder_file_path = dump_model_dir + '/' + gen_model_type + '_' \
@@ -45,7 +46,8 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
     read_and_plot_phenos(train_data_path, test_data=decoder_output,
                          winner_file_name=winner_file_name,
                          plot_axis_lb=plot_axis_lb, plot_axis_ub=plot_axis_ub,
-                         colour_params=colour_params, group=train_data_exp_group)
+                         colour_params=colour_params, group=train_data_exp_group,
+                         plot_evo_starts=plot_evo_starts)
 
 
 def build_decoder(gen_model_type, decoder_file_path):
