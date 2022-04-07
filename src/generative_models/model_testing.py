@@ -1,12 +1,14 @@
 import numpy as np
 import torch
 from plotter import read_and_plot_phenos
+from typing import Optional
 
 
 def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_path,
                  winner_file_name, plot_axis_lb=None, plot_axis_ub=None,
                  colour_params=False, print_numpy_arrays=False,
-                 train_data_exp_group: bool = False):
+                 train_data_exp_group: bool = False,
+                 data_lb: Optional[float] = None, data_ub: Optional[float] = None):
 
     # Read decoder
     decoder_file_path = dump_model_dir + '/' + gen_model_type + '_' \
@@ -26,6 +28,18 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
         import sys
         np.set_printoptions(threshold=sys.maxsize)
     print(decoder_output)
+
+    ub_filter = np.full((decoder_output.shape[0]), True)
+    lb_filter = np.full((decoder_output.shape[0]), True)
+    if data_ub is not None:
+        # Filter out phenotypes if any elements are greater than data_ub
+        ub_filter = ~np.any(decoder_output > data_ub, axis=1)
+    if data_lb is not None:
+        # Filter out phenotypes if any elements are greater than data_ub
+        lb_filter = ~np.any(decoder_output < data_lb, axis=1)
+
+    # Apply filters
+    decoder_output = decoder_output[ub_filter & lb_filter]
 
     # Plot decoder output and training data
     read_and_plot_phenos(train_data_path, test_data=decoder_output,

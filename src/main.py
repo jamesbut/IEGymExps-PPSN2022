@@ -185,6 +185,13 @@ def main(argv, config):
 
         # Get axis limits from command line
         plot_axis_lb, plot_axis_ub = parse_axis_limits(argv)
+        # Get data limits from command line
+        data_lb = retrieve_flag_args('--data-lb', argv)
+        if data_lb:
+            data_lb = float(data_lb[0])
+        data_ub = retrieve_flag_args('--data-ub', argv)
+        if data_ub:
+            data_ub = float(data_ub[0])
 
         # Test decoder
         test_decoder(config['ie']['dump_model_dir'],
@@ -197,7 +204,8 @@ def main(argv, config):
                      colour_params=True if '--colour-params' in argv else False,
                      print_numpy_arrays=True
                         if '--print-numpy-arrays' in argv else False,
-                     train_data_exp_group=config['ie']['exp_group'])
+                     train_data_exp_group=config['ie']['exp_group'],
+                     data_lb=data_lb, data_ub=data_ub)
 
     # Evolutionary run
     elif '--evo-run' in argv:
