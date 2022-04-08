@@ -5,7 +5,7 @@ import numpy as np
 from typing import Optional, List
 from data import read_agent_data, read_evo_data, get_sub_folders
 from command_line import parse_axis_limits, read_configs, retrieve_flag_args
-from itertools import chain
+from agent import Agent
 
 np.set_printoptions(suppress=True)
 
@@ -38,16 +38,15 @@ def _plot_discrete_scatter(train_phenotypes, colour_vals):
             if pheno[2] == colour:
                 plot_phenos.append(pheno)
         plot_phenos = np.array(plot_phenos)
-        plt.scatter(plot_phenos[:, 0], plot_phenos[:, 1], label=str(colour),
+        plt.scatter(plot_phenos[:, 0], plot_phenos[:, 1],
+                    label='Engine power: ' + str(colour) + ' train data',
                     c=param_colour[i])
-
-    plt.legend()
 
 
 def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None,
                          discrete_colours: bool = False, test_phenotypes=None,
                          plot_axis_lb=None, plot_axis_ub=None,
-                         plot_evo_starts: bool = False):
+                         plot_evo_starts: Optional[List[str]] = None):
 
     # Plot training data
     if train_phenotypes is not None:
@@ -71,26 +70,57 @@ def _plot_phenos_scatter(train_phenotypes=None, colour_vals=None,
 
     # Plot test data
     if test_phenotypes is not None:
-        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=1.0, c='black')
+        plt.scatter(test_phenotypes[:, 0], test_phenotypes[:, 1], alpha=.5, c='black',
+                    label='IE manifold')
 
     # Plot evo starts
-    if plot_evo_starts:
+    if plot_evo_starts is not None:
 
-        # DE start
-        starts = np.array([[0., 0.]])
+        # Read in UC start centroid by giving file name in command line
+        UC_start_file_name = plot_evo_starts[0]
+        # TODO: Use data_dir_path and winner_file_name from config
+        uc_file_path = 'data/' + UC_start_file_name + '/best_winner_so_far.json'
+        UC_start_centroid = Agent(agent_path=uc_file_path).genotype
 
-        # Plot initial sigma
-        init_sigma = plt.Circle((0., 0.), 1.0, fill=False, linestyle='--',
+        # Read in IE winner from command line
+        IE_winner_file_name = plot_evo_starts[1]
+        IE_file_path = 'data/' + IE_winner_file_name + '/best_winner_so_far.json'
+        IE_winner = Agent(agent_path=IE_file_path).weights
+
+        # Plot DE start
+        plt.scatter(0., 0., marker='x', c='red', s=[10.], label='DE start centroid')
+        # Plot UC start
+        plt.scatter(UC_start_centroid[0], UC_start_centroid[1], marker='x',
+                    c='green', s=[10.], label='Universal Controller start centroid')
+        # Plot IE winner
+        plt.scatter(IE_winner[0], IE_winner[1], marker='D',
+                    c='blue', s=[10.], label='IE winner')
+
+        # Plot initial sigmas
+        de_sigma = plt.Circle((0., 0.), 1.0, fill=False, linestyle='--',
                                 edgecolor='red')
-        plt.gcf().gca().add_artist(init_sigma)
-
-        # Plot starts
-        plt.scatter(starts[:, 0], starts[:, 1], marker='x', c='red', s=[10.])
+        plt.gcf().gca().add_artist(de_sigma)
+        uc_sigma = plt.Circle((UC_start_centroid[0], UC_start_centroid[1]),
+                                1.0, fill=False, linestyle='--', edgecolor='green')
+        plt.gcf().gca().add_artist(uc_sigma)
 
     # Set axis limit if given
-    if plot_axis_lb and plot_axis_ub:
-        plt.xlim([plot_axis_lb, plot_axis_ub])
-        plt.ylim([plot_axis_lb, plot_axis_ub])
+    if plot_axis_lb is not None and plot_axis_ub is not None:
+        print('plot_axis_lb:', plot_axis_lb)
+        print('plot_axis_ub:', plot_axis_ub)
+        plt.xlim([plot_axis_lb[0], plot_axis_ub[0]])
+        plt.ylim([plot_axis_lb[1], plot_axis_ub[1]])
+
+    plt.legend()
+
+    plt.xlabel('Weight 1')
+    plt.ylabel('Weight 2')
+
+    # Save figure
+    print('Saving figure..')
+    plt.gcf().set_size_inches(10, 10)
+    plt.savefig('figures/pheno_figure.png', bbox_inches='tight',
+                pad_inches=0.05, dpi=500, figsize=(80, 60))
 
     plt.show()
 
@@ -254,7 +284,7 @@ def _read_exp(exp_data_path, winner_file_name, verbosity, colour_params):
 def read_and_plot_phenos(exp_data_path=None, winner_file_name=None, test_data=None,
                          group=False, colour_params=False, print_numpy_arrays=False,
                          verbosity=True, plot_axis_lb=None, plot_axis_ub=None,
-                         plot_evo_starts: bool = False):
+                         plot_evo_starts: Optional[List[str]] = None):
 
     print('exp_data_path:', exp_data_path)
 
@@ -339,8 +369,10 @@ def _determine_experiment_to_plot(exp_data_path: str, winner_file_name: str,
             # Calculate run with greatest best fitness so far at generation 1
             if gen_one_max:
 
-                _, best_fitnesses = read_evo_data(edp)
-                max_fitnesses.append(np.max(best_fitnesses[:, 0]))
+                _, best_fitnesses, run_folder_paths = read_evo_data(edp)
+                max_arg = np.argmax(best_fitnesses[:, 0])
+                max_fitnesses.append(best_fitnesses[max_arg, 0])
+                max_fitness_files.append(run_folder_paths[max_arg])
 
             # Calculate max fitness of best winners so far for the experiments
             # in the group
@@ -429,7 +461,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         print('Experiment data path:', exp_data_path)
 
         # Read experiment data
-        mean_fitnesses, best_fitnesses = read_evo_data(exp_data_path)
+        mean_fitnesses, best_fitnesses, _ = read_evo_data(exp_data_path)
         if verbosity:
             print('Best fitnesses of run:\n', best_fitnesses)
 
@@ -471,7 +503,7 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
     plt.ylabel('Fitness')
 
     # Save figure
-    plt.savefig('figures/figure.png', bbox_inches='tight', pad_inches=0.05, dpi=500)
+    plt.savefig('figures/evo_figure.png', bbox_inches='tight', pad_inches=0.05, dpi=500)
 
     plt.show()
 

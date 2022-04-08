@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from plotter import read_and_plot_phenos
-from typing import Optional
+from typing import Optional, List
 
 
 def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_path,
@@ -9,7 +9,7 @@ def test_decoder(dump_model_dir, gen_model_type, decoder_file_num, train_data_pa
                  colour_params=False, print_numpy_arrays=False,
                  train_data_exp_group: bool = False,
                  data_lb: Optional[float] = None, data_ub: Optional[float] = None,
-                 plot_evo_starts: bool = False):
+                 plot_evo_starts: Optional[List[str]] = None):
 
     # Read decoder
     decoder_file_path = dump_model_dir + '/' + gen_model_type + '_' \

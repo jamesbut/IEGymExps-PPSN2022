@@ -48,7 +48,7 @@ def read_evo_data(exp_data_path):
         exp_mean_fitnesses.append(mean_fitnesses)
         exp_best_fitnesses.append(best_fitnesses)
 
-    return np.array(exp_mean_fitnesses), np.array(exp_best_fitnesses)
+    return np.array(exp_mean_fitnesses), np.array(exp_best_fitnesses), run_folder_paths
 
 
 # Read new data format that uses json files

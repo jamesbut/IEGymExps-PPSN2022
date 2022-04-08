@@ -13,6 +13,8 @@ from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
 from command_line import parse_axis_limits, parse_test_decoder, read_configs, \
                          retrieve_flag_args
+from typing import Optional, List
+
 
 # Suppress scientific notation
 np.set_printoptions(suppress=True)
@@ -192,6 +194,10 @@ def main(argv, config):
         data_ub = retrieve_flag_args('--data-ub', argv)
         if data_ub:
             data_ub = float(data_ub[0])
+        # Get evo starts for plot from command line
+        # ONLY HAVE AS LAST ARG FOR NOW!
+        plot_evo_starts: Optional[List[str]] = \
+            retrieve_flag_args('--plot-evo-starts', argv)
 
         # Test decoder
         test_decoder(config['ie']['dump_model_dir'],
@@ -206,7 +212,7 @@ def main(argv, config):
                         if '--print-numpy-arrays' in argv else False,
                      train_data_exp_group=config['ie']['exp_group'],
                      data_lb=data_lb, data_ub=data_ub,
-                     plot_evo_starts=True if '--plot-evo-starts' in argv else False)
+                     plot_evo_starts=plot_evo_starts)
 
     # Evolutionary run
     elif '--evo-run' in argv:
