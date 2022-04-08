@@ -4,16 +4,15 @@
             "centroid": [0.0],
             "sigma": 1.0,
             "lambda": 100,
-            "fix_C": false,
-            "fix_sigma": false,
-            "fix_centroid": false,
+            "fix_C": true,
+            "fix_sigma": true,
+            "fix_centroid": true,
             "verbosity": 0
         },
-        "num_gens": 10000,
+        "num_gens": 500,
         "parallelise": true,
         "render": false,
-        "quit_domain_when_complete": false,
-        "dump_every": 20,
+        "quit_domain_when_complete": true,
         "g_lb": [-100.0],
         "g_ub": [100.0],
         "p_lb": [-100.0],
@@ -21,7 +20,7 @@
     },
     "controller": {
         "num_hidden_layers": 1,
-        "neurons_per_hidden_layer": 8,
+        "neurons_per_hidden_layer": 4,
         "bias": true,
         "hidden_layer_activ_func": "relu",
         "final_layer_activ_func": "sigmoid"
@@ -32,14 +31,14 @@
             "is_slippery": false,
             "reward_fnc": "manhattan",
             "desc": [
-                "SFFFF",
-                "HHHHF",
-                "HFFFF",
-                "HFFFH",
-                "HFFFG"
+                "SFFF",
+                "FHFH",
+                "HFFF",
+                "HFFG"
             ]
         },
         "completion_fitness": 0.0,
+        "domain_params": [{"x": 3, "y": 3}],
         "normalise_state": false,
         "seed": 108,
         "verbosity": 0

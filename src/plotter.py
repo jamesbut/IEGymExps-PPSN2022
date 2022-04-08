@@ -561,6 +561,9 @@ if __name__ == '__main__':
         gen_one_max = True if '--gen-one-max' in sys.argv else False
 
         verbosity = True if '--verbosity' in sys.argv else False
+        # Print full numpy arrays
+        if verbosity:
+            np.set_printoptions(threshold=sys.maxsize)
 
         # Prompot for legend labels
         prompt_legend_labels = True if '--legend-labels' in sys.argv else False

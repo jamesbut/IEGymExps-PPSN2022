@@ -4,14 +4,14 @@
 
 from data import get_sub_folders, dump_json
 from helper import modify_dict, print_dict
-from command_line import read_configs
+from command_line import read_configs, retrieve_flag_args
 import itertools
 import copy
 import os
 import re
 import sys
 from boltons import iterutils
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 # Generate new config file using a base config and setting modifications
@@ -42,12 +42,17 @@ def create_settings(hyper_params):
     return settings
 
 
-def _calculate_new_group_path(configs, exp_dir) -> Tuple[str, str]:
+def _calculate_new_group_path(configs, exp_dir: Optional[str],
+                              group_dir: Optional[str]) -> Tuple[str, str]:
 
     # Build config path
     config_path = 'configs'
-    if exp_dir != '':
+    if exp_dir is not None:
         config_path += '/' + exp_dir
+
+    # If group dir is already given return group path
+    if group_dir is not None:
+        return config_path + '/' + group_dir, group_dir
 
     # Get all directories in configs dir
     config_dirs = get_sub_folders(config_path, recursive=False,
@@ -68,9 +73,10 @@ def _calculate_new_group_path(configs, exp_dir) -> Tuple[str, str]:
 
 
 # Dump configs into directory
-def dump_configs(configs, exp_dir):
+def dump_configs(configs, exp_dir, group_dir):
 
-    new_group_path, new_group_name = _calculate_new_group_path(configs, exp_dir)
+    new_group_path, new_group_name = _calculate_new_group_path(configs, exp_dir,
+                                                               group_dir)
 
     # Create group directory
     os.mkdir(new_group_path)
@@ -102,7 +108,7 @@ def dump_configs(configs, exp_dir):
             dump_json(config_file_path, config)
 
 
-def main():
+def main(argv):
     base_config = read_configs(None)[0]
 
     # Get centroid directories for universal controllers
@@ -113,9 +119,9 @@ def main():
         # (["env", "domain_params"], [[{"x": 1, "y": 2}], [{"x": 3, "y": 2}],
         #                            [{"x": 3, "y": 3}], [{"x": 1, "y": 3}],
         #                            [{"x": 3, "y": 0}]]),
-        (["env", "domain_params"], [[2.0], [3.0], [4.0], [5.0], [6.0]]),
+        (["env", "domain_params"], [[3.0], [5.0]]),
         # (["optimiser", "cmaes", "centroid"], centroid_dirs)
-        (["ie", "decoder_file_num"], [10, 11, 12, 13, 14])
+        (["ie", "decoder_file_num"], [5, 6, 7, 8, 9])
     ]
 
     if len(hyper_params) > 2:
@@ -135,11 +141,16 @@ def main():
 
     # Optional to give experiment config directory to dump configs in rather than
     # straight into the 'configs' directory
-    exp_dir = ''
-    if len(sys.argv) == 2:
-        exp_dir = sys.argv[1]
-    dump_configs(configs, exp_dir)
+    exp_dir = retrieve_flag_args('--config-dir', argv)
+    if exp_dir is not None:
+        exp_dir = exp_dir[0]
+    # Option to give custom group directory name
+    group_dir = retrieve_flag_args('--group-dir', argv)
+    if group_dir is not None:
+        group_dir = group_dir[0]
+
+    dump_configs(configs, exp_dir, group_dir)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
