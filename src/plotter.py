@@ -172,6 +172,8 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
+    x_axis_ticks = range(gens[0], gens[-1])
+    plt.xticks(x_axis_ticks)
 
     data = PlotData(gens, x_axis_max)
 
