@@ -13,6 +13,7 @@ from env_wrapper import EnvWrapper
 from neural_network import NeuralNetwork
 from command_line import parse_axis_limits, parse_test_decoder, read_configs, \
                          retrieve_flag_args
+from analyser import Analyser
 from typing import Optional, List
 
 
@@ -118,6 +119,10 @@ def evo_run(config, exp_dir_path, decoder):
     p_lb = expand_bound(config['optimiser'].get('p_lb', None), num_weights)
     p_ub = expand_bound(config['optimiser'].get('p_ub', None), num_weights)
 
+    # Runs additional analysis during evolutionary algorithm
+    analyser = Analyser(verbosity=True, pop_size=config['optimiser']['cmaes']['lambda'],
+                        maze_size=env_wrapper._env.nrow * env_wrapper._env.ncol)
+
     # Run evolutionary algorithm
     population, logbook, winner_found = evo_utils.eaGenerateUpdate(
         toolbox, ngen=config['optimiser']['num_gens'], stats=stats,
@@ -126,7 +131,8 @@ def evo_run(config, exp_dir_path, decoder):
         decoder=decoder, pop_size=config['optimiser']['cmaes']['lambda'],
         p_lb=p_lb, p_ub=p_ub, agent=agent, exp_dir_path=exp_dir_path,
         log_config=config['logging'], env_wrapper=env_wrapper,
-        dump_every=config['optimiser'].get('dump_every', None))
+        dump_every=config['optimiser'].get('dump_every', None),
+        analyser=analyser)
 
     if config['optimiser']['parallelise']:
         pool.close()

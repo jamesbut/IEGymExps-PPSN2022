@@ -4,55 +4,66 @@
             "centroid": [0.0],
             "sigma": 1.0,
             "lambda": 100,
-            "fix_C": false,
-            "fix_sigma": false,
-            "verbosity": false
+            "fix_C": true,
+            "fix_sigma": true,
+            "fix_centroid": true,
+            "verbosity": 0
         },
-        "num_gens": 500,
-        "parallelise": true,
+        "num_gens": 1,
+        "parallelise": false,
         "render": false,
-        "quit_domain_when_complete": false,
-        "dump_every": 20,
+        "quit_domain_when_complete": true,
+        "g_lb": [-100.0],
+        "g_ub": [100.0],
         "p_lb": [-100.0],
         "p_ub": [100.0]
     },
     "controller": {
-        "num_hidden_layers": 0,
-        "neurons_per_hidden_layer": 0,
+        "num_hidden_layers": 1,
+        "neurons_per_hidden_layer": 4,
         "bias": true,
         "hidden_layer_activ_func": "relu",
         "final_layer_activ_func": "sigmoid"
     },
     "env": {
-        "name": "BipedalWalker-v3",
-        "completion_fitness": 200.0,
-        "domain_params": [2.0],
-        "domain_params_high": [10.0],
-        "domain_params_low": [1.0],
-        "domain_params_input": false,
+        "name": "FrozenLake-v0",
+        "env_kwargs": {
+            "is_slippery": false,
+            "reward_fnc": "manhattan",
+            "desc": [
+                "SFFF",
+                "FHFH",
+                "HFFF",
+                "HFFG"
+            ]
+        },
+        "completion_fitness": 0.0,
+        "domain_params": [{"x": 3, "y": 3}],
         "normalise_state": false,
-        "seed": 108
+        "seed": 108,
+        "verbosity": 0
     },
     "ie": {
         "name": "gan",
         "use_decoder": true,
-        "decoder_file_num": 0,
-        "code_size": 3,
+        "decoder_file_num": 6,
+        "code_size": 2,
         "num_hidden_layers": 1,
         "neurons_per_hidden_layer": 64,
-        "num_epochs": 40000,
-        "batch_size": 1000,
+        "num_epochs": 10000,
+        "batch_size": 64,
         "optimiser": {
             "name": "adam",
-            "lr": 1e-3
+            "g_lr": 2e-4,
+            "d_lr": 5e-4
         },
-        "training_data_dir": "bpw_configs/bpw_train_data",
+        "training_data_dir": "fl_configs/fl_train_data",
         "exp_group": true,
-        "dump_model_dir": "models/bpw_models",
-        "num_trains": 5
+        "dump_model_dir": "models/fl_models",
+        "num_trains": 1
     },
     "execution": {
-        "num_runs": 5
+        "num_runs": 1
     },
     "logging": {
         "data_dir_path": "data/",

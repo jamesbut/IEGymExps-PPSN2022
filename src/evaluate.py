@@ -53,9 +53,7 @@ def run(agent, env, render=False, fps: float = None, verbosity=0):
     # Render final frame
     render_fn(env, render, fps)
 
-    env.close()
-
-    return reward
+    return reward, state, info
 
 
 # Either pass in a genome and an agent with the required architecture OR
@@ -69,6 +67,7 @@ def evaluate(genome=None, agent=None, env_wrapper=None, render: bool = False,
         agent.genotype = genome
 
     rewards = []
+    info = {}
 
     # Only 1 trial if a domain param distrbution is given
     num_trials = 1
@@ -84,13 +83,21 @@ def evaluate(genome=None, agent=None, env_wrapper=None, render: bool = False,
             print("Domain parameters:", env_wrapper.domain_params[trial_num])
 
         env_wrapper.make_env(trial_num, env_seed)
-        r = run(agent, env_wrapper, render, fps, verbosity)
+
+        r, final_state, i = run(agent, env_wrapper, render, fps, verbosity)
+
         rewards.append(r)
+
+        # Prepare info
+        i['final_state'] = final_state
+        info.update({str(trial_num): i})
 
         if verbosity > 0:
             print("Reward: ", r)
 
+    # Average rewards
     if avg_fitnesses:
-        return [sum(rewards) / len(rewards)]
-    else:
-        return rewards
+        rewards = [sum(rewards) / len(rewards)]
+
+    # Return dictionary and info
+    return {'fitness': rewards, **info}

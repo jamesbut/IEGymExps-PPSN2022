@@ -13,7 +13,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                      quit_domain_when_complete=True, decoder=None,
                      pop_size=None, p_lb=None, p_ub=None, agent=None,
                      exp_dir_path=None, log_config=None, env_wrapper=None,
-                     dump_every=None):
+                     dump_every=None, analyser=None):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -26,9 +26,13 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         population = _generate_population(toolbox, decoder, pop_size, p_lb, p_ub)
 
         # Evaluate the individuals
-        fitnesses = toolbox.map(toolbox.evaluate, population)
-        for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
+        results = list(toolbox.map(toolbox.evaluate, population))
+
+        for ind, res in zip(population, results):
+            ind.fitness.values = res['fitness']
+
+        # Collect data for analysis
+        analyser.collect(results)
 
         if halloffame is not None:
             halloffame.update(population)
