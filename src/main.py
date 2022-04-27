@@ -120,8 +120,12 @@ def evo_run(config, exp_dir_path, decoder):
     p_ub = expand_bound(config['optimiser'].get('p_ub', None), num_weights)
 
     # Runs additional analysis during evolutionary algorithm
-    analyser = Analyser(verbosity=True, pop_size=config['optimiser']['cmaes']['lambda'],
-                        maze_size=env_wrapper._env.nrow * env_wrapper._env.ncol)
+    analyser = Analyser(verbosity=True,
+                        pop_size=config['optimiser']['cmaes']['lambda'],
+                        maze_height=env_wrapper._env.nrow,
+                        maze_width=env_wrapper._env.ncol,
+                        #maze=config['env']['env_kwargs']['desc'])
+                        maze=env_wrapper._env.map)
 
     # Run evolutionary algorithm
     population, logbook, winner_found = evo_utils.eaGenerateUpdate(

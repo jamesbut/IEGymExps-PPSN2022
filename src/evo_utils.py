@@ -32,7 +32,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
             ind.fitness.values = res['fitness']
 
         # Collect data for analysis
-        analyser.collect(results)
+        analyser.collect(results, gen == ngen - 1)
 
         if halloffame is not None:
             halloffame.update(population)

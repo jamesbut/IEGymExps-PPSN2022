@@ -172,8 +172,8 @@ def _plot_exp_evo_data(mean_bests, median_bests, lq_bests, uq_bests, best_bests,
 
     # Create x axis of generations
     gens = np.arange(1, median_bests.shape[0] + 1)
-    x_axis_ticks = range(gens[0], gens[-1])
-    plt.xticks(x_axis_ticks)
+    #x_axis_ticks = range(gens[0], gens[-1])
+    #plt.xticks(x_axis_ticks)
 
     data = PlotData(gens, x_axis_max)
 
@@ -443,10 +443,14 @@ def _plot_legend(prompt_legend_labels: bool, exp_data_dirs: List[str],
 
 def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
                            gen_one_max: bool = False, plot_mean_bests: bool = False,
-                           plot_median_bests: bool = True, plot_q_bests: bool = False,
-                           plot_best_bests: bool = True, plot_mean_means: bool = True,
-                           plot_median_means: bool = False, plot_q_means: bool = False,
-                           verbosity: bool = False, prompt_legend_labels: bool = False,
+                           plot_median_bests: bool = True,
+                           plot_q_bests: bool = False,
+                           plot_best_bests: bool = True,
+                           plot_mean_means: bool = True,
+                           plot_median_means: bool = False,
+                           plot_q_means: bool = False,
+                           verbosity: bool = False,
+                           prompt_legend_labels: bool = False,
                            x_axis_max: Optional[int] = None):
 
     # Prefix exp data directory with data path
@@ -499,13 +503,15 @@ def read_and_plot_evo_data(exp_data_dirs, data_dir_path, winner_file_name,
         print('-' * 50)
 
     # Plot legend
-    _plot_legend(prompt_legend_labels, exp_data_dirs, exp_plot_colours, plotted_labels)
+    _plot_legend(prompt_legend_labels, exp_data_dirs,
+                 exp_plot_colours, plotted_labels)
 
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
 
     # Save figure
-    plt.savefig('figures/evo_figure.png', bbox_inches='tight', pad_inches=0.05, dpi=500)
+    plt.savefig('figures/evo_figure.png', bbox_inches='tight',
+                pad_inches=0.05, dpi=500)
 
     plt.show()
 
